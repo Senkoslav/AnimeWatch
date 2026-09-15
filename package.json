@@ -9,6 +9,7 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "video:probe": "tsx scripts/video-probe.ts",
+    "data:inventory": "tsx scripts/tg-export-to-inventory.ts",
     "bunny:check": "tsx scripts/bunny-check.ts"
   },
   "devDependencies": {

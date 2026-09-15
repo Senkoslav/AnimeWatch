@@ -20,7 +20,10 @@
       Ждёт трёх мастеров.
 - [ ] `S` Собрать инвентаризацию контента: тайтлы, номера серий, ссылки на посты.
       **Приёмка:** `data/inventory.csv` со столбцами
-      `title,shikimori_url,episode,tg_message_id`.
+      `title,shikimori_url,episode,tg_chat_id,tg_message_id` и без пометок в
+      `review`. `tg_chat_id` добавлен: без него не создать `IngestJob`.
+      Инструмент готов: `pnpm data:inventory <result.json>` собирает черновик из
+      выгрузки Telegram Desktop. Ждёт выгрузки канала.
 - [ ] `S` Завести аккаунт-воркер с Premium, добавить админом в канал,
       получить `TG_SESSION`. **Приёмка:** скрипт `pnpm tg:whoami` печатает ник.
 - [x] `S` Библиотека в Bunny, ключи, включены hotlink protection и токены.

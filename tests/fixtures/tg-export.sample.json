@@ -1,0 +1,146 @@
+{
+  "name": "BebraDub Архив",
+  "type": "private_channel",
+  "id": 1987654321,
+  "messages": [
+    {
+      "id": 1,
+      "type": "service",
+      "date": "2024-09-01T10:00:00",
+      "actor": "BebraDub Архив",
+      "action": "create_channel",
+      "title": "BebraDub Архив",
+      "text": "",
+      "text_entities": []
+    },
+    {
+      "id": 12,
+      "type": "message",
+      "date": "2024-09-02T21:00:00",
+      "from": "BebraDub Архив",
+      "file": "(File not included. Change data exporting settings to download.)",
+      "file_name": "Frieren_S01E01_BebraDub_2160p.mkv",
+      "file_size": 3712991232,
+      "mime_type": "video/x-matroska",
+      "text": "Провожающая в последний путь Фрирен — 1 серия",
+      "text_entities": [{ "type": "plain", "text": "Провожающая в последний путь Фрирен — 1 серия" }]
+    },
+    {
+      "id": 13,
+      "type": "message",
+      "date": "2024-09-09T21:00:00",
+      "from": "BebraDub Архив",
+      "file": "(File not included. Change data exporting settings to download.)",
+      "file_name": "[BebraDub] Sousou no Frieren - 02 [2160p].mkv",
+      "file_size": 3690000000,
+      "mime_type": "video/x-matroska",
+      "text": "",
+      "text_entities": []
+    },
+    {
+      "id": 14,
+      "type": "message",
+      "date": "2024-09-10T12:00:00",
+      "from": "BebraDub Архив",
+      "photo": "(File not included. Change data exporting settings to download.)",
+      "width": 1280,
+      "height": 720,
+      "text": "Постер второго сезона",
+      "text_entities": [{ "type": "plain", "text": "Постер второго сезона" }]
+    },
+    {
+      "id": 15,
+      "type": "message",
+      "date": "2024-09-12T12:00:00",
+      "from": "BebraDub Архив",
+      "text": "Серия 3 выйдет в пятницу",
+      "text_entities": [{ "type": "plain", "text": "Серия 3 выйдет в пятницу" }]
+    },
+    {
+      "id": 16,
+      "type": "message",
+      "date": "2024-09-16T21:00:00",
+      "from": "BebraDub Архив",
+      "file": "(File not included. Change data exporting settings to download.)",
+      "file_name": "frieren_03.mp4",
+      "media_type": "video_file",
+      "mime_type": "video/mp4",
+      "duration_seconds": 1440,
+      "width": 3840,
+      "height": 2160,
+      "text": [{ "type": "hashtag", "text": "#Фрирен" }, " эпизод №3"],
+      "text_entities": [
+        { "type": "hashtag", "text": "#Фрирен" },
+        { "type": "plain", "text": " эпизод №3" }
+      ]
+    },
+    {
+      "id": 17,
+      "type": "message",
+      "date": "2024-09-17T09:00:00",
+      "from": "BebraDub Архив",
+      "file": "(File not included. Change data exporting settings to download.)",
+      "file_name": "Frieren_S01E03_v2.mkv",
+      "mime_type": "video/x-matroska",
+      "text": "Фрирен 3 серия (исправленная)\nПерезалили со звуком",
+      "text_entities": [{ "type": "plain", "text": "Фрирен 3 серия (исправленная)\nПерезалили со звуком" }]
+    },
+    {
+      "id": 18,
+      "type": "message",
+      "date": "2024-10-01T20:00:00",
+      "from": "BebraDub Архив",
+      "file": "(File not included. Change data exporting settings to download.)",
+      "file_name": "Mushoku_Tensei_II_07.mkv",
+      "mime_type": "video/x-matroska",
+      "text": "Реинкарнация безработного 2 — 7 серия 🔥",
+      "text_entities": [{ "type": "plain", "text": "Реинкарнация безработного 2 — 7 серия 🔥" }]
+    },
+    {
+      "id": 19,
+      "type": "message",
+      "date": "2024-10-02T20:00:00",
+      "from": "BebraDub Архив",
+      "file": "(File not included. Change data exporting settings to download.)",
+      "file_name": "trailer.mp4",
+      "media_type": "video_file",
+      "mime_type": "video/mp4",
+      "text": "Трейлер нового сезона",
+      "text_entities": [{ "type": "plain", "text": "Трейлер нового сезона" }]
+    },
+    {
+      "id": 20,
+      "type": "message",
+      "date": "2024-10-03T20:00:00",
+      "from": "BebraDub Архив",
+      "file": "(File not included. Change data exporting settings to download.)",
+      "file_name": "funny.gif.mp4",
+      "media_type": "animation",
+      "mime_type": "video/mp4",
+      "text": "",
+      "text_entities": []
+    },
+    {
+      "id": 21,
+      "type": "message",
+      "date": "2024-10-04T20:00:00",
+      "from": "BebraDub Архив",
+      "file": "(File not included. Change data exporting settings to download.)",
+      "file_name": "Кайдзю 8 - 05.mkv",
+      "mime_type": "video/x-matroska",
+      "text": "",
+      "text_entities": []
+    },
+    {
+      "id": 22,
+      "type": "message",
+      "date": "2024-10-05T20:00:00",
+      "from": "BebraDub Архив",
+      "file": "(File not included. Change data exporting settings to download.)",
+      "file_name": "ep.mkv",
+      "mime_type": "video/x-matroska",
+      "text": "Кайдзю №8 6",
+      "text_entities": [{ "type": "plain", "text": "Кайдзю №8 6" }]
+    }
+  ]
+}
