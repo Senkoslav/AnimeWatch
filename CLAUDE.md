@@ -37,6 +37,7 @@ pnpm worker:dev       # воркер импорта видео (отдельны
 
 pnpm typecheck        # tsc --noEmit
 pnpm video:probe      # ffprobe и тест апскейла мастеров → markdown для docs/05
+pnpm data:inventory   # выгрузка Telegram Desktop → черновик data/inventory.csv
 ```
 
 ## Стек и границы
