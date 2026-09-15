@@ -1,0 +1,12 @@
+packages:
+  - worker
+
+# Скрипты сборки этих зависимостей не нужны, pnpm их не запускает:
+# esbuild (из tsx) берёт готовый бинарник платформы; bufferutil и utf-8-validate —
+# необязательные нативные ускорители websocket из GramJS, без них работает JS-версия;
+# es5-ext в postinstall только печатает сообщение.
+ignoredBuiltDependencies:
+  - bufferutil
+  - es5-ext
+  - esbuild
+  - utf-8-validate

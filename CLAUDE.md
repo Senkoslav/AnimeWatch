@@ -35,11 +35,17 @@ pnpm db:migrate       # prisma migrate dev
 pnpm db:studio        # prisma studio
 pnpm worker:dev       # воркер импорта видео (отдельный процесс)
 
-pnpm typecheck        # tsc --noEmit
+pnpm typecheck        # tsc по корню и воркеру
 pnpm video:probe      # ffprobe и тест апскейла мастеров → markdown для docs/05
 pnpm data:inventory   # выгрузка Telegram Desktop → черновик data/inventory.csv
 pnpm bunny:check      # защита библиотеки Bunny: подписанный URL играет, без подписи 403
+pnpm tg:login         # вход аккаунтом-воркером → TG_SESSION в worker/.env
+pnpm tg:whoami        # ник, Premium и роль воркера в архивном канале
 ```
+
+`pnpm tg:login` запускает только человек в своём терминале: скрипт интерактивный,
+а сессия даёт полный доступ к аккаунту. Не запускай его сам и не выводи
+содержимое `.env`, `.env.local`, `worker/.env`.
 
 ## Стек и границы
 
