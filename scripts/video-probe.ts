@@ -17,6 +17,8 @@ import { mkdir, stat } from "node:fs/promises";
 import { basename, join, parse, resolve } from "node:path";
 import { promisify } from "node:util";
 
+import { asNumber, asObject, asString, isDefined, type Json } from "../lib/unknown";
+
 const execFileAsync = promisify(execFile);
 
 /** Доли длительности, на которых берутся кадры: мимо опенинга и эндинга. */
@@ -31,7 +33,6 @@ const LOSS_CELL = 8;
 const DIFF_GAIN = 16;
 const OUT_DIR = ".tmp/probe";
 
-type Json = Record<string, unknown>;
 type Size = { w: number; h: number };
 
 interface VideoTrack {
@@ -139,9 +140,7 @@ async function probe(file: string): Promise<ProbeResult> {
   ]);
   const root = asObject(JSON.parse(stdout));
   const format = asObject(root?.format);
-  const streams = (Array.isArray(root?.streams) ? root.streams : [])
-    .map(asObject)
-    .filter((stream): stream is Json => stream !== undefined);
+  const streams = (Array.isArray(root?.streams) ? root.streams : []).map(asObject).filter(isDefined);
 
   const videoStream = streams.find(
     (stream) => stream.codec_type === "video" && asObject(stream.disposition)?.attached_pic !== 1,
@@ -539,19 +538,6 @@ function formatKbit(bitsPerSecond: number | undefined): string | undefined {
 
 function cell(text: string): string {
   return text.replaceAll("|", "\\|");
-}
-
-function asObject(value: unknown): Json | undefined {
-  return typeof value === "object" && value !== null && !Array.isArray(value) ? (value as Json) : undefined;
-}
-
-function asString(value: unknown): string | undefined {
-  return typeof value === "string" && value !== "" ? value : undefined;
-}
-
-function asNumber(value: unknown): number | undefined {
-  const parsed = typeof value === "number" ? value : typeof value === "string" && value.trim() !== "" ? Number(value) : NaN;
-  return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 function errorMessage(error: unknown): string {
