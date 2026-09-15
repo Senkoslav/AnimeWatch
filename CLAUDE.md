@@ -34,6 +34,9 @@ pnpm test:e2e         # playwright
 pnpm db:migrate       # prisma migrate dev
 pnpm db:studio        # prisma studio
 pnpm worker:dev       # воркер импорта видео (отдельный процесс)
+
+pnpm typecheck        # tsc --noEmit
+pnpm video:probe      # ffprobe и тест апскейла мастеров → markdown для docs/05
 ```
 
 ## Стек и границы
