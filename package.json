@@ -8,7 +8,8 @@
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "video:probe": "tsx scripts/video-probe.ts"
+    "video:probe": "tsx scripts/video-probe.ts",
+    "bunny:check": "tsx scripts/bunny-check.ts"
   },
   "devDependencies": {
     "@types/node": "^24.13.4",
