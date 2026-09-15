@@ -93,7 +93,21 @@ async function main(): Promise<void> {
 
   const master = await request(masterUrl, referer, "text");
   expectStatus("мастер-плейлист с токеном", 200, master.status);
-  const variants = master.status === 200 ? parseMasterPlaylist(master.body) : [];
+  if (master.status !== 200) {
+    printResults(results);
+    // Токен и список разрешённых доменов оба отвечают 403 — разводим причины.
+    const withoutReferer = await request(masterUrl, undefined, "none");
+    if (withoutReferer.status === 200) {
+      console.log(
+        `\nБез Referer подписанный URL открывается, значит ${new URL(referer).host} нет в разрешённых ` +
+          "доменах библиотеки. Порт в списке учитывается: localhost и localhost:3000 — разные записи.",
+      );
+    }
+    console.log("Отказные проверки пропущены: пока подписанный URL не открывается, их 403 ничего не доказывает.");
+    process.exitCode = 1;
+    return;
+  }
+  const variants = parseMasterPlaylist(master.body);
 
   const best = variants.reduce<Variant | undefined>(
     (top, variant) => ((variant.bandwidth ?? 0) > (top?.bandwidth ?? -1) ? variant : top),
@@ -146,11 +160,7 @@ async function main(): Promise<void> {
   expectStatus("токен, выданный на другое видео", 403, (await request(otherVideoUrl, referer, "none")).status);
   expectStatus(`токен с чужим Referer (${FOREIGN_REFERER})`, 403, (await request(masterUrl, FOREIGN_REFERER, "none")).status);
 
-  for (const result of results) {
-    const verdict = result.passed ? "ОК    " : "ПРОВАЛ";
-    const detail = result.passed ? result.actual : `ожидали ${result.expected}, получили ${result.actual}`;
-    console.log(`${verdict} ${result.name}: ${detail}`);
-  }
+  printResults(results);
 
   if (variants.length > 0) {
     const ladder = variants
@@ -201,14 +211,22 @@ async function verifySignerAgainstVectors(): Promise<string> {
   return `${vectors.length} из ${vectors.length}`;
 }
 
+function printResults(results: readonly CheckResult[]): void {
+  for (const result of results) {
+    const verdict = result.passed ? "ОК    " : "ПРОВАЛ";
+    const detail = result.passed ? result.actual : `ожидали ${result.expected}, получили ${result.actual}`;
+    console.log(`${verdict} ${result.name}: ${detail}`);
+  }
+}
+
 async function request(
   url: string,
-  referer: string,
+  referer: string | undefined,
   read: "text" | "none",
 ): Promise<{ status: number; body: string }> {
   try {
     const response = await fetch(url, {
-      headers: { Referer: referer },
+      headers: referer ? { Referer: referer } : {},
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
     if (read === "text") {

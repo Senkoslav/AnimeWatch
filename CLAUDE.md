@@ -37,6 +37,7 @@ pnpm worker:dev       # воркер импорта видео (отдельны
 
 pnpm typecheck        # tsc --noEmit
 pnpm video:probe      # ffprobe и тест апскейла мастеров → markdown для docs/05
+pnpm bunny:check      # защита библиотеки Bunny: подписанный URL играет, без подписи 403
 ```
 
 ## Стек и границы
