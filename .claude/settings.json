@@ -7,16 +7,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if echo \"$CLAUDE_FILE_PATHS\" | grep -qE '\\.(ts|tsx|css|json|md)$'; then pnpm prettier --write $CLAUDE_FILE_PATHS 2>/dev/null; fi"
-          }
-        ]
-      },
-      {
-        "matcher": "Edit|Write",
-        "hooks": [
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/format.sh",
+            "timeout": 30
+          },
           {
             "type": "command",
-            "command": "if echo \"$CLAUDE_FILE_PATHS\" | grep -q 'prisma/schema.prisma'; then echo 'Схема изменена: не забудь pnpm db:migrate и обнови docs/03-data-model.md'; fi"
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/schema-reminder.sh"
           }
         ]
       }
@@ -26,7 +22,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "pnpm typecheck 2>&1 | tail -20"
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/typecheck.sh",
+            "timeout": 180
           }
         ]
       }

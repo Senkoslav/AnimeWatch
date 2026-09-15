@@ -1,0 +1,16 @@
+# зависимости
+node_modules/
+
+# секреты: ключи Bunny, сессия телеграм-воркера, строки подключения к БД
+.env*
+!.env.example
+*.session
+
+# локальные артефакты: скриншоты /ui-review, кропы video:probe, выгрузки из телеграма
+.tmp/
+data/raw/
+
+# личные настройки Claude Code
+.claude/settings.local.json
+
+.DS_Store
