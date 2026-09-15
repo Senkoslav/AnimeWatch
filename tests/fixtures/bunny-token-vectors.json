@@ -1,0 +1,29 @@
+{
+  "source": "https://github.com/BunnyWay/BunnyCDN.TokenAuthentication/blob/master/go/token_test.go",
+  "note": "Эталонные подписи Bunny для случаев, которые использует lib/bunny/sign.ts: токен в пути и в query, с token_path и без.",
+  "securityKey": "SecurityKey",
+  "expiresAt": 1598024587,
+  "hostname": "token-tester.b-cdn.net",
+  "vectors": [
+    {
+      "name": "каталог с token_path, токен в пути (наш случай для HLS)",
+      "path": "/abc/",
+      "tokenPath": "/abc",
+      "tokenInPath": true,
+      "expected": "https://token-tester.b-cdn.net/bcdn_token=HS256-uVZvT3SbEoVKYJyDJgbcsDmSFf73cv-uNUVaJiKWpbQ&token_path=%2Fabc&expires=1598024587/abc/"
+    },
+    {
+      "name": "каталог без token_path, токен в пути",
+      "path": "/abc/",
+      "tokenInPath": true,
+      "expected": "https://token-tester.b-cdn.net/bcdn_token=HS256-bTMv4RVOkjx2UXLfVDl-JIygaxfSIQP8UCnCy7CILuY&expires=1598024587/abc/"
+    },
+    {
+      "name": "файл с token_path, токен в query",
+      "path": "/abc/300kb.jpg",
+      "tokenPath": "/abc",
+      "tokenInPath": false,
+      "expected": "https://token-tester.b-cdn.net/abc/300kb.jpg?token=HS256-uVZvT3SbEoVKYJyDJgbcsDmSFf73cv-uNUVaJiKWpbQ&token_path=%2Fabc&expires=1598024587"
+    }
+  ]
+}
