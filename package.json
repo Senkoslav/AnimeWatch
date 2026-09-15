@@ -7,10 +7,12 @@
     "node": ">=24"
   },
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && pnpm -C worker run typecheck",
     "video:probe": "tsx scripts/video-probe.ts",
     "data:inventory": "tsx scripts/tg-export-to-inventory.ts",
-    "bunny:check": "tsx scripts/bunny-check.ts"
+    "bunny:check": "tsx scripts/bunny-check.ts",
+    "tg:login": "pnpm -C worker run tg:login",
+    "tg:whoami": "pnpm -C worker run tg:whoami"
   },
   "devDependencies": {
     "@types/node": "^24.13.4",

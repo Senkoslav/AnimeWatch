@@ -85,7 +85,8 @@ BUNNY_CDN_HOSTNAME
 BUNNY_TOKEN_KEY          # подпись playback-URL
 BUNNY_WEBHOOK_SECRET
 TELEGRAM_BOT_TOKEN       # проверка подписи логина
-TG_API_ID / TG_API_HASH / TG_SESSION   # только воркер
+TG_API_ID / TG_API_HASH / TG_SESSION   # только воркер, worker/.env
+TG_ARCHIVE_CHAT          # только воркер: id архивного канала для tg:whoami
 REDIS_URL                # только воркер
 NEXT_PUBLIC_SITE_URL
 ```
