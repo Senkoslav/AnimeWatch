@@ -38,6 +38,18 @@ export function isFresh(date: Date, now: Date): boolean {
   return now.getTime() - date.getTime() < DAY;
 }
 
+const pluralRules = new Intl.PluralRules("ru");
+
+/** Формы слова для 1, 2 и 5: ["тайтл", "тайтла", "тайтлов"]. */
+export type PluralForms = readonly [one: string, few: string, many: string];
+
+/** «1 тайтл», «3 тайтла», «8 тайтлов». */
+export function formatCount(count: number, [one, few, many]: PluralForms): string {
+  const rule = pluralRules.select(count);
+  const word = rule === "one" ? one : rule === "few" ? few : many;
+  return `${count} ${word}`;
+}
+
 /** Номер серии как номер дубля: 07, 12, 108. */
 export function formatEpisodeNumber(number: number): string {
   return String(number).padStart(2, "0");

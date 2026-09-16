@@ -1,13 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { Poster } from "@/components/ui/poster";
 import { formatEpisodeNumber, formatRelativeDate, isFresh } from "@/lib/format";
 import { TitleKind } from "@/lib/generated/prisma/enums";
 import type { Release } from "@/lib/queries/home";
 import { episodeHref } from "@/lib/routes";
 
 import { FreshMark } from "./fresh-mark";
-import { Poster } from "./poster";
 
 interface HeroProps {
   release: Release;

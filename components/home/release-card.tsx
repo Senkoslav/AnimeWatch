@@ -1,12 +1,12 @@
 import Link from "next/link";
 
+import { Poster } from "@/components/ui/poster";
 import { formatEpisodeNumber, formatRelativeDate, isFresh } from "@/lib/format";
 import { TitleKind } from "@/lib/generated/prisma/enums";
 import type { Release } from "@/lib/queries/home";
 import { episodeHref } from "@/lib/routes";
 
 import { FreshMark } from "./fresh-mark";
-import { Poster } from "./poster";
 
 const POSTER_SIZES = "(min-width: 1280px) 180px, (min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw";
 
