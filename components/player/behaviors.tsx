@@ -89,28 +89,43 @@ export function ResumePosition({ episodeId }: { episodeId: string }) {
   return null;
 }
 
+/** Флаг автостарта действует недолго: иначе, не дойдя до canPlay, он запустил бы серию, открытую позже из списка. */
+const AUTOPLAY_TTL_MS = 30_000;
+
+function readAutoplayFlag(storage: Storage | undefined): { episodeId: string; at: number } | null {
+  try {
+    const value: unknown = JSON.parse(storage?.getItem(AUTOPLAY_KEY) ?? "null");
+    if (typeof value !== "object" || value === null) return null;
+    const { episodeId, at } = value as Record<string, unknown>;
+    return typeof episodeId === "string" && typeof at === "number" ? { episodeId, at } : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Автопереход ставит флаг перед навигацией: следующая серия стартует сама, жест пользователя в SPA сохранён. */
 export function AutoplayOnArrival({ episodeId }: { episodeId: string }) {
   const store = usePlayer();
   const canPlay = usePlayer((state) => state.canPlay);
-  const done = useRef(false);
+  const shouldPlay = useRef<boolean | null>(null);
 
   useEffect(() => {
-    if (done.current || !canPlay) return;
-    done.current = true;
+    // Флаг снимаем сразу при монтировании, а не на canPlay: он одноразовый в любом случае.
     const storage = sessionStore();
-    let flag: string | null = null;
-    try {
-      flag = storage?.getItem(AUTOPLAY_KEY) ?? null;
-    } catch {
-      flag = null;
-    }
-    if (flag !== episodeId) return;
+    const flag = readAutoplayFlag(storage);
+    // Нет флага — решение не трогаем: в StrictMode эффект выполняется дважды, и второй проход флаг уже не найдёт.
+    if (!flag) return;
     write(storage, AUTOPLAY_KEY, null);
+    shouldPlay.current = flag.episodeId === episodeId && Date.now() - flag.at < AUTOPLAY_TTL_MS;
+  }, [episodeId]);
+
+  useEffect(() => {
+    if (!canPlay || !shouldPlay.current) return;
+    shouldPlay.current = false;
     store.play().catch(() => {
       // Браузер запретил автостарт: зритель нажмёт Play сам, контролы видны на паузе.
     });
-  }, [canPlay, episodeId, store]);
+  }, [canPlay, store]);
 
   return null;
 }
@@ -119,35 +134,58 @@ interface Preferences {
   playbackRate?: number;
 }
 
-/** Скорость — настройка устройства (docs/05): переживает серии и перезагрузки, в базу не идёт. */
+function readPreferences(): Preferences {
+  try {
+    return JSON.parse(localStore()?.getItem(PREFERENCES_KEY) ?? "{}") as Preferences;
+  } catch {
+    // Испорченная запись — настройки по умолчанию.
+    return {};
+  }
+}
+
+/** Сохраняется только по выбору зрителя в меню: перезагрузка источника сбрасывает скорость элемента на 1. */
+export function savePlaybackRate(rate: number): void {
+  write(
+    localStore(),
+    PREFERENCES_KEY,
+    JSON.stringify({ ...readPreferences(), playbackRate: rate } satisfies Preferences),
+  );
+}
+
+/**
+ * Скорость — настройка устройства (docs/05): переживает серии и перезагрузки, в базу не идёт. Применяется к каждому
+ * новому источнику, включая перезагрузку после обновления токена.
+ */
 export function PersistPreferences() {
   const store = usePlayer();
-  const canPlay = usePlayer((state) => state.canPlay);
-  const playbackRate = usePlayer((state) => state.playbackRate);
-  const applied = useRef(false);
 
   useEffect(() => {
-    if (applied.current || !canPlay) return;
-    applied.current = true;
-    try {
-      const saved = JSON.parse(localStore()?.getItem(PREFERENCES_KEY) ?? "{}") as Preferences;
-      if (isKnownRate(saved.playbackRate)) {
-        store.setPlaybackRate(saved.playbackRate);
-      }
-    } catch {
-      // Испорченная запись — остаёмся на скорости по умолчанию.
-    }
-  }, [canPlay, store]);
-
-  useEffect(() => {
-    if (!applied.current) return;
-    write(localStore(), PREFERENCES_KEY, JSON.stringify({ playbackRate } satisfies Preferences));
-  }, [playbackRate]);
+    let appliedTo: string | null | undefined;
+    return store.subscribe(() => {
+      const { source, canPlay } = store.state;
+      if (!canPlay || source === appliedTo) return;
+      appliedTo = source;
+      const { playbackRate } = readPreferences();
+      // Без сравнения со стором: сброс скорости при загрузке источника может пройти без ratechange,
+      // и стор продолжит показывать старое значение.
+      if (isKnownRate(playbackRate)) store.setPlaybackRate(playbackRate);
+    });
+  }, [store]);
 
   return null;
 }
 
-type RefreshState = "idle" | "refreshing" | "failed";
+type RefreshState = "idle" | "refreshing" | "network" | "media";
+
+/** MediaError.MEDIA_ERR_NETWORK: 403 протухшего токена hls.js отдаёт именно так. Остальное URL не вылечит. */
+const MEDIA_ERR_NETWORK = 2;
+const REFRESH_TIMEOUT_MS = 10_000;
+/**
+ * Сколько видео может ждать данные на воспроизведении, прежде чем считать это отказом. hls.js не всегда отдаёт
+ * фатальную ошибку на постоянные 403: иногда просто стоит, и зритель видел бы вечный спиннер без объяснений.
+ */
+const STALL_LIMIT_MS = 20_000;
+const STALL_CHECK_MS = 2_000;
 
 /**
  * Токен протух на долгой паузе или истёк срок URL: CDN отвечает 403, плеер получает сетевую ошибку.
@@ -168,7 +206,7 @@ export function useTokenRefresh(episodeId: string, onSource: (src: string) => vo
       if (busy.current) return;
       const now = Date.now();
       if (!force && now - lastRefresh.current < REFRESH_COOLDOWN_MS) {
-        setState("failed");
+        setState("network");
         return;
       }
       busy.current = true;
@@ -176,7 +214,10 @@ export function useTokenRefresh(episodeId: string, onSource: (src: string) => vo
       const snapshot = lastGood.current;
       setState("refreshing");
       try {
-        const response = await fetch(`/api/playback/${episodeId}`, { cache: "no-store" });
+        const response = await fetch(`/api/playback/${episodeId}`, {
+          cache: "no-store",
+          signal: AbortSignal.timeout(REFRESH_TIMEOUT_MS),
+        });
         if (!response.ok) throw new Error(`playback ${response.status}`);
         const body = (await response.json()) as { src?: unknown };
         if (typeof body.src !== "string") throw new Error("playback: в ответе нет src");
@@ -186,7 +227,7 @@ export function useTokenRefresh(episodeId: string, onSource: (src: string) => vo
         setState("idle");
       } catch (cause) {
         console.error("Не удалось обновить ссылку на видео", { episodeId, cause });
-        setState("failed");
+        setState("network");
       } finally {
         busy.current = false;
       }
@@ -200,7 +241,13 @@ export function useTokenRefresh(episodeId: string, onSource: (src: string) => vo
       store.subscribe(() => {
         const { error, paused, currentTime, canPlay, source } = store.state;
         if (error) {
-          if (!busy.current) void refresh(false);
+          if (error.code !== MEDIA_ERR_NETWORK) {
+            // Декодирование, неподдерживаемый формат: свежая ссылка не поможет, запрос к API не нужен.
+            setState("media");
+          } else if (!busy.current) {
+            // Пока запрос за URL идёт, ошибки старого источника не важны: успех их снимет через dismissError.
+            void refresh(false);
+          }
           return;
         }
         const target = resume.current;
@@ -220,17 +267,42 @@ export function useTokenRefresh(episodeId: string, onSource: (src: string) => vo
     [refresh, store],
   );
 
-  return { failed: state === "failed", retry: () => void refresh(true) };
+  // Сторож зависания: таймер — внешний источник, setState в его колбэке допустим.
+  useEffect(() => {
+    let waitingSince: number | null = null;
+    const timer = window.setInterval(() => {
+      const { waiting, paused, error } = store.state;
+      if (!waiting || paused || error || busy.current) {
+        waitingSince = null;
+        return;
+      }
+      waitingSince ??= Date.now();
+      if (Date.now() - waitingSince < STALL_LIMIT_MS) return;
+      waitingSince = null;
+      // Недавно уже обновляли ссылку — refresh сам покажет сетевую ошибку по кулдауну.
+      void refresh(false);
+    }, STALL_CHECK_MS);
+    return () => window.clearInterval(timer);
+  }, [refresh, store]);
+
+  return {
+    error: state === "network" || state === "media" ? state : null,
+    retry: () => void refresh(true),
+  };
 }
 
-/** Ошибка после попытки обновить ссылку: что случилось и что делать (docs/04, «Текст в интерфейсе»). */
-export function PlaybackError({ onRetry }: { onRetry: () => void }) {
+/** Ошибка: что случилось и что делать (docs/04, «Текст в интерфейсе»). */
+export function PlaybackError({ kind, onRetry }: { kind: "network" | "media"; onRetry: () => void }) {
   return (
     <div
       role="alert"
       className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-bg/95 p-6 text-center"
     >
-      <p className="max-w-[40ch]">Не удалось загрузить серию. Проверьте соединение и попробуйте ещё раз.</p>
+      <p className="max-w-[40ch]">
+        {kind === "network"
+          ? "Не удалось загрузить серию. Проверьте соединение и попробуйте ещё раз."
+          : "Этот браузер не смог воспроизвести серию. Обновите страницу или откройте её в другом браузере."}
+      </p>
       <button
         type="button"
         onClick={onRetry}
@@ -266,7 +338,7 @@ export function NextEpisode({ episodeId, href, label }: NextEpisodeProps) {
   const active = ended && !cancelled;
 
   const go = useCallback(() => {
-    write(sessionStore(), AUTOPLAY_KEY, episodeId);
+    write(sessionStore(), AUTOPLAY_KEY, JSON.stringify({ episodeId, at: Date.now() }));
     router.push(href);
   }, [episodeId, href, router]);
 
@@ -283,12 +355,13 @@ export function NextEpisode({ episodeId, href, label }: NextEpisodeProps) {
   if (!active) return null;
 
   return (
-    <div
-      role="status"
-      className="absolute inset-x-3 top-3 flex flex-wrap items-center gap-3 rounded-md border border-line bg-surface p-3 sm:inset-x-auto sm:right-3"
-    >
-      <p className="text-sm">
-        {label} через {Math.max(left, 0)} с
+    <div className="absolute inset-x-3 top-3 flex flex-wrap items-center gap-3 rounded-md border border-line bg-surface p-3 sm:inset-x-auto sm:right-3">
+      {/* Скринридер слышит одну фразу, а не отсчёт каждую секунду: цифры скрыты от него. */}
+      <p role="status" className="text-sm">
+        <span className="sr-only">{label} скоро начнётся</span>
+        <span aria-hidden="true">
+          {label} через {Math.max(left, 0)} с
+        </span>
       </p>
       <div className="flex gap-2">
         <button

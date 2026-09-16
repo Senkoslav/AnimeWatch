@@ -40,7 +40,7 @@ test("приёмка: старт, перемотка, конец серии и �
   await waitForTime(page, (time) => time > 0.5, "время должно пойти после Play");
 
   // Перемотка шкалой с клавиатуры: End уводит в конец серии.
-  const slider = page.getByRole("slider", { name: /Поиск|Seek|Перемотка/i });
+  const slider = page.getByRole("slider", { name: "Перемотка" });
   await slider.focus();
   await page.keyboard.press("End");
   await waitForTime(page, (time) => time > 6, "перемотка в конец должна сменить позицию");
@@ -57,7 +57,7 @@ test("«Отмена» останавливает автопереход", async
   await page.goto("/anime/frieren/2");
   await page.getByRole("button", { name: "Воспроизвести" }).click();
   await waitForTime(page, (time) => time > 0.3, "время должно пойти");
-  await page.getByRole("slider", { name: /Поиск|Seek|Перемотка/i }).focus();
+  await page.getByRole("slider", { name: "Перемотка" }).focus();
   await page.keyboard.press("End");
 
   await page.getByRole("button", { name: "Отмена" }).click({ timeout: 15_000 });
@@ -115,6 +115,24 @@ test("клавиатура целиком: Tab до плеера, пауза, п
   await expect(quality).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.getByRole("menuitemradio", { name: /240p/ })).toHaveAttribute("aria-checked", "true");
+
+  // Конец серии и переход к следующей — тоже с клавиатуры.
+  await page.keyboard.press("Escape");
+  // End на шкале ставит позицию в конец: серия закончена и на паузе, Space здесь запустил бы её заново.
+  await page.getByRole("slider", { name: "Перемотка" }).focus();
+  await page.keyboard.press("End");
+  const watchNow = page.getByRole("button", { name: "Смотреть сейчас" });
+  await expect(watchNow).toBeVisible({ timeout: 15_000 });
+  for (
+    let step = 0;
+    step < 25 && !(await watchNow.evaluate((element) => element === document.activeElement));
+    step += 1
+  ) {
+    await page.keyboard.press("Tab");
+  }
+  await expect(watchNow).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page).toHaveURL("/anime/frieren/2");
 });
 
 test("позиция восстанавливается после перезагрузки вкладки", async ({ page }) => {
@@ -135,6 +153,8 @@ test("протухший токен: CDN отвечает 403, плеер бер
   // Срок в подписи — в секундах: если hls.js сдастся быстро, свежий URL из API совпадёт с выданным страницей.
   // В жизни токен протухает через часы и всегда отличается; в тесте гарантируем секунду между подписями.
   cdn.firstRejectDelayMs = 1_100;
+  // Зритель раньше выбрал 1,5×: перезагрузка источника не должна сбросить скорость.
+  await page.addInitScript(() => window.localStorage.setItem("bebradub:player", JSON.stringify({ playbackRate: 1.5 })));
   const refreshed = page.waitForResponse((response) => response.url().includes("/api/playback/"), { timeout: 25_000 });
 
   await page.goto("/anime/frieren/1");
@@ -144,6 +164,7 @@ test("протухший токен: CDN отвечает 403, плеер бер
   await expect.poll(() => cdn.tokens.length, { message: "запросы пошли со свежим токеном" }).toBeGreaterThan(1);
   // Дальше первого сегмента можно уйти только со свежим токеном; играло до ошибки — играет и после.
   await waitForTime(page, (time) => time > 3, "после обновления ссылки серия играет дальше");
+  expect(await video(page).evaluate((element: HTMLVideoElement) => element.playbackRate)).toBe(1.5);
   // Не getByRole("alert") целиком: объявитель маршрута Next.js тоже alert.
   await expect(page.getByText("Не удалось загрузить серию")).toHaveCount(0);
 });
@@ -158,6 +179,12 @@ test("настоящий отказ: после неудачного обнов�
   const alert = page.getByRole("alert").filter({ hasText: "Не удалось загрузить серию" });
   await expect(alert).toBeVisible({ timeout: 60_000 });
   await expect(alert.getByRole("button", { name: "Попробовать снова" })).toBeVisible();
+});
+
+test("подписи плеера русские уже в серверном HTML", async ({ request }) => {
+  const html = await (await request.get("/anime/frieren/1")).text();
+  expect(html).toContain('aria-label="Воспроизвести"');
+  expect(html).not.toContain('aria-label="Play"');
 });
 
 test("опубликованная серия без видео, черновик и мусор в адресе", async ({ page, request }) => {

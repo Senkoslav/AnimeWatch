@@ -27,6 +27,7 @@ import { QualityRadioGroup } from "@videojs/react/ui/quality-radio-group";
 
 import { formatRate, PLAYBACK_RATES } from "@/lib/player/rates";
 
+import { savePlaybackRate } from "./behaviors";
 import { usePlayer } from "./store";
 
 /** Кнопка контролов: 44×44, видимый фокус, без теней и стекла. Display отдельно: иначе hidden спорит с inline-flex. */
@@ -140,7 +141,10 @@ function SpeedMenu() {
           <Menu.RadioGroup
             aria-label="Скорость"
             value={String(playbackRate)}
-            onValueChange={(value) => store.setPlaybackRate(Number(value))}
+            onValueChange={(value) => {
+              store.setPlaybackRate(Number(value));
+              savePlaybackRate(Number(value));
+            }}
           >
             {PLAYBACK_RATES.map((rate) => (
               <Menu.RadioItem key={rate} value={String(rate)} className={ITEM}>

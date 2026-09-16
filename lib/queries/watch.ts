@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { getPlayback, type Playback } from "@/lib/playback/server";
 
 import { getTitlePage, type TitleEpisode, type TitlePage } from "./title";
@@ -11,8 +13,11 @@ export interface WatchPage {
   playback: Playback;
 }
 
-/** null — нет такого публичного тайтла или опубликованной серии с этим номером. */
-export async function getWatchPage(slug: string, number: number): Promise<WatchPage | null> {
+/**
+ * null — нет такого публичного тайтла или опубликованной серии с этим номером.
+ * cache(): generateMetadata и страница в одном рендере делят один запрос и одну подпись URL.
+ */
+export const getWatchPage = cache(async (slug: string, number: number): Promise<WatchPage | null> => {
   // getTitlePage уже отфильтровал черновики и скрытые тайтлы и отдал только опубликованные серии.
   const title = await getTitlePage(slug);
   if (!title) return null;
@@ -31,4 +36,4 @@ export async function getWatchPage(slug: string, number: number): Promise<WatchP
     next: title.episodes[index + 1] ?? null,
     playback,
   };
-}
+});

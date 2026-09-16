@@ -3,6 +3,9 @@
 import { BufferingIndicator, Container, Gesture, Hotkey, StatusAnnouncer } from "@videojs/react";
 import { SpinnerIcon } from "@videojs/react/icons";
 import { I18nProvider } from "@videojs/react/i18n";
+// Русская локаль регистрируется синхронно при импорте: подписи и aria-label русские уже в серверном HTML,
+// а не после ленивой загрузки пакета на клиенте.
+import "@videojs/react/i18n/locales/ru/register";
 import { HlsJsVideo } from "@videojs/react/media/hlsjs-video";
 import { useState } from "react";
 
@@ -39,7 +42,7 @@ export function EpisodePlayer(props: EpisodePlayerProps) {
 
 function PlayerSurface({ episodeId, src: initialSrc, next }: EpisodePlayerProps) {
   const [src, setSrc] = useState(initialSrc);
-  const { failed, retry } = useTokenRefresh(episodeId, setSrc);
+  const { error, retry } = useTokenRefresh(episodeId, setSrc);
 
   return (
     <Container className="relative aspect-video w-full overflow-hidden bg-bg sm:rounded-md">
@@ -75,7 +78,7 @@ function PlayerSurface({ episodeId, src: initialSrc, next }: EpisodePlayerProps)
       <AutoplayOnArrival episodeId={episodeId} />
       <PersistPreferences />
       {next && <NextEpisode episodeId={next.episodeId} href={next.href} label={next.label} />}
-      {failed && <PlaybackError onRetry={retry} />}
+      {error && <PlaybackError kind={error} onRetry={retry} />}
     </Container>
   );
 }
