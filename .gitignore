@@ -15,7 +15,8 @@ data/raw/
 
 .DS_Store
 
-# сборка Next.js и отчёты тестов
+# сборка Next.js, клиент Prisma (генерируется в postinstall) и отчёты тестов
+lib/generated/
 .next/
 next-env.d.ts
 *.tsbuildinfo

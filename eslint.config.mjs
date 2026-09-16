@@ -17,7 +17,14 @@ export default defineConfig([
   ...nextVitals,
   ...nextTs,
   prettier,
-  globalIgnores([".next/**", ".tmp/**", "playwright-report/**", "test-results/**", "next-env.d.ts"]),
+  globalIgnores([
+    ".next/**",
+    ".tmp/**",
+    "playwright-report/**",
+    "test-results/**",
+    "next-env.d.ts",
+    "lib/generated/**",
+  ]),
   {
     rules: {
       "@typescript-eslint/no-explicit-any": "error",

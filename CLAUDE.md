@@ -36,7 +36,9 @@ pnpm lint             # eslint, предупреждения тоже роняю
 pnpm format           # prettier --write .
 pnpm test:unit        # vitest
 pnpm test:e2e         # playwright: chromium-desktop и mobile-chrome
-pnpm db:migrate       # prisma migrate dev
+pnpm db:migrate       # prisma migrate dev, только локально
+pnpm db:seed          # тестовые данные, только в локальную базу
+pnpm db:deploy        # prisma migrate deploy: прод и CI
 pnpm db:studio        # prisma studio
 pnpm worker:dev       # воркер импорта видео (отдельный процесс)
 
