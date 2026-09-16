@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatEpisodeNumber, formatRelativeDate, isFresh } from "./format";
+import { formatCount, formatEpisodeNumber, formatRelativeDate, isFresh } from "./format";
 
 const now = new Date("2026-09-16T12:00:00Z");
 const ago = (ms: number) => new Date(now.getTime() - ms);
@@ -55,5 +55,18 @@ describe("isFresh", () => {
 describe("formatEpisodeNumber", () => {
   it("дополняет до двух цифр и не режет длинные", () => {
     expect([1, 12, 108].map(formatEpisodeNumber)).toEqual(["01", "12", "108"]);
+  });
+});
+
+describe("formatCount", () => {
+  it.each([
+    [1, "1 тайтл"],
+    [3, "3 тайтла"],
+    [8, "8 тайтлов"],
+    [11, "11 тайтлов"],
+    [21, "21 тайтл"],
+    [0, "0 тайтлов"],
+  ])("%i", (count, expected) => {
+    expect(formatCount(count, ["тайтл", "тайтла", "тайтлов"])).toBe(expected);
   });
 });
