@@ -1,9 +1,9 @@
 import { cache } from "react";
-import { z } from "zod";
 
 import { prisma } from "@/lib/db";
 import type { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 import { publicEpisodeWhere, publicTitleWhere } from "@/lib/public-where";
+import { slugSchema } from "@/lib/slug";
 
 export interface TitleEpisode {
   id: string;
@@ -37,19 +37,11 @@ export interface TitlePage {
 }
 
 /**
- * Slug из URL — внешний вход. Всё, что не похоже на slug (в том числе \0, который Postgres не принимает
- * в text и ответил бы 500), сразу «не найдено», без похода в базу.
- */
-const slugSchema = z
-  .string()
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
-  .max(120);
-
-/**
  * Публичный тайтл с опубликованными сериями и составом; null — нет, черновик или скрыт по жалобе.
  * cache(): generateMetadata и страница в одном рендере делят один запрос.
  */
 export const getTitlePage = cache(async (slug: string): Promise<TitlePage | null> => {
+  // Slug из URL — внешний вход: мусор (в том числе \0, на котором Postgres ответил бы ошибкой) — сразу «не найдено».
   const parsed = slugSchema.safeParse(slug);
   if (!parsed.success) return null;
 

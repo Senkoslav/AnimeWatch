@@ -25,8 +25,8 @@ function CreditGroup({ title, credits }: { title: string; credits: TitleCredit[]
       <ul className="mt-2 space-y-1">
         {credits.map((credit) => (
           <li key={credit.id} className="flex flex-wrap gap-x-2">
-            <span className="font-medium">{credit.nickname}</span>
-            <span className="text-muted">{credit.role}</span>
+            <span className="min-w-0 font-medium break-words">{credit.nickname}</span>
+            <span className="min-w-0 break-words text-muted">{credit.role}</span>
           </li>
         ))}
       </ul>
