@@ -55,8 +55,11 @@ serverless-функции открывают соединения агресси
 
 ## Кеширование
 
-- Каталог и карточки тайтлов — ISR, `revalidate: 300`, плюс точечный
-  `revalidateTag('title:<id>')` из админки после правки.
+- Каталог и карточки тайтлов — ISR, `revalidate: 300`, плюс точечная
+  ревалидация тега из админки после правки. В Next 16 это `updateTag('title:<id>')`
+  внутри server action: редактор сразу видит свою правку. `revalidateTag` теперь
+  требует второй аргумент (`revalidateTag(tag, 'max')`, stale-while-revalidate)
+  и нужен только вне server actions, например в вебхуке Bunny.
 - Главная — `revalidate: 60`.
 - Страница просмотра — динамическая: подписанный URL живёт недолго.
 - `/me`, админка — `no-store`.
@@ -90,6 +93,19 @@ TG_ARCHIVE_CHAT          # только воркер: id архивного ка
 REDIS_URL                # только воркер
 NEXT_PUBLIC_SITE_URL
 ```
+
+## Версии
+
+Сверено по npm 2026-09-16. Обновляя мажорную версию, проверь причины из таблицы.
+
+| Что | Версия | Почему |
+|---|---|---|
+| Node | 24 LTS (`.nvmrc`, `engines`) | Vercel работает на LTS; Vitest 5 не поддерживает нечётные 25.x |
+| Next.js | 16.3 | `next dev` по умолчанию на Turbopack; `next lint` убран, линт через `eslint .` |
+| TypeScript | ~6.0 | в TS 7 (нативный) нет старого compiler API: на нём не работают проверка типов в `next build` и typescript-eslint (`<6.1.0`) |
+| ESLint | 9.x | плагины из eslint-config-next (react, import, jsx-a11y) объявляют peer до `^9` |
+| Tailwind CSS | 4.x | конфиг в CSS через `@theme` в `app/globals.css`, без `tailwind.config` |
+| Vitest / Playwright | 5 / 1.63 | — |
 
 ## Решения и их причины
 
