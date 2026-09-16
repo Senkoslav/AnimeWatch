@@ -6,6 +6,8 @@ playwright-report/
 test-results/
 next-env.d.ts
 lib/generated/
+# Сегменты HLS в фикстуре — MPEG-TS с расширением .ts, как у Bunny, а не TypeScript.
+tests/fixtures/hls/
 prisma/migrations/
 
 # Доки и правила пишутся руками: prettier переносит строки и ломает выравнивание таблиц.
