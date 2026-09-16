@@ -1,0 +1,56 @@
+import { describe, expect, it } from "vitest";
+
+import { prisma } from "@/lib/db";
+import { TitleStatus } from "@/lib/generated/prisma/enums";
+import { getTitlePage } from "@/lib/queries/title";
+
+import { createEpisode, createTitle } from "../factories/catalog";
+
+describe("getTitlePage", () => {
+  it("отдаёт тайтл с опубликованными сериями по номеру и составом: голоса первыми", async () => {
+    const title = await createTitle({ slug: "frieren", nameRu: "Фрирен", genres: ["Драма"] });
+    await createEpisode(title, { number: 2, name: "Вторая" });
+    await createEpisode(title, { number: 1, name: "Первая" });
+    await createEpisode(title, { number: 3, publishedAt: null });
+
+    const sound = await prisma.member.create({ data: { slug: "trek", nickname: "Трек", sortOrder: 1 } });
+    const voice = await prisma.member.create({ data: { slug: "mika", nickname: "Мика", sortOrder: 50 } });
+    await prisma.credit.createMany({
+      data: [
+        { titleId: title.id, memberId: sound.id, role: "Звукорежиссёр", isVoice: false },
+        { titleId: title.id, memberId: voice.id, role: "Фрирен", isVoice: true },
+      ],
+    });
+
+    const page = await getTitlePage("frieren");
+    expect(page).toMatchObject({ slug: "frieren", nameRu: "Фрирен", genres: ["Драма"] });
+    expect(page?.episodes.map((episode) => [episode.number, episode.name])).toEqual([
+      [1, "Первая"],
+      [2, "Вторая"],
+    ]);
+    expect(page?.credits.map((credit) => [credit.nickname, credit.role, credit.isVoice])).toEqual([
+      ["Мика", "Фрирен", true],
+      ["Трек", "Звукорежиссёр", false],
+    ]);
+  });
+
+  it("несуществующий slug и мусор вместо slug — null, без ошибки базы", async () => {
+    expect(await getTitlePage("net-takogo")).toBeNull();
+    expect(await getTitlePage("\u0000")).toBeNull();
+    expect(await getTitlePage("Frieren")).toBeNull();
+  });
+
+  describe("приватность (docs/07)", () => {
+    it("черновик тайтла — null, даже с опубликованными сериями", async () => {
+      const draft = await createTitle({ slug: "draft", publishedAt: null });
+      await createEpisode(draft);
+      expect(await getTitlePage("draft")).toBeNull();
+    });
+
+    it("тайтл, скрытый по жалобе, — null", async () => {
+      const hidden = await createTitle({ slug: "hidden", status: TitleStatus.HIDDEN });
+      await createEpisode(hidden);
+      expect(await getTitlePage("hidden")).toBeNull();
+    });
+  });
+});
