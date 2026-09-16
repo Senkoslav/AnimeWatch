@@ -51,7 +51,19 @@ export type SearchParams = Record<string, string | string[] | undefined>;
 const first = (value: unknown) => (Array.isArray(value) ? value[0] : value);
 
 const schema = z.object({
-  genre: z.preprocess(first, z.string().trim().min(1).max(64).optional()).catch(undefined),
+  // Управляющие символы (в том числе \0, который Postgres не принимает в text) — не жанр.
+  genre: z
+    .preprocess(
+      first,
+      z
+        .string()
+        .trim()
+        .min(1)
+        .max(64)
+        .regex(/^\P{Cc}+$/u)
+        .optional(),
+    )
+    .catch(undefined),
   // Пустое поле формы (year=) приводится к 0 и не проходит min: получается «не задано».
   year: z.preprocess(first, z.coerce.number().int().min(1900).max(2100).optional()).catch(undefined),
   status: z.preprocess(first, z.enum(STATUS_PARAMS).optional()).catch(undefined),
@@ -113,4 +125,36 @@ export function requestedCatalogHref(searchParams: SearchParams): string {
   }
   const search = query.toString();
   return search ? `/catalog?${search}` : "/catalog";
+}
+
+/** Метки кампаний не часть состояния каталога, но переживают редирект: иначе аналитика потеряет источник. */
+const TRACKING_PARAM = /^(utm_[a-z]+|fbclid|gclid|yclid)$/;
+
+/** Канонический адрес с сохранёнными метками кампаний из запроса. */
+export function withTracking(href: Route, searchParams: SearchParams): Route {
+  const tracking = new URLSearchParams();
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (!TRACKING_PARAM.test(key)) continue;
+    for (const item of Array.isArray(value) ? value : value === undefined ? [] : [value]) {
+      tracking.append(key, item);
+    }
+  }
+  const extra = tracking.toString();
+  if (!extra) return href;
+  return `${href}${href.includes("?") ? "&" : "?"}${extra}` as Route;
+}
+
+/**
+ * Жанр и год, которых нет среди публичных тайтлов, отбрасываются: иначе любой текст из ?genre=
+ * показывался бы выбранным фильтром, а число индексируемых пустых адресов было бы бесконечным.
+ */
+export function sanitizeCatalogParams(
+  params: CatalogParams,
+  options: { genres: readonly string[]; years: readonly number[] },
+): CatalogParams {
+  return {
+    ...params,
+    genre: params.genre && options.genres.includes(params.genre) ? params.genre : undefined,
+    year: params.year && options.years.includes(params.year) ? params.year : undefined,
+  };
 }

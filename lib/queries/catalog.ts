@@ -40,7 +40,8 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogPage> {
     AND: [publicTitleWhere(), { genres: genre ? { has: genre } : undefined, year, status, kind }],
   };
 
-  const [total, items] = await prisma.$transaction([
+  // Без транзакции: точное совпадение счётчика и страницы не нужно, а транзакция держит соединение из пула.
+  const [total, items] = await Promise.all([
     prisma.title.count({ where }),
     prisma.title.findMany({
       where,
@@ -56,15 +57,10 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogPage> {
 
 /** Значения для фильтров — только из публичных тайтлов: жанр скрытого тайтла не выдаёт его существование. */
 export async function getCatalogFilters(): Promise<CatalogFilters> {
-  const [titles, years] = await Promise.all([
-    prisma.title.findMany({ where: publicTitleWhere(), select: { genres: true } }),
-    prisma.title.groupBy({
-      by: ["year"],
-      where: { AND: [publicTitleWhere(), { year: { not: null } }] },
-      orderBy: { year: "desc" },
-    }),
-  ]);
+  // Один запрос на оба списка: тайтлов у студии сотни, свёртка в JS дешевле второго похода в базу.
+  const titles = await prisma.title.findMany({ where: publicTitleWhere(), select: { genres: true, year: true } });
 
   const genres = [...new Set(titles.flatMap((title) => title.genres))].sort((a, b) => a.localeCompare(b, "ru"));
-  return { genres, years: years.map((row) => row.year).filter((value): value is number => value !== null) };
+  const years = [...new Set(titles.map((title) => title.year).filter((year): year is number => year !== null))];
+  return { genres, years: years.sort((a, b) => b - a) };
 }

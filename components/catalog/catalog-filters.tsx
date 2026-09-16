@@ -25,11 +25,8 @@ interface CatalogFiltersProps {
  * отправляется — после смены фильтров всегда первая. Выбранные значения берутся из URL.
  */
 export function CatalogFilters({ params, options }: CatalogFiltersProps) {
-  // Значение из URL, которого нет среди вариантов (например, жанр пропал из каталога), всё равно показываем выбранным:
-  // ссылка должна открываться в том же виде, в каком её отправили.
-  const genres =
-    params.genre && !options.genres.includes(params.genre) ? [params.genre, ...options.genres] : options.genres;
-  const years = params.year && !options.years.includes(params.year) ? [params.year, ...options.years] : options.years;
+  // Значения вне вариантов сюда не доходят: страница уводит такой адрес на канонический (sanitizeCatalogParams).
+  const { genres, years } = options;
 
   return (
     // key: при переходе по ссылке «Сбросить» или «Назад» в истории форма пересоздаётся, иначе
@@ -115,7 +112,8 @@ function Field({ label, name, defaultValue, children }: FieldProps) {
         id={id}
         name={name}
         defaultValue={defaultValue}
-        className="h-11 w-full min-w-0 rounded-sm border border-line bg-surface px-3 text-sm text-text"
+        // 16px на телефоне: iOS Safari увеличивает страницу при фокусе на поле с шрифтом мельче.
+        className="h-11 w-full min-w-0 rounded-sm border border-line bg-surface px-3 text-base text-text sm:text-sm"
       >
         {children}
       </select>

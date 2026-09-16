@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 
-import { catalogHref, hasFilters, parseCatalogParams, requestedCatalogHref } from "./params";
+import {
+  catalogHref,
+  hasFilters,
+  parseCatalogParams,
+  requestedCatalogHref,
+  sanitizeCatalogParams,
+  withTracking,
+} from "./params";
 
 describe("parseCatalogParams", () => {
   it("пустой URL — всё по умолчанию", () => {
@@ -32,6 +39,11 @@ describe("parseCatalogParams", () => {
       year: 2020,
       genre: "Драма",
     });
+  });
+
+  it("управляющие символы в жанре — не жанр (Postgres не принимает \\0 в text)", () => {
+    expect(parseCatalogParams({ genre: "\u0000" }).genre).toBeUndefined();
+    expect(parseCatalogParams({ genre: "Драма\u0000" }).genre).toBeUndefined();
   });
 
   it("обрезает пробелы вокруг жанра", () => {
@@ -85,5 +97,31 @@ describe("requestedCatalogHref", () => {
 
   it("повторённые параметры сохраняются, чтобы их тоже увело на канонический адрес", () => {
     expect(requestedCatalogHref({ year: ["2020", "2021"] })).toBe("/catalog?year=2020&year=2021");
+  });
+});
+
+describe("withTracking", () => {
+  it("метки кампаний переживают редирект, остальной мусор — нет", () => {
+    expect(withTracking("/catalog", { utm_source: "telegram", foo: "bar", fbclid: "x" })).toBe(
+      "/catalog?utm_source=telegram&fbclid=x",
+    );
+    expect(withTracking("/catalog?kind=tv", { utm_campaign: "ep7" })).toBe("/catalog?kind=tv&utm_campaign=ep7");
+    expect(withTracking("/catalog", {})).toBe("/catalog");
+  });
+});
+
+describe("sanitizeCatalogParams", () => {
+  it("отбрасывает жанр и год, которых нет среди публичных тайтлов", () => {
+    const options = { genres: ["Драма"], years: [2023] };
+    expect(sanitizeCatalogParams({ genre: "Хоррор", year: 1999, sort: "name", page: 2 }, options)).toEqual({
+      sort: "name",
+      page: 2,
+    });
+    expect(sanitizeCatalogParams({ genre: "Драма", year: 2023, sort: "new", page: 1 }, options)).toEqual({
+      genre: "Драма",
+      year: 2023,
+      sort: "new",
+      page: 1,
+    });
   });
 });

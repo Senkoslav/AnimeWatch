@@ -57,10 +57,22 @@ test("черновик и скрытый по жалобе тайтл не ви�
   await expect(page.getByLabel("Жанр").locator("option", { hasText: "Сэйнэн" })).toHaveCount(0);
 });
 
-test("мусор в адресе не ломает страницу, а ведёт на чистый каталог", async ({ page }) => {
-  const response = await page.goto("/catalog?year=abc&page=-1&status=hidden");
-  expect(response?.status()).toBe(200);
+test("мусор, неизвестный жанр и страница за последней ведут на чистый адрес, метки кампаний сохраняются", async ({
+  page,
+}) => {
+  const garbage = await page.goto("/catalog?year=abc&page=-1&status=hidden&genre=%00");
+  expect(garbage?.status()).toBe(200);
   await expect(page).toHaveURL("/catalog");
+
+  // Любой текст из ?genre= не должен становиться выбранным фильтром.
+  await page.goto("/catalog?genre=%D0%9A%D0%B0%D0%BA%D0%BE%D0%B9-%D1%82%D0%BE%20%D1%82%D0%B5%D0%BA%D1%81%D1%82");
+  await expect(page).toHaveURL("/catalog");
+
+  await page.goto("/catalog?kind=tv&page=40");
+  await expect(page).toHaveURL("/catalog?kind=tv");
+
+  await page.goto("/catalog?utm_source=telegram&kind=tv&foo=bar");
+  await expect(page).toHaveURL("/catalog?kind=tv&utm_source=telegram");
 });
 
 test("карточка ведёт на страницу тайтла", async ({ page }) => {
