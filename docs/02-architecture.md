@@ -81,7 +81,8 @@ serverless-функции открывают соединения агресси
 ## Env
 
 ```
-DATABASE_URL
+DATABASE_URL             # через пулер: рантайм приложения
+DIRECT_URL               # напрямую: миграции и prisma studio
 BUNNY_STREAM_API_KEY
 BUNNY_LIBRARY_ID
 BUNNY_CDN_HOSTNAME
@@ -106,6 +107,7 @@ NEXT_PUBLIC_SITE_URL
 | ESLint | 9.x | плагины из eslint-config-next (react, import, jsx-a11y) объявляют peer до `^9` |
 | Tailwind CSS | 4.x | конфиг в CSS через `@theme` в `app/globals.css`, без `tailwind.config` |
 | Vitest / Playwright | 5 / 1.63 | — |
+| Prisma | 7.10 | 8 на 2026-09-16 только RC: `@prisma/client@8` не опубликован, CLI переписан. Переходить после стабильного релиза |
 
 ## Решения и их причины
 
