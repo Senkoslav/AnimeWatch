@@ -50,6 +50,15 @@ export function formatCount(count: number, [one, few, many]: PluralForms): strin
   return `${count} ${word}`;
 }
 
+/** Длительность серии: 24:05, 1:45:02. */
+export function formatDuration(totalSeconds: number): string {
+  const seconds = Math.max(0, Math.round(totalSeconds));
+  const hours = Math.floor(seconds / 3600);
+  const minutes = Math.floor((seconds % 3600) / 60);
+  const rest = String(seconds % 60).padStart(2, "0");
+  return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${rest}` : `${minutes}:${rest}`;
+}
+
 /** Номер серии как номер дубля: 07, 12, 108. */
 export function formatEpisodeNumber(number: number): string {
   return String(number).padStart(2, "0");
