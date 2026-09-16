@@ -2,7 +2,9 @@
  * Фильтры публичной выдачи. Любой запрос, который увидит зритель, идёт через них:
  * иначе он покажет черновики и тайтлы, скрытые по жалобе правообладателя.
  */
-import { TitleStatus, type Prisma } from "./generated/prisma/client";
+import type { Prisma } from "./generated/prisma/client";
+// enums.ts не тянет за собой рантайм клиента с node:-модулями.
+import { TitleStatus } from "./generated/prisma/enums";
 
 /** Тайтл опубликован и не скрыт. */
 export function publicTitleWhere(): Prisma.TitleWhereInput {

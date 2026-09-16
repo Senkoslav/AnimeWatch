@@ -93,13 +93,17 @@ async function main(): Promise<void> {
   if (existsSync(".env.local")) {
     process.loadEnvFile(".env.local");
   }
-  const connectionString = process.env.DIRECT_URL ?? process.env.DATABASE_URL;
+  const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL;
   if (!connectionString) {
     throw new Error("нет DIRECT_URL или DATABASE_URL: добавь их в .env.local, образец в .env.example");
   }
   // Upsert по slug перезапишет настоящие тайтлы с такими же slug, поэтому чужую базу нужно подтвердить явно.
-  const host = new URL(connectionString).hostname;
-  if (!["localhost", "127.0.0.1", "[::1]"].includes(host) && process.env.SEED_ALLOW_REMOTE !== "1") {
+  // pg берёт хост из ?host=, если он есть, поэтому проверяем оба места.
+  const url = new URL(connectionString);
+  const host = url.searchParams.get("host") ?? url.hostname;
+  // Путь вместо хоста — unix-сокет, то есть тоже локальная база.
+  const isLocal = host.startsWith("/") || ["localhost", "127.0.0.1", "[::1]", "::1"].includes(host);
+  if (!isLocal && process.env.SEED_ALLOW_REMOTE !== "1") {
     throw new Error(
       `seed пишет в ${host}, а не в локальную базу. Если это точно нужно: SEED_ALLOW_REMOTE=1 pnpm db:seed`,
     );

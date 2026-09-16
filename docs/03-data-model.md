@@ -122,6 +122,7 @@ model Credit {
   isVoice  Boolean @default(true)
 
   @@index([titleId])
+  @@index([memberId])
 }
 
 model User {
@@ -146,6 +147,7 @@ model Bookmark {
 
   @@id([userId, titleId])
   @@index([userId, state])
+  @@index([titleId])
 }
 
 model Progress {
@@ -159,6 +161,7 @@ model Progress {
 
   @@id([userId, episodeId])
   @@index([userId, updatedAt])
+  @@index([episodeId])
 }
 
 model News {
@@ -184,6 +187,9 @@ model News {
   жалобы не должно случайно опубликовать недозаполненный тайтл.
 - Прогресс пишем не чаще раза в 10 секунд и на `pause`/`ended`/уходе со страницы
   через `sendBeacon`. Неавторизованным — в память вкладки, без записи в БД.
+- Postgres не индексирует внешние ключи сам. У каждого FK, который не стоит
+  первым в составном ключе, есть свой `@@index`: иначе каскадное удаление тайтла
+  или серии сканирует `Progress` целиком.
 - `BigInt` для `tgId` не сериализуется в JSON по умолчанию — приводи к строке на
   границе, иначе поймаешь рантайм-ошибку в server action.
 
@@ -205,6 +211,13 @@ model News {
   Для удалённой нужен явный `SEED_ALLOW_REMOTE=1`.
 - **Прод** применяет миграции `pnpm db:deploy`; `db:migrate` — только локально,
   ему нужна shadow-база.
+- **Пул в serverless.** Сейчас `PrismaPg` сам создаёт `pg.Pool` с настройками по
+  умолчанию (до 10 соединений). Vercel замораживает инстанс вместе с открытыми
+  соединениями, и после разморозки первый запрос может попасть в оборванный
+  сокет. До прода: явный `pg.Pool` с маленьким `max` и коротким
+  `idleTimeoutMillis`, плюс `attachDatabasePool` из `@vercel/functions`.
+- `lib/db.ts` проверяет `DATABASE_URL` при импорте, поэтому `next build` страниц
+  с запросами требует этот env и в CI.
 - Локально стоит Postgres 14 из Homebrew, на проде будет новее. Схема не
   использует ничего версии-специфичного; расширения (например, `pg_trgm` для
   поиска) проверять на обеих.

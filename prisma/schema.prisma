@@ -160,6 +160,7 @@ model Credit {
   isVoice  Boolean @default(true)
 
   @@index([titleId])
+  @@index([memberId])
 }
 
 model User {
@@ -184,6 +185,7 @@ model Bookmark {
 
   @@id([userId, titleId])
   @@index([userId, state])
+  @@index([titleId])
 }
 
 model Progress {
@@ -197,6 +199,7 @@ model Progress {
 
   @@id([userId, episodeId])
   @@index([userId, updatedAt])
+  @@index([episodeId])
 }
 
 model News {
