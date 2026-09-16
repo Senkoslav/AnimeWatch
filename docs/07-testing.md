@@ -20,6 +20,10 @@ service-контейнер в CI, URL в `TEST_DATABASE_URL`, имя обяза�
 
 **Playwright** — пользовательские сценарии целиком. Проекты: `chromium-desktop`
 и `mobile-chrome` (Pixel 7). Мобильный прогон обязателен, это основной трафик.
+Плеерный спек (`tests/e2e/player.spec.ts`) идёт в Google Chrome
+(`channel: "chrome"`): Chromium из Playwright не декодирует H.264. В CI нужен
+`pnpm exec playwright install chrome`. Bunny в e2e заменён фикстурой HLS и
+ненастоящими ключами из `playwright.config.ts` — живой CDN тесты не трогают.
 
 ## Что тестируем обязательно
 

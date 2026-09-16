@@ -9,7 +9,7 @@ import { existsSync } from "node:fs";
 
 import { PrismaPg } from "@prisma/adapter-pg";
 
-import { PrismaClient, TitleKind, TitleStatus, type Prisma } from "../lib/generated/prisma/client";
+import { PrismaClient, SourceType, TitleKind, TitleStatus, type Prisma } from "../lib/generated/prisma/client";
 
 interface SeedEpisode {
   number: number;
@@ -17,6 +17,8 @@ interface SeedEpisode {
   duration: number;
   /** Сколько часов назад вышла; null — черновик. */
   hoursAgo: number | null;
+  /** Bunny videoId. Без него серия «ещё обрабатывается». */
+  video?: string;
 }
 
 interface SeedTitle {
@@ -28,6 +30,11 @@ interface SeedTitle {
 }
 
 const SEEDED_AT = Date.now();
+/**
+ * Тестовое видео из библиотеки Bunny (фаза 0, docs/05): 12 секунд синтетики в 480/720/1080p. Играет с
+ * подписанным URL на localhost:3000 — только этот origin разрешён в библиотеке. e2e подменяет CDN фикстурой.
+ */
+const TEST_VIDEO = "ee9ae3d2-b3d3-49e0-b2eb-2eb91ae6f381";
 const HOUR = 60 * 60 * 1000;
 const EPISODE_SECONDS = 1440;
 
@@ -75,9 +82,9 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: 240,
     episodes: [
-      { number: 1, name: "Конец путешествия", duration: 1470, hoursAgo: 240 },
-      { number: 2, name: "Не обязательно магия", duration: 1440, hoursAgo: 120 },
-      { number: 3, name: "Магия убийства людей", duration: 1440, hoursAgo: 2 },
+      { number: 1, name: "Конец путешествия", duration: 1470, hoursAgo: 240, video: TEST_VIDEO },
+      { number: 2, name: "Не обязательно магия", duration: 1440, hoursAgo: 120, video: TEST_VIDEO },
+      { number: 3, name: "Магия убийства людей", duration: 1440, hoursAgo: 2, video: TEST_VIDEO },
       // Черновик: серия заведена, но зритель её не видит.
       { number: 4, name: "Земля, где покоятся души", duration: 1440, hoursAgo: null },
     ],
@@ -103,7 +110,8 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: 400,
     episodes: [
-      { number: 1, name: "Человек, ставший кайдзю", duration: 1420, hoursAgo: 400 },
+      { number: 1, name: "Человек, ставший кайдзю", duration: 1420, hoursAgo: 400, video: TEST_VIDEO },
+      // Опубликована, но видео нет: страница просмотра показывает «Серия ещё обрабатывается».
       { number: 2, name: "Кайдзю, который побеждает кайдзю", duration: 1420, hoursAgo: 30 },
     ],
     credits: [{ member: "mika", role: "Мина Асиро", isVoice: true }, SOUND],
@@ -297,13 +305,18 @@ async function seed(prisma: PrismaClient): Promise<void> {
       const fields = { ...data, publishedAt: hoursAgo(titleHoursAgo) };
       const title = await tx.title.upsert({ where: { slug: data.slug }, create: fields, update: fields });
 
-      for (const { hoursAgo: episodeHoursAgo, ...episode } of episodes) {
+      for (const { hoursAgo: episodeHoursAgo, video, ...episode } of episodes) {
         const episodeFields = { name: null, ...episode, publishedAt: hoursAgo(episodeHoursAgo) };
-        await tx.episode.upsert({
+        const { id: episodeId } = await tx.episode.upsert({
           where: { titleId_number: { titleId: title.id, number: episode.number } },
           create: { ...episodeFields, titleId: title.id },
           update: episodeFields,
         });
+        // У Source нет естественного ключа: источники серии пересоздаются целиком.
+        await tx.source.deleteMany({ where: { episodeId } });
+        if (video) {
+          await tx.source.create({ data: { episodeId, type: SourceType.HLS, url: video, isDefault: true } });
+        }
       }
 
       // У Credit нет естественного ключа, поэтому состав тайтла пересоздаётся целиком.

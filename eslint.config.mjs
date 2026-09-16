@@ -24,6 +24,7 @@ export default defineConfig([
     "test-results/**",
     "next-env.d.ts",
     "lib/generated/**",
+    "tests/fixtures/hls/**",
   ]),
   {
     rules: {

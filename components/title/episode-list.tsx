@@ -9,10 +9,12 @@ import { episodeHref } from "@/lib/routes";
 interface EpisodeListProps {
   title: Pick<TitlePage, "slug" | "kind" | "totalEpisodes" | "episodes">;
   now: Date;
+  /** На странице просмотра: серия, которая играет сейчас. */
+  currentNumber?: number;
 }
 
 /** Список серий — основной блок страницы на телефоне. Полоса прогресса появится вместе с его сохранением. */
-export function EpisodeList({ title, now }: EpisodeListProps) {
+export function EpisodeList({ title, now, currentNumber }: EpisodeListProps) {
   const { episodes, totalEpisodes, kind, slug } = title;
   const isMovie = kind === TitleKind.MOVIE;
   const count =
@@ -36,6 +38,7 @@ export function EpisodeList({ title, now }: EpisodeListProps) {
             const label = isMovie ? "Фильм" : (episode.name ?? `Эпизод ${episode.number}`);
             const duration = episode.duration ? formatDuration(episode.duration) : null;
             const fresh = isFresh(episode.publishedAt, now);
+            const current = episode.number === currentNumber;
 
             return (
               <li key={episode.id} className="border-b border-line last:border-b-0">
@@ -47,12 +50,19 @@ export function EpisodeList({ title, now }: EpisodeListProps) {
                     episode.name,
                     duration && `длительность ${duration}`,
                     fresh ? "новая" : null,
+                    current ? "играет сейчас" : null,
                   ]
                     .filter(Boolean)
                     .join(", ")}
-                  className="flex min-h-14 items-center gap-4 px-2 hover:bg-surface-2"
+                  aria-current={current ? "page" : undefined}
+                  className="flex min-h-14 items-center gap-4 px-2 hover:bg-surface-2 aria-[current=page]:bg-surface-2"
                 >
-                  {!isMovie && <span className="w-10 shrink-0 font-display text-lg font-bold">{number}</span>}
+                  {/* Янтарный номер — серия, которая идёт прямо сейчас (docs/04). */}
+                  {!isMovie && (
+                    <span className={`w-10 shrink-0 font-display text-lg font-bold ${current ? "text-signal" : ""}`}>
+                      {number}
+                    </span>
+                  )}
                   <span className="min-w-0 flex-1 truncate">{label}</span>
                   {fresh && <FreshMark />}
                   {duration && <span className="shrink-0 text-sm text-muted tabular-nums">{duration}</span>}
