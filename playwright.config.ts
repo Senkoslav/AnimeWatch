@@ -19,10 +19,10 @@ export default defineConfig({
     { name: "mobile-chrome", use: { ...devices["Pixel 7"] } },
   ],
   webServer: {
-    // В CI проверяем прод-сборку, локально — дев-сервер, чтобы не ждать build.
-    command: isCI ? `pnpm build && pnpm start --port ${PORT}` : `pnpm dev --port ${PORT}`,
+    // В CI проверяем прод-сборку из отдельного шага build (docs/07, «CI»), локально — дев-сервер.
+    command: isCI ? `pnpm start --port ${PORT}` : `pnpm dev --port ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !isCI,
-    timeout: 180_000,
+    timeout: 120_000,
   },
 });

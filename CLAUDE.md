@@ -32,7 +32,7 @@ Node 24 из `.nvmrc` (`nvm use`): на 25.x Vitest не поддерживае�
 pnpm dev              # next dev (Turbopack по умолчанию)
 pnpm verify           # typecheck + lint + test:unit  ← гоняй перед коммитом
 pnpm build            # next build, проверяет типы
-pnpm lint             # eslint .
+pnpm lint             # eslint, предупреждения тоже роняют
 pnpm format           # prettier --write .
 pnpm test:unit        # vitest
 pnpm test:e2e         # playwright: chromium-desktop и mobile-chrome

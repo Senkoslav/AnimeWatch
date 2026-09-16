@@ -36,9 +36,10 @@
 
 ## Фаза 1. Каркас и админка
 
-- [ ] `M` Инициализация: Next.js App Router + TS strict, Tailwind с токенами из
+- [x] `M` Инициализация: Next.js App Router + TS strict, Tailwind с токенами из
       дизайн-дока, ESLint + Prettier, Vitest, Playwright, pnpm-скрипты.
       **Приёмка:** `pnpm verify` зелёный на пустом проекте.
+      Сделано 2026-09-16: версии и причины в `docs/02`, «Версии».
 - [ ] `S` Prisma: схема из `docs/03-data-model.md`, первая миграция, seed с
       двумя тайтлами и шестью сериями. **Приёмка:** `pnpm db:migrate && pnpm db:seed`
       отрабатывают с нуля.
