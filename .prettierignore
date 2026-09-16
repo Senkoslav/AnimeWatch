@@ -1,0 +1,10 @@
+pnpm-lock.yaml
+.next/
+.tmp/
+data/
+playwright-report/
+test-results/
+next-env.d.ts
+
+# Доки и правила пишутся руками: prettier переносит строки и ломает выравнивание таблиц.
+*.md

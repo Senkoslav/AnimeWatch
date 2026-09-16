@@ -131,13 +131,7 @@ async function main(): Promise<void> {
 }
 
 async function probe(file: string): Promise<ProbeResult> {
-  const stdout = await exec("ffprobe", [
-    "-v", "error",
-    "-print_format", "json",
-    "-show_format",
-    "-show_streams",
-    file,
-  ]);
+  const stdout = await exec("ffprobe", ["-v", "error", "-print_format", "json", "-show_format", "-show_streams", file]);
   const root = asObject(JSON.parse(stdout));
   const format = asObject(root?.format);
   const streams = (Array.isArray(root?.streams) ? root.streams : []).map(asObject).filter(isDefined);
@@ -205,8 +199,7 @@ async function upscaleTest(file: string, info: ProbeResult): Promise<UpscaleResu
 
   // gray16le: сравниваем только яркость и без дизеринга при переводе 10 бит в 8.
   const highFilter =
-    `[0:v]format=gray16le,split=2[ref][tmp];` +
-    `[tmp]${roundTrip(full, half)}[rt];[ref][rt]ssim=stats_file=-`;
+    `[0:v]format=gray16le,split=2[ref][tmp];` + `[tmp]${roundTrip(full, half)}[rt];[ref][rt]ssim=stats_file=-`;
   const midFilter =
     `[0:v]format=gray16le,${scale(half)},split=2[ref][tmp];` +
     `[tmp]${roundTrip(half, quarter)}[rt];[ref][rt]ssim=stats_file=-`;
@@ -232,20 +225,42 @@ async function upscaleTest(file: string, info: ProbeResult): Promise<UpscaleResu
   const crop = `crop=${cropSize.w}:${cropSize.h}:${origin.x}:${origin.y}`;
   const cropPath = join(dir, "crop-50.png");
   await exec("ffmpeg", [
-    "-v", "error", "-nostdin", "-y", "-ss", at, "-i", file, "-frames:v", "1",
+    "-v",
+    "error",
+    "-nostdin",
+    "-y",
+    "-ss",
+    at,
+    "-i",
+    file,
+    "-frames:v",
+    "1",
     "-filter_complex",
     `[0:v]split=2[ref][tmp];[tmp]${roundTrip(full, half)}[rt];` +
       `[ref]${crop}[a];[rt]${crop}[b];[a][b]hstack=inputs=2`,
-    "-update", "1", cropPath,
+    "-update",
+    "1",
+    cropPath,
   ]);
 
   // Разница «оригинал − круг», усиленная: чёрный кадр значит, что выше 1080p терять нечего.
   const diffPath = join(dir, "diff-50.png");
   await exec("ffmpeg", [
-    "-v", "error", "-nostdin", "-y", "-ss", at, "-i", file, "-frames:v", "1",
+    "-v",
+    "error",
+    "-nostdin",
+    "-y",
+    "-ss",
+    at,
+    "-i",
+    file,
+    "-frames:v",
+    "1",
     "-filter_complex",
     `${lossGraph},lut=c0=clip(val*${DIFF_GAIN}\\,0\\,maxval),scale=1920:-2:flags=area`,
-    "-update", "1", diffPath,
+    "-update",
+    "1",
+    diffPath,
   ]);
 
   const lossHigh = median(highLosses);
@@ -264,9 +279,22 @@ async function lossMap(file: string, at: string, lossGraph: string, full: Size):
   const cols = Math.floor(full.w / LOSS_CELL);
   const rows = Math.floor(full.h / LOSS_CELL);
   const raw = await execBuffer("ffmpeg", [
-    "-v", "error", "-nostdin", "-ss", at, "-i", file, "-frames:v", "1",
-    "-filter_complex", `${lossGraph},scale=${cols}:${rows}:flags=area`,
-    "-f", "rawvideo", "-pix_fmt", "gray16le", "-",
+    "-v",
+    "error",
+    "-nostdin",
+    "-ss",
+    at,
+    "-i",
+    file,
+    "-frames:v",
+    "1",
+    "-filter_complex",
+    `${lossGraph},scale=${cols}:${rows}:flags=area`,
+    "-f",
+    "rawvideo",
+    "-pix_fmt",
+    "gray16le",
+    "-",
   ]);
   if (raw.length < cols * rows * 2) {
     throw new Error("ffmpeg вернул неполную карту потерь");
@@ -290,8 +318,7 @@ function busiestRegion(map: LossMap, crop: Size, full: Size): { x: number; y: nu
   const sumAt = (x: number, y: number) => sums[y * stride + x] ?? 0;
   for (let y = 0; y < rows; y += 1) {
     for (let x = 0; x < cols; x += 1) {
-      sums[(y + 1) * stride + x + 1] =
-        (values[y * cols + x] ?? 0) + sumAt(x + 1, y) + sumAt(x, y + 1) - sumAt(x, y);
+      sums[(y + 1) * stride + x + 1] = (values[y * cols + x] ?? 0) + sumAt(x + 1, y) + sumAt(x, y + 1) - sumAt(x, y);
     }
   }
 
@@ -318,12 +345,20 @@ function busiestRegion(map: LossMap, crop: Size, full: Size): { x: number; y: nu
 
 async function frameLoss(file: string, atSec: number, filter: string): Promise<number> {
   const stdout = await exec("ffmpeg", [
-    "-v", "error", "-nostdin",
-    "-ss", atSec.toFixed(2),
-    "-i", file,
-    "-frames:v", "1",
-    "-filter_complex", filter,
-    "-f", "null", "-",
+    "-v",
+    "error",
+    "-nostdin",
+    "-ss",
+    atSec.toFixed(2),
+    "-i",
+    file,
+    "-frames:v",
+    "1",
+    "-filter_complex",
+    filter,
+    "-f",
+    "null",
+    "-",
   ]);
   const ssim = Number(/Y:([\d.]+)/.exec(stdout)?.[1]);
   if (!Number.isFinite(ssim)) {
