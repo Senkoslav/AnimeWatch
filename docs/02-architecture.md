@@ -81,7 +81,7 @@ serverless-функции открывают соединения агресси
 ## Env
 
 ```
-DATABASE_URL             # через пулер: рантайм приложения
+DATABASE_URL             # через пулер: рантайм и next build (ISR-страницы рендерятся на сборке)
 DIRECT_URL               # напрямую: миграции и prisma studio
 BUNNY_STREAM_API_KEY
 BUNNY_LIBRARY_ID

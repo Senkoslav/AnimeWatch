@@ -1,9 +1,9 @@
 import { prisma } from "@/lib/db";
 import type { TitleKind } from "@/lib/generated/prisma/enums";
 import { publicEpisodeWhere } from "@/lib/public-where";
+import { isDefined } from "@/lib/unknown";
 
-/** Сколько свежих серий читать, чтобы после свёртки по тайтлам набралась лента. */
-const RECENT_EPISODES = 60;
+/** Карточек в ленте «Свежее», не считая героя. */
 const FEED_SIZE = 12;
 
 export interface Release {
@@ -28,10 +28,28 @@ export interface HomeFeed {
 }
 
 export async function getHomeFeed(): Promise<HomeFeed> {
-  const episodes = await prisma.episode.findMany({
+  // Одна строка на тайтл считается в базе: пакетная публикация (импорт, дюжина серий разом) иначе вытеснила бы
+  // остальные тайтлы из окна последних серий. titleId в сортировке — чтобы герой не прыгал при равных датах.
+  const latestByTitle = await prisma.episode.groupBy({
+    by: ["titleId"],
     where: publicEpisodeWhere(),
-    orderBy: [{ publishedAt: "desc" }, { number: "desc" }],
-    take: RECENT_EPISODES,
+    _max: { publishedAt: true },
+    orderBy: [{ _max: { publishedAt: "desc" } }, { titleId: "asc" }],
+    take: FEED_SIZE + 1,
+  });
+  if (latestByTitle.length === 0) {
+    return { hero: null, releases: [] };
+  }
+
+  const episodes = await prisma.episode.findMany({
+    where: {
+      AND: [
+        publicEpisodeWhere(),
+        { OR: latestByTitle.map(({ titleId, _max }) => ({ titleId, publishedAt: _max.publishedAt })) },
+      ],
+    },
+    // Несколько серий тайтла вышли одновременно: показываем старшую.
+    orderBy: { number: "desc" },
     select: {
       id: true,
       titleId: true,
@@ -43,15 +61,12 @@ export async function getHomeFeed(): Promise<HomeFeed> {
     },
   });
 
-  // Три серии одного онгоинга подряд заняли бы три карточки: оставляем самую свежую серию тайтла.
-  const seen = new Set<string>();
-  const latest: Release[] = [];
+  const byTitle = new Map<string, Release>();
   for (const { id, titleId, publishedAt, ...episode } of episodes) {
-    if (publishedAt === null || seen.has(titleId)) continue;
-    seen.add(titleId);
-    latest.push({ ...episode, episodeId: id, publishedAt });
+    if (publishedAt === null || byTitle.has(titleId)) continue;
+    byTitle.set(titleId, { ...episode, episodeId: id, publishedAt });
   }
 
-  const [hero = null, ...rest] = latest;
-  return { hero, releases: rest.slice(0, FEED_SIZE) };
+  const [hero = null, ...releases] = latestByTitle.map(({ titleId }) => byTitle.get(titleId)).filter(isDefined);
+  return { hero, releases };
 }

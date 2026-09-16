@@ -14,7 +14,14 @@ function createPrismaClient(): PrismaClient {
   if (!connectionString) {
     throw new Error("DATABASE_URL не задан: локально добавь его в .env.local, образец в .env.example");
   }
-  return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
+  return new PrismaClient({
+    adapter: new PrismaPg({
+      connectionString,
+      // У pg по умолчанию ожидания нет: при недоступной базе фоновая ревалидация висела бы до таймаута функции.
+      connectionTimeoutMillis: 5_000,
+      query_timeout: 15_000,
+    }),
+  });
 }
 
 // В dev горячая перезагрузка заново исполняет модуль, и каждый раз открывался бы новый пул.

@@ -216,6 +216,8 @@ model News {
   соединениями, и после разморозки первый запрос может попасть в оборванный
   сокет. До прода: явный `pg.Pool` с маленьким `max` и коротким
   `idleTimeoutMillis`, плюс `attachDatabasePool` из `@vercel/functions`.
+- У `pg` по умолчанию нет таймаута соединения, поэтому в `lib/db.ts` заданы
+  `connectionTimeoutMillis` (5 с) и `query_timeout` (15 с).
 - `lib/db.ts` проверяет `DATABASE_URL` при импорте, поэтому `next build` страниц
   с запросами требует этот env и в CI.
 - Локально стоит Postgres 14 из Homebrew, на проде будет новее. Схема не

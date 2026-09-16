@@ -23,6 +23,14 @@ describe("formatRelativeDate", () => {
     expect(formatRelativeDate(ago(ms), now)).toBe(expected);
   });
 
+  it("дни после первых суток считает по календарю Москвы", () => {
+    // Суббота 23:00 МСК, сейчас понедельник 05:00 МСК: 30 часов, но это позавчера, а не вчера.
+    const monday = new Date("2026-09-14T02:00:00Z");
+    expect(formatRelativeDate(new Date("2026-09-12T20:00:00Z"), monday)).toBe("позавчера");
+    // Меньше суток — по часам, даже если это уже вчерашняя дата.
+    expect(formatRelativeDate(new Date("2026-09-13T20:00:00Z"), monday)).toBe("6 часов назад");
+  });
+
   it("старше недели — дата без года в текущем году", () => {
     expect(formatRelativeDate(new Date("2026-09-01T12:00:00Z"), now)).toBe("1 сентября");
   });

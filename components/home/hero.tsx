@@ -34,7 +34,10 @@ export function Hero({ release, now }: HeroProps) {
                 className="object-cover"
               />
               {!isMovie && (
-                <p className="absolute bottom-3 left-3 rounded-sm bg-bg px-2 font-display text-2xl font-bold md:text-3xl">
+                <p
+                  aria-hidden="true"
+                  className="absolute bottom-3 left-3 rounded-sm bg-bg px-2 font-display text-2xl font-bold md:text-3xl"
+                >
                   {formatEpisodeNumber(number)}
                 </p>
               )}
@@ -65,16 +68,17 @@ function HeroText({ release, now, showNumber = false }: HeroProps & { showNumber
 
   return (
     <div className="flex min-w-0 flex-col items-start gap-3">
+      <h2 id="hero-title" className="text-base font-semibold text-balance md:text-xl md:leading-tight">
+        {title.nameRu}
+      </h2>
       {showNumber && (
         // Номер дублем: крупная цифра и есть «Эпизод 03», второй раз в строке ниже не повторяем.
-        <p className="flex flex-col">
+        // В DOM после заголовка, чтобы переход по заголовкам не пропускал номер; на экране — над ним.
+        <p className="order-first flex flex-col">
           <span className="text-sm text-muted">Эпизод</span>
           <span className="font-display text-2xl font-bold md:text-3xl">{formatEpisodeNumber(number)}</span>
         </p>
       )}
-      <h2 id="hero-title" className="text-base font-semibold text-balance md:text-xl md:leading-tight">
-        {title.nameRu}
-      </h2>
       {(!showNumber || name) && (
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
           {!showNumber && (

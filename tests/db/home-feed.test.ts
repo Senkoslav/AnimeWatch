@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { prisma } from "@/lib/db";
 import { TitleStatus } from "@/lib/generated/prisma/enums";
 import { getHomeFeed } from "@/lib/queries/home";
 
@@ -40,6 +41,30 @@ describe("getHomeFeed", () => {
     const feed = await getHomeFeed();
     expect(slugs(feed)).toEqual(["other", "ongoing"]);
     expect(feed.releases[0]?.number).toBe(3);
+  });
+
+  it("пакетная публикация одного тайтла не вытесняет остальные", async () => {
+    const batch = await createTitle({ slug: "batch" });
+    const older = await createTitle({ slug: "older" });
+    const oldest = await createTitle({ slug: "oldest" });
+    await createEpisode(older, { number: 1, publishedAt: hoursAgo(100) });
+    await createEpisode(oldest, { number: 1, publishedAt: hoursAgo(200) });
+    // Больше, чем любое разумное окно последних серий, и все с одной датой, как при импорте.
+    const publishedAt = hoursAgo(1);
+    await prisma.episode.createMany({
+      data: Array.from({ length: 61 }, (_, index) => ({ titleId: batch.id, number: index + 1, publishedAt })),
+    });
+
+    const feed = await getHomeFeed();
+    expect(slugs(feed)).toEqual(["batch", "older", "oldest"]);
+    expect(feed.hero?.number).toBe(61);
+  });
+
+  it("не больше двенадцати карточек после героя", async () => {
+    for (let index = 0; index < 15; index += 1) {
+      await createEpisode(await createTitle(), { publishedAt: hoursAgo(index + 1) });
+    }
+    expect((await getHomeFeed()).releases).toHaveLength(12);
   });
 
   describe("приватность (docs/07)", () => {

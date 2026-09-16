@@ -10,6 +10,7 @@ const MOBILE_COLUMNS = 2;
 
 export default async function HomePage() {
   const { hero, releases } = await getHomeFeed();
+  // Момент рендера: при ISR «N минут назад» и метка «новая» стареют до минуты после простоя. Осознанно.
   const now = new Date();
 
   return (
