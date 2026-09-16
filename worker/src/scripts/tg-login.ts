@@ -33,7 +33,9 @@ async function main(): Promise<void> {
 
     await upsertEnvVar(WORKER_ENV_PATH, "TG_SESSION", session.save());
     const me = await client.getMe();
-    console.log(`Вход выполнен: ${me.username ? `@${me.username}` : "аккаунт без ника"}. TG_SESSION записан в worker/.env.`);
+    console.log(
+      `Вход выполнен: ${me.username ? `@${me.username}` : "аккаунт без ника"}. TG_SESSION записан в worker/.env.`,
+    );
     console.log("Проверка: pnpm tg:whoami");
   } finally {
     await client.destroy();

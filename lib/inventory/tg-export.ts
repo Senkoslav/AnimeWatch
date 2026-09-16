@@ -99,7 +99,9 @@ function isEpisodeFile(message: Json): boolean {
 function textOf(text: unknown): string {
   if (typeof text === "string") return text;
   if (!Array.isArray(text)) return "";
-  return text.map((part: unknown) => (typeof part === "string" ? part : (asString(asObject(part)?.text) ?? ""))).join("");
+  return text
+    .map((part: unknown) => (typeof part === "string" ? part : (asString(asObject(part)?.text) ?? "")))
+    .join("");
 }
 
 export interface EpisodeGuess {
@@ -144,10 +146,11 @@ const RELEASE_TOKENS =
 
 export function guessEpisode(caption: string, fileName: string | undefined): EpisodeGuess {
   const notes: string[] = [];
-  const firstLine = caption
-    .split(/\r?\n/u)
-    .map((line) => line.trim())
-    .find((line) => line !== "") ?? "";
+  const firstLine =
+    caption
+      .split(/\r?\n/u)
+      .map((line) => line.trim())
+      .find((line) => line !== "") ?? "";
 
   let source: "caption" | "file" | undefined;
   let found = findEpisode(caption, EPISODE_PATTERNS);
@@ -170,7 +173,11 @@ export function guessEpisode(caption: string, fileName: string | undefined): Epi
 
   const captionTitle = cleanTitle(source === "caption" && found ? firstLine.replace(found.match, " ") : firstLine);
   const title =
-    captionTitle !== "" ? captionTitle : fileName ? titleFromFileName(fileName, source === "file" ? found?.match : undefined) : "";
+    captionTitle !== ""
+      ? captionTitle
+      : fileName
+        ? titleFromFileName(fileName, source === "file" ? found?.match : undefined)
+        : "";
   if (title === "") {
     notes.push("название не найдено");
   }

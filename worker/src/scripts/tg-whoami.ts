@@ -36,9 +36,7 @@ async function main(): Promise<void> {
 
     const me = await withTimeout(client.getMe(), NETWORK_TIMEOUT_MS, "профиль");
     console.log(me.username ? `@${me.username}` : `аккаунт без ника: ${me.firstName ?? me.id.toString()}`);
-    console.log(
-      me.premium ? "Premium: есть" : "Premium: нет — без него Telegram режет скорость скачивания мастеров",
-    );
+    console.log(me.premium ? "Premium: есть" : "Premium: нет — без него Telegram режет скорость скачивания мастеров");
 
     const archive = process.env.TG_ARCHIVE_CHAT?.trim();
     if (!archive) {
@@ -71,7 +69,12 @@ async function main(): Promise<void> {
 /** Ищем среди диалогов: у приватного канала без access hash из диалогов id не разрешить. */
 async function findChannel(client: TelegramClient, reference: string): Promise<Api.Channel | undefined> {
   const id = channelIdFrom(reference);
-  const username = id ? undefined : reference.replace(/^(?:https?:\/\/)?t\.me\//, "").replace(/^@/, "").toLowerCase();
+  const username = id
+    ? undefined
+    : reference
+        .replace(/^(?:https?:\/\/)?t\.me\//, "")
+        .replace(/^@/, "")
+        .toLowerCase();
   for await (const dialog of client.iterDialogs({})) {
     const entity = dialog.entity;
     if (!(entity instanceof Api.Channel)) continue;

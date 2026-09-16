@@ -143,7 +143,11 @@ async function main(): Promise<void> {
   );
   if (segmentUrl) {
     const unsignedPath = segmentUrl.pathname.replace(/^\/bcdn_token=[^/]*/, "");
-    expectStatus("сегмент без токена", 403, (await request(`https://${hostname}${unsignedPath}`, referer, "none")).status);
+    expectStatus(
+      "сегмент без токена",
+      403,
+      (await request(`https://${hostname}${unsignedPath}`, referer, "none")).status,
+    );
   }
 
   const expiredUrl = signedPlaylistUrl({ hostname, securityKey, videoId, expiresAt: now - 60 });
@@ -158,7 +162,11 @@ async function main(): Promise<void> {
     tokenInPath: true,
   });
   expectStatus("токен, выданный на другое видео", 403, (await request(otherVideoUrl, referer, "none")).status);
-  expectStatus(`токен с чужим Referer (${FOREIGN_REFERER})`, 403, (await request(masterUrl, FOREIGN_REFERER, "none")).status);
+  expectStatus(
+    `токен с чужим Referer (${FOREIGN_REFERER})`,
+    403,
+    (await request(masterUrl, FOREIGN_REFERER, "none")).status,
+  );
 
   printResults(results);
 
@@ -205,7 +213,9 @@ async function verifySignerAgainstVectors(): Promise<string> {
       tokenInPath: vector.tokenInPath === true,
     });
     if (actual !== expected) {
-      throw new Error(`Подпись разошлась с эталоном Bunny («${asString(vector.name) ?? path}»):\n  ${actual}\n  ${expected}`);
+      throw new Error(
+        `Подпись разошлась с эталоном Bunny («${asString(vector.name) ?? path}»):\n  ${actual}\n  ${expected}`,
+      );
     }
   }
   return `${vectors.length} из ${vectors.length}`;
@@ -235,9 +245,12 @@ async function request(
     await response.body?.cancel();
     return { status: response.status, body: "" };
   } catch (error) {
-    throw new Error(`Запрос к CDN не выполнился: ${new URL(url).pathname.replace(/bcdn_token=[^/]*/, "bcdn_token=…")}`, {
-      cause: error,
-    });
+    throw new Error(
+      `Запрос к CDN не выполнился: ${new URL(url).pathname.replace(/bcdn_token=[^/]*/, "bcdn_token=…")}`,
+      {
+        cause: error,
+      },
+    );
   }
 }
 
@@ -246,17 +259,33 @@ async function decodeWithFfmpeg(url: string, referer: string): Promise<string> {
   try {
     await execFileAsync(
       "ffmpeg",
-      ["-v", "error", "-nostdin", "-headers", `Referer: ${referer}\r\n`, "-i", url, "-t", String(DECODE_SECONDS), "-f", "null", "-"],
+      [
+        "-v",
+        "error",
+        "-nostdin",
+        "-headers",
+        `Referer: ${referer}\r\n`,
+        "-i",
+        url,
+        "-t",
+        String(DECODE_SECONDS),
+        "-f",
+        "null",
+        "-",
+      ],
       { timeout: 60_000 },
     );
     return "да";
   } catch (error) {
-    const stderr =
-      typeof error === "object" && error !== null && "stderr" in error ? String(error.stderr).trim() : "";
+    const stderr = typeof error === "object" && error !== null && "stderr" in error ? String(error.stderr).trim() : "";
     if (stderr === "" && typeof error === "object" && error !== null && "code" in error && error.code === "ENOENT") {
       return "ffmpeg не установлен";
     }
-    return `нет: ${stderr.split("\n").slice(-2).join(" / ").replace(/bcdn_token=[^/\s]*/g, "bcdn_token=…")}`;
+    return `нет: ${stderr
+      .split("\n")
+      .slice(-2)
+      .join(" / ")
+      .replace(/bcdn_token=[^/\s]*/g, "bcdn_token=…")}`;
   }
 }
 
