@@ -30,11 +30,12 @@ Node 24 из `.nvmrc` (`nvm use`): на 25.x Vitest не поддерживае�
 
 ```bash
 pnpm dev              # next dev (Turbopack по умолчанию)
-pnpm verify           # typecheck + lint + test:unit  ← гоняй перед коммитом
+pnpm verify           # typecheck + lint + test:unit + test:db  ← гоняй перед коммитом
 pnpm build            # next build, проверяет типы
 pnpm lint             # eslint, предупреждения тоже роняют
 pnpm format           # prettier --write .
-pnpm test:unit        # vitest
+pnpm test:unit        # vitest, чистая логика
+pnpm test:db          # vitest на базе bebradub_test (нужен локальный Postgres)
 pnpm test:e2e         # playwright: chromium-desktop и mobile-chrome
 pnpm db:migrate       # prisma migrate dev, только локально
 pnpm db:seed          # тестовые данные, только в локальную базу
