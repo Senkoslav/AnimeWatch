@@ -226,6 +226,25 @@ const TITLES: SeedTitle[] = [
     credits: [SOUND],
   },
   {
+    // Длинный сериал без видео: на нём проверяется поиск с опечаткой («наруот»).
+    data: {
+      slug: "naruto",
+      shikimoriId: 20,
+      name: "Naruto",
+      nameRu: "Наруто",
+      synonyms: ["NARUTO"],
+      posterUrl: poster("20.jpg?1711965679"),
+      kind: TitleKind.TV,
+      status: TitleStatus.COMPLETED,
+      year: 2002,
+      genres: ["Экшен", "Приключения", "Фэнтези", "Боевые искусства", "Сёнен"],
+      totalEpisodes: 220,
+    },
+    hoursAgo: 900,
+    episodes: episodes(900, 890),
+    credits: [SOUND],
+  },
+  {
     // Черновик тайтла со свежей опубликованной серией: если фильтр сломан, он станет героем главной.
     data: {
       slug: "spy-x-family",

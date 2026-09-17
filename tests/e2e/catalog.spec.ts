@@ -34,6 +34,10 @@ test("ссылка с фильтрами открывается в новой в
 
 test("форма меняет адрес на чистый, «Сбросить» возвращает весь каталог", async ({ page }) => {
   await page.goto("/catalog");
+  // Сравниваем с тем, что каталог показал до фильтров: число тайтлов в seed меняется от задачи к задаче.
+  const total = await results(page).count();
+  expect(total).toBeGreaterThan(DRAMA_TV_BY_NAME.length);
+
   await page.getByLabel("Жанр").selectOption("Драма");
   await page.getByLabel("Тип").selectOption("tv");
   await page.getByLabel("Сортировка").selectOption("name");
@@ -46,7 +50,7 @@ test("форма меняет адрес на чистый, «Сбросить»
   await page.getByRole("link", { name: "Сбросить" }).click();
   await expect(page).toHaveURL("/catalog");
   await expect(page.getByLabel("Жанр")).toHaveValue("");
-  await expect(results(page)).toHaveCount(8);
+  await expect(results(page)).toHaveCount(total);
 });
 
 test("черновик и скрытый по жалобе тайтл не видны ни в выдаче, ни через свои фильтры", async ({ page }) => {
