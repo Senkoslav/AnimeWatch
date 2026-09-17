@@ -5,13 +5,13 @@ import { redirect } from "next/navigation";
 import { CatalogFilters } from "@/components/catalog/catalog-filters";
 import { Pagination } from "@/components/catalog/pagination";
 import { TitleCard } from "@/components/catalog/title-card";
+import { withTracking } from "@/lib/canonical";
 import {
   catalogHref,
   hasFilters,
   parseCatalogParams,
   requestedCatalogHref,
   sanitizeCatalogParams,
-  withTracking,
 } from "@/lib/catalog/params";
 import { formatCount } from "@/lib/format";
 import { getCatalog, getCatalogFilters } from "@/lib/queries/catalog";
