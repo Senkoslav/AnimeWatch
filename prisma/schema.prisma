@@ -2,12 +2,15 @@
 // URL базы живёт в prisma.config.ts (Prisma 7), рантайм подключается через driver adapter в lib/db.ts.
 
 generator client {
-  provider = "prisma-client"
-  output   = "../lib/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../lib/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
-  provider = "postgresql"
+  provider   = "postgresql"
+  // pg_trgm — поиск, устойчивый к опечаткам (docs/03, «Поиск»). Ставится миграцией, не руками.
+  extensions = [pgTrgm(map: "pg_trgm")]
 }
 
 enum TitleStatus {
@@ -83,6 +86,10 @@ model Title {
   @@index([status, updatedAt])
   @@index([publishedAt])
   @@index([year])
+  // Триграммные индексы под поиск. Текущий запрос считает счёт выражением и идёт сканом;
+  // индексы понадобятся, когда каталог вырастет и запрос перепишут на оператор % (docs/03).
+  @@index([nameRu(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([name(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 model Episode {

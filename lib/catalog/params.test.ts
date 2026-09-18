@@ -2,14 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 
-import {
-  catalogHref,
-  hasFilters,
-  parseCatalogParams,
-  requestedCatalogHref,
-  sanitizeCatalogParams,
-  withTracking,
-} from "./params";
+import { withTracking } from "@/lib/canonical";
+
+import { catalogHref, hasFilters, parseCatalogParams, requestedCatalogHref, sanitizeCatalogParams } from "./params";
 
 describe("parseCatalogParams", () => {
   it("пустой URL — всё по умолчанию", () => {

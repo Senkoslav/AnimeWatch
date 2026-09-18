@@ -5,6 +5,7 @@
 import type { Route } from "next";
 import { z } from "zod";
 
+import { requestedHref, type SearchParams } from "@/lib/canonical";
 import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 
 export const CATALOG_SORTS = ["new", "year", "name"] as const;
@@ -44,8 +45,6 @@ export interface CatalogParams {
   sort: CatalogSort;
   page: number;
 }
-
-export type SearchParams = Record<string, string | string[] | undefined>;
 
 /** Параметр повторён (?year=1&year=2) — берём первый. */
 const first = (value: unknown) => (Array.isArray(value) ? value[0] : value);
@@ -112,36 +111,9 @@ export function catalogHref(params: Partial<CatalogParams> = {}): Route {
   return search ? `/catalog?${search}` : "/catalog";
 }
 
-/**
- * Адрес запроса в том же виде, в каком пришёл: чтобы сравнить с catalogHref и понять, нужен ли редирект
- * на канонический URL (форма отправляет пустые поля, а в ссылках бывает мусор).
- */
+/** Адрес запроса каталога в том же виде, в каком пришёл: с ним сравнивается catalogHref. */
 export function requestedCatalogHref(searchParams: SearchParams): string {
-  const query = new URLSearchParams();
-  for (const [key, value] of Object.entries(searchParams)) {
-    for (const item of Array.isArray(value) ? value : value === undefined ? [] : [value]) {
-      query.append(key, item);
-    }
-  }
-  const search = query.toString();
-  return search ? `/catalog?${search}` : "/catalog";
-}
-
-/** Метки кампаний не часть состояния каталога, но переживают редирект: иначе аналитика потеряет источник. */
-const TRACKING_PARAM = /^(utm_[a-z]+|fbclid|gclid|yclid)$/;
-
-/** Канонический адрес с сохранёнными метками кампаний из запроса. */
-export function withTracking(href: Route, searchParams: SearchParams): Route {
-  const tracking = new URLSearchParams();
-  for (const [key, value] of Object.entries(searchParams)) {
-    if (!TRACKING_PARAM.test(key)) continue;
-    for (const item of Array.isArray(value) ? value : value === undefined ? [] : [value]) {
-      tracking.append(key, item);
-    }
-  }
-  const extra = tracking.toString();
-  if (!extra) return href;
-  return `${href}${href.includes("?") ? "&" : "?"}${extra}` as Route;
+  return requestedHref("/catalog", searchParams);
 }
 
 /**
