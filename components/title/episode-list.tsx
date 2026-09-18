@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { FreshMark } from "@/components/ui/fresh-mark";
+import { episodeWindow } from "@/lib/episodes";
 import { formatCount, formatDuration, formatEpisodeNumber, isFresh } from "@/lib/format";
 import { TitleKind } from "@/lib/generated/prisma/enums";
 import type { TitlePage } from "@/lib/queries/title";
@@ -15,19 +16,27 @@ interface EpisodeListProps {
 
 /** Список серий — основной блок страницы на телефоне. Полоса прогресса появится вместе с его сохранением. */
 export function EpisodeList({ title, now, currentNumber }: EpisodeListProps) {
-  const { episodes, totalEpisodes, kind, slug } = title;
+  const { episodes: all, totalEpisodes, kind, slug } = title;
   const isMovie = kind === TitleKind.MOVIE;
+  // У долгих тайтлов серий больше тысячи: список показывается окном (lib/episodes.ts).
+  const { episodes, capped, first, last, total } = episodeWindow(all, currentNumber);
   const count =
-    totalEpisodes && totalEpisodes > episodes.length
-      ? `${episodes.length} из ${totalEpisodes}`
-      : formatCount(episodes.length, ["серия", "серии", "серий"]);
+    totalEpisodes && totalEpisodes > total
+      ? `${total} из ${totalEpisodes}`
+      : formatCount(total, ["серия", "серии", "серий"]);
 
   return (
     <section aria-labelledby="episodes-title">
       <h2 id="episodes-title" className="flex items-baseline gap-3 text-lg font-semibold">
         {isMovie ? "Фильм" : "Серии"}
-        {!isMovie && episodes.length > 0 && <span className="text-sm font-normal text-muted">{count}</span>}
+        {!isMovie && total > 0 && <span className="text-sm font-normal text-muted">{count}</span>}
       </h2>
+
+      {capped && (
+        <p className="mt-2 text-sm text-muted">
+          Показаны серии {first}–{last} из {total}
+        </p>
+      )}
 
       {episodes.length === 0 ? (
         <p className="mt-3 text-muted">Первая серия ещё в работе.</p>
