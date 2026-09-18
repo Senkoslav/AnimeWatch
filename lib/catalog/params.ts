@@ -10,6 +10,8 @@ import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 
 export const CATALOG_SORTS = ["new", "year", "name"] as const;
 export type CatalogSort = (typeof CATALOG_SORTS)[number];
+/** Порядок по умолчанию: он же отсутствует в каноническом адресе. */
+export const DEFAULT_SORT: CatalogSort = "new";
 
 /** HIDDEN в фильтре нет: скрытый по жалобе тайтл не существует для зрителя. */
 const STATUS_BY_PARAM = {
@@ -67,7 +69,7 @@ const schema = z.object({
   year: z.preprocess(first, z.coerce.number().int().min(1900).max(2100).optional()).catch(undefined),
   status: z.preprocess(first, z.enum(STATUS_PARAMS).optional()).catch(undefined),
   kind: z.preprocess(first, z.enum(KIND_PARAMS).optional()).catch(undefined),
-  sort: z.preprocess(first, z.enum(CATALOG_SORTS)).catch("new"),
+  sort: z.preprocess(first, z.enum(CATALOG_SORTS)).catch(DEFAULT_SORT),
   page: z.preprocess(first, z.coerce.number().int().min(1).max(10_000)).catch(1),
 });
 
@@ -104,7 +106,7 @@ export function catalogHref(params: Partial<CatalogParams> = {}): Route {
   if (params.year) query.set("year", String(params.year));
   if (params.status) query.set("status", statusParam(params.status));
   if (params.kind) query.set("kind", kindParam(params.kind));
-  if (params.sort && params.sort !== "new") query.set("sort", params.sort);
+  if (params.sort && params.sort !== DEFAULT_SORT) query.set("sort", params.sort);
   if (params.page && params.page > 1) query.set("page", String(params.page));
 
   const search = query.toString();

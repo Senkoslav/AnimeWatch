@@ -14,6 +14,22 @@ function results(page: Page) {
   return page.getByRole("region", { name: /Найдено/ }).getByRole("listitem");
 }
 
+/** Ширина, с которой панель фильтров раскрыта всегда (lg в tailwind). */
+const DESKTOP = 1024;
+
+/**
+ * На телефоне панель свёрнута. Ветвимся по ширине окна, а не по видимости подписи: isVisible
+ * не ждёт, и на медленном прогоне вернул бы false до отрисовки.
+ */
+async function openFilters(page: Page) {
+  const viewport = page.viewportSize();
+  if (viewport && viewport.width < DESKTOP) {
+    // Кликаем подпись, а не сам чекбокс: он sr-only, и Playwright не дотянется до клипнутого элемента.
+    await page.locator('label[for="catalog-filters-open"]').click();
+  }
+  await expect(page.getByLabel("Жанр")).toBeVisible();
+}
+
 async function expectFilteredView(page: Page) {
   await expect(page.getByLabel("Жанр")).toHaveValue("Драма");
   await expect(page.getByLabel("Тип")).toHaveValue("tv");
@@ -38,6 +54,7 @@ test("форма меняет адрес на чистый, «Сбросить»
   const total = await results(page).count();
   expect(total).toBeGreaterThan(DRAMA_TV_BY_NAME.length);
 
+  await openFilters(page);
   await page.getByLabel("Жанр").selectOption("Драма");
   await page.getByLabel("Тип").selectOption("tv");
   await page.getByLabel("Сортировка").selectOption("name");
@@ -89,6 +106,40 @@ test("пункт «Каталог» в шапке отмечен текущим"
   await expect(
     page.getByRole("navigation", { name: "Разделы" }).getByRole("link", { name: "Каталог" }),
   ).toHaveAttribute("aria-current", "page");
+});
+
+test("на широком экране панель фильтров стоит справа от выдачи", async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/catalog");
+
+  const filters = await page.getByRole("button", { name: "Показать" }).boundingBox();
+  const grid = await page.getByRole("region", { name: /Найдено/ }).boundingBox();
+  if (!filters || !grid) throw new Error("панель фильтров или выдача не отрисованы");
+
+  expect(filters.x).toBeGreaterThanOrEqual(grid.x + grid.width);
+
+  // Панель липкая: после прокрутки она обязана остаться в окне, иначе фильтры недостижимы в длинной выдаче.
+  await page.mouse.wheel(0, 600);
+  const scrolled = await page.getByRole("button", { name: "Показать" }).boundingBox();
+  if (!scrolled) throw new Error("кнопка «Показать» пропала после прокрутки");
+  expect(scrolled.y).toBeGreaterThan(0);
+  expect(scrolled.y).toBeLessThan(900);
+});
+
+test("на 360px фильтры свёрнуты и первый ряд постеров виден сразу", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/catalog");
+
+  await expect(page.getByLabel("Жанр")).toBeHidden();
+  // Сортировка тоже держит панель раскрытой: свёрнутая, она прячет единственный признак иного порядка.
+  await page.goto("/catalog?sort=name");
+  await expect(page.getByLabel("Сортировка")).toBeVisible();
+  await page.goto("/catalog");
+  const first = await results(page).first().boundingBox();
+  if (!first) throw new Error("выдача пуста");
+  expect(first.y).toBeLessThan(800);
+
+  await openFilters(page);
 });
 
 test("на 360px нет горизонтального скролла", async ({ page }) => {

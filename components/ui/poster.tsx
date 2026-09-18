@@ -7,13 +7,19 @@ interface PosterProps {
   sizes: string;
   /** preload — картинка героя; eager — видна без прокрутки и может оказаться LCP (на телефоне карточка крупнее героя). */
   loading?: "preload" | "eager" | "lazy";
+  /** Фон под заглушкой: он обязан отличаться от того, на чём лежит карточка, иначе тайтл без постера пропадает. */
+  background?: "surface" | "bg";
   className?: string;
 }
 
+const BACKGROUNDS = { surface: "bg-surface", bg: "bg-bg" } as const;
+
 /** Постер 2:3. Пропорция задана контейнером, поэтому вёрстка не прыгает ни с картинкой, ни без неё. */
-export function Poster({ src, title, sizes, loading = "lazy", className = "" }: PosterProps) {
+export function Poster({ src, title, sizes, loading = "lazy", background = "surface", className = "" }: PosterProps) {
   return (
-    <div className={`relative aspect-2/3 overflow-hidden rounded-md border border-line bg-surface ${className}`}>
+    <div
+      className={`relative aspect-2/3 overflow-hidden rounded-md border border-line ${BACKGROUNDS[background]} ${className}`}
+    >
       {src ? (
         // alt пустой: название всегда стоит текстом рядом, иначе скринридер прочтёт его дважды.
         <Image
