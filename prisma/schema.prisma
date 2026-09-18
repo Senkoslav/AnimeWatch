@@ -29,25 +29,16 @@ enum TitleKind {
 }
 
 enum SourceType {
-  HLS
+  // Плеер Kodik во фрейме: основной источник (docs/05-kodik.md).
+  KODIK
+  // Про запас, когда появится второй поставщик: прямой файл или чужой фрейм.
   MP4
-  TELEGRAM
-  VK
+  HLS
   EXTERNAL
-}
-
-enum IngestStatus {
-  PENDING
-  DOWNLOADING
-  UPLOADING
-  ENCODING
-  READY
-  FAILED
 }
 
 enum Role {
   USER
-  EDITOR
   ADMIN
 }
 
@@ -78,7 +69,6 @@ model Title {
   airDay        Int? // 1-7, для расписания
   publishedAt   DateTime? // null = черновик; HIDDEN — только рубильник по жалобе
   episodes      Episode[]
-  credits       Credit[]
   bookmarks     Bookmark[]
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
@@ -100,10 +90,9 @@ model Episode {
   name        String?
   description String?
   thumbUrl    String?
-  duration    Int? // секунды, из Bunny после энкода
+  duration    Int? // секунды, если источник их сообщает
   publishedAt DateTime? // null = черновик, не виден зрителю
   sources     Source[]
-  ingest      IngestJob?
   progress    Progress[]
   createdAt   DateTime   @default(now())
 
@@ -111,63 +100,19 @@ model Episode {
   @@index([publishedAt])
 }
 
-// Один эпизод — несколько источников. Плеер берёт isDefault, затем остальные
-// по приоритету. Это то, что позволяет переезжать между хостингами без правок UI.
+// Один эпизод — несколько источников. Страница просмотра берёт isDefault, затем остальные
+// по приоритету. Это то, что позволяет сменить поставщика видео без правок UI.
 model Source {
   id        String     @id @default(cuid())
   episodeId String
   episode   Episode    @relation(fields: [episodeId], references: [id], onDelete: Cascade)
   type      SourceType
-  url       String // bunny videoId, iframe src или .m3u8
+  url       String // src фрейма Kodik, ссылка на файл или .m3u8
   quality   String? // "1080p"; null для адаптивного HLS
   isDefault Boolean    @default(false)
   priority  Int        @default(100)
 
   @@index([episodeId, priority])
-}
-
-// Состояние конвейера «телеграм → bunny». Отдельно от Episode,
-// чтобы падение импорта не ломало карточку серии.
-model IngestJob {
-  id           String       @id @default(cuid())
-  episodeId    String       @unique
-  episode      Episode      @relation(fields: [episodeId], references: [id], onDelete: Cascade)
-  tgChatId     String
-  tgMessageId  Int
-  bunnyVideoId String?
-  status       IngestStatus @default(PENDING)
-  progress     Int          @default(0) // 0-100
-  error        String?
-  attempts     Int          @default(0)
-  startedAt    DateTime?
-  finishedAt   DateTime?
-  createdAt    DateTime     @default(now())
-
-  @@index([status])
-}
-
-model Member {
-  id        String   @id @default(cuid())
-  slug      String   @unique
-  nickname  String
-  avatarUrl String?
-  bio       String?
-  tgUrl     String?
-  credits   Credit[]
-  sortOrder Int      @default(100)
-}
-
-model Credit {
-  id       String  @id @default(cuid())
-  titleId  String
-  title    Title   @relation(fields: [titleId], references: [id], onDelete: Cascade)
-  memberId String
-  member   Member  @relation(fields: [memberId], references: [id], onDelete: Cascade)
-  role     String // "Наруто", "Звукорежиссёр", "Перевод"
-  isVoice  Boolean @default(true)
-
-  @@index([titleId])
-  @@index([memberId])
 }
 
 model User {
@@ -209,12 +154,21 @@ model Progress {
   @@index([episodeId])
 }
 
-model News {
-  id          String    @id @default(cuid())
-  slug        String    @unique
-  title       String
-  cover       String?
-  body        String    @db.Text // markdown
-  publishedAt DateTime?
-  createdAt   DateTime  @default(now())
+// Обращение правообладателя с /dmca. Лежит в базе, а не только уходит уведомлением:
+// канал уведомления может упасть, а срок ответа на жалобу от этого не сдвигается.
+model DmcaRequest {
+  id            String    @id @default(cuid())
+  claimantName  String
+  claimantEmail String
+  rightsHolder  String
+  targetUrl     String
+  message       String    @db.Text
+  // sha256 от IP с солью: лимит на поток обращений нужен, адреса заявителей в базе — нет.
+  ipHash        String
+  // null = уведомление не ушло: обращение принято, но мы о нём ещё не знаем.
+  notifiedAt    DateTime?
+  createdAt     DateTime  @default(now())
+
+  @@index([createdAt])
+  @@index([ipHash, createdAt])
 }

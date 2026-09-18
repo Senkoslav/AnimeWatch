@@ -1,12 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
 
-import { E2E_CDN_HOSTNAME } from "./tests/e2e/hls-fixture.ts";
-
 const PORT = 3100;
 const isCI = Boolean(process.env.CI);
 
 export default defineConfig({
   testDir: "tests/e2e",
+  // Убирает следы прошлых прогонов: без этого лимит обращений на /dmca роняет тест по истории запусков.
+  globalSetup: "./tests/e2e/global-setup.ts",
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
@@ -26,8 +26,5 @@ export default defineConfig({
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !isCI,
     timeout: 120_000,
-    // Ненастоящие ключи Bunny: e2e никогда не ходит в живой CDN, запросы к этому хосту подменяет фикстура
-    // (tests/e2e/hls-fixture.ts). Переменные процесса важнее .env.local, так что реальные ключи сюда не попадут.
-    env: { BUNNY_CDN_HOSTNAME: E2E_CDN_HOSTNAME, BUNNY_TOKEN_KEY: "e2e-token-key" },
   },
 });

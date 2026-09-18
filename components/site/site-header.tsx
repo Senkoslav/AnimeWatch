@@ -11,7 +11,7 @@ export function SiteHeader() {
           href="/"
           className="-mx-2 inline-flex min-h-11 items-center rounded-sm px-2 font-display text-lg font-bold"
         >
-          BebraDub
+          AnimeWatch
         </Link>
         <nav aria-label="Разделы">
           <NavLink href="/catalog">Каталог</NavLink>

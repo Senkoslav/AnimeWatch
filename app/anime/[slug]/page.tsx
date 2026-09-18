@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { Credits } from "@/components/title/credits";
 import { EpisodeList } from "@/components/title/episode-list";
 import { ExpandableText } from "@/components/title/expandable-text";
 import { Poster } from "@/components/ui/poster";
@@ -31,7 +30,7 @@ export async function generateMetadata({ params }: PageProps<"/anime/[slug]">): 
   const title = await getTitlePage((await params).slug);
   if (!title) return {};
 
-  const description = title.description ?? `${title.nameRu} в озвучке BebraDub`;
+  const description = title.description ?? `${title.nameRu} — смотреть онлайн на AnimeWatch`;
   return {
     title: title.nameRu,
     description: description.length > META_DESCRIPTION ? `${description.slice(0, META_DESCRIPTION - 1)}…` : description,
@@ -87,7 +86,6 @@ export default async function TitlePageView({ params }: PageProps<"/anime/[slug]
             <ExpandableText text={title.description} collapsible={title.description.length > COLLAPSIBLE_DESCRIPTION} />
           )}
           <EpisodeList title={title} now={now} />
-          <Credits credits={title.credits} />
         </div>
       </div>
     </div>

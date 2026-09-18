@@ -57,7 +57,7 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogPage> {
 
 /** Значения для фильтров — только из публичных тайтлов: жанр скрытого тайтла не выдаёт его существование. */
 export async function getCatalogFilters(): Promise<CatalogFilters> {
-  // Один запрос на оба списка: тайтлов у студии сотни, свёртка в JS дешевле второго похода в базу.
+  // Один запрос на оба списка: тайтлов сотни, свёртка в JS дешевле второго похода в базу.
   const titles = await prisma.title.findMany({ where: publicTitleWhere(), select: { genres: true, year: true } });
 
   const genres = [...new Set(titles.flatMap((title) => title.genres))].sort((a, b) => a.localeCompare(b, "ru"));

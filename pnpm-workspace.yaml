@@ -1,20 +1,14 @@
-packages:
-  - worker
-
 # Скрипты сборки этих зависимостей не нужны, pnpm их не запускает:
-# esbuild (из tsx) берёт готовый бинарник платформы; bufferutil и utf-8-validate —
-# необязательные нативные ускорители websocket из GramJS, без них работает JS-версия;
+# esbuild (из tsx) берёт готовый бинарник платформы;
 # es5-ext в postinstall только печатает сообщение;
 # unrs-resolver (резолвер импортов в eslint-config-next) берёт бинарник из
 # optional-зависимости платформы, postinstall лишь докачивает его, если той нет;
 # prisma в preinstall только проверяет версию Node.
 ignoredBuiltDependencies:
-  - bufferutil
   - es5-ext
   - esbuild
   - prisma
   - unrs-resolver
-  - utf-8-validate
 
 # @prisma/engines в postinstall скачивает бинарник schema engine: без него не работают миграции.
 onlyBuiltDependencies:

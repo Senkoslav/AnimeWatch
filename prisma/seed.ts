@@ -17,24 +17,24 @@ interface SeedEpisode {
   duration: number;
   /** Сколько часов назад вышла; null — черновик. */
   hoursAgo: number | null;
-  /** Bunny videoId. Без него серия «ещё обрабатывается». */
-  video?: string;
+  /** Адрес фрейма с плеером. Без него серия показывает «источник не подключён». */
+  kodik?: string;
 }
 
 interface SeedTitle {
-  data: Omit<Prisma.TitleCreateInput, "episodes" | "credits" | "bookmarks" | "publishedAt">;
+  data: Omit<Prisma.TitleCreateInput, "episodes" | "bookmarks" | "publishedAt">;
   /** Сколько часов назад тайтл опубликован; null — черновик. */
   hoursAgo: number | null;
   episodes: SeedEpisode[];
-  credits: { member: string; role: string; isVoice: boolean }[];
 }
 
 const SEEDED_AT = Date.now();
 /**
- * Тестовое видео из библиотеки Bunny (фаза 0, docs/05): 12 секунд синтетики в 480/720/1080p. Играет с
- * подписанным URL на localhost:3000 — только этот origin разрешён в библиотеке. e2e подменяет CDN фикстурой.
+ * Выдуманный адрес фрейма: настоящие ссылки приходят из базы Kodik, а токена пока нет (docs/05-kodik.md).
+ * Хост настоящий, поэтому проходит проверку `embedSrc` и слот плеера рендерит фрейм; сам фрейм не загрузится,
+ * и это нормально — в e2e ответ подменяется, а на dev-данных видно ровно место плеера.
  */
-const TEST_VIDEO = "ee9ae3d2-b3d3-49e0-b2eb-2eb91ae6f381";
+const DEMO_EMBED = "https://kodik.info/seria/000000/demo/720p";
 const HOUR = 60 * 60 * 1000;
 const EPISODE_SECONDS = 1440;
 
@@ -50,13 +50,6 @@ function poster(path: string): string {
 function episodes(...hours: (number | null)[]): SeedEpisode[] {
   return hours.map((hoursAgo, index) => ({ number: index + 1, duration: EPISODE_SECONDS, hoursAgo }));
 }
-
-const MEMBERS: Prisma.MemberCreateInput[] = [
-  { slug: "mika", nickname: "Мика", bio: "Голос героинь, которые старше всех в кадре.", sortOrder: 10 },
-  { slug: "trek", nickname: "Трек", bio: "Сводит дорожки и следит, чтобы голос не тонул в музыке.", sortOrder: 20 },
-];
-
-const SOUND = { member: "trek", role: "Звукорежиссёр", isVoice: false };
 
 const TITLES: SeedTitle[] = [
   {
@@ -82,13 +75,12 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: 240,
     episodes: [
-      { number: 1, name: "Конец путешествия", duration: 1470, hoursAgo: 240, video: TEST_VIDEO },
-      { number: 2, name: "Не обязательно магия", duration: 1440, hoursAgo: 120, video: TEST_VIDEO },
-      { number: 3, name: "Магия убийства людей", duration: 1440, hoursAgo: 2, video: TEST_VIDEO },
+      { number: 1, name: "Конец путешествия", duration: 1470, hoursAgo: 240, kodik: DEMO_EMBED },
+      { number: 2, name: "Не обязательно магия", duration: 1440, hoursAgo: 120, kodik: DEMO_EMBED },
+      { number: 3, name: "Магия убийства людей", duration: 1440, hoursAgo: 2, kodik: DEMO_EMBED },
       // Черновик: серия заведена, но зритель её не видит.
       { number: 4, name: "Земля, где покоятся души", duration: 1440, hoursAgo: null },
     ],
-    credits: [{ member: "mika", role: "Фрирен", isVoice: true }, SOUND],
   },
   {
     data: {
@@ -110,11 +102,10 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: 400,
     episodes: [
-      { number: 1, name: "Человек, ставший кайдзю", duration: 1420, hoursAgo: 400, video: TEST_VIDEO },
+      { number: 1, name: "Человек, ставший кайдзю", duration: 1420, hoursAgo: 400, kodik: DEMO_EMBED },
       // Опубликована, но видео нет: страница просмотра показывает «Серия ещё обрабатывается».
       { number: 2, name: "Кайдзю, который побеждает кайдзю", duration: 1420, hoursAgo: 30 },
     ],
-    credits: [{ member: "mika", role: "Мина Асиро", isVoice: true }, SOUND],
   },
   {
     data: {
@@ -132,7 +123,6 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: 200,
     episodes: episodes(200, 150, 50),
-    credits: [SOUND],
   },
   {
     data: {
@@ -150,7 +140,6 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: 90,
     episodes: episodes(90, 5),
-    credits: [SOUND],
   },
   {
     data: {
@@ -168,7 +157,6 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: 70,
     episodes: episodes(70),
-    credits: [SOUND],
   },
   {
     data: {
@@ -186,7 +174,6 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: 300,
     episodes: episodes(300),
-    credits: [SOUND],
   },
   {
     // Самое длинное название: проверка, что карточка и герой его переносят.
@@ -205,7 +192,6 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: 700,
     episodes: episodes(700, 20),
-    credits: [SOUND],
   },
   {
     // Без постера: карточка должна держать пропорцию и без картинки.
@@ -223,7 +209,6 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: 100,
     episodes: episodes(100),
-    credits: [SOUND],
   },
   {
     // Длинный сериал без видео: на нём проверяется поиск с опечаткой («наруот»).
@@ -242,7 +227,6 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: 900,
     episodes: episodes(900, 890),
-    credits: [SOUND],
   },
   {
     // Черновик тайтла со свежей опубликованной серией: если фильтр сломан, он станет героем главной.
@@ -261,7 +245,6 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: null,
     episodes: episodes(1),
-    credits: [SOUND],
   },
   {
     // Скрыт по жалобе, самая свежая серия в базе: если фильтр сломан, он станет героем главной.
@@ -280,7 +263,6 @@ const TITLES: SeedTitle[] = [
     },
     hoursAgo: 60,
     episodes: episodes(60, 0.5),
-    credits: [SOUND],
   },
 ];
 
@@ -313,18 +295,12 @@ async function main(): Promise<void> {
 }
 
 async function seed(prisma: PrismaClient): Promise<void> {
-  const memberIds = new Map<string, string>();
-  for (const member of MEMBERS) {
-    const { id } = await prisma.member.upsert({ where: { slug: member.slug }, create: member, update: member });
-    memberIds.set(member.slug, id);
-  }
-
-  for (const { data, hoursAgo: titleHoursAgo, episodes, credits } of TITLES) {
+  for (const { data, hoursAgo: titleHoursAgo, episodes } of TITLES) {
     await prisma.$transaction(async (tx) => {
       const fields = { ...data, publishedAt: hoursAgo(titleHoursAgo) };
       const title = await tx.title.upsert({ where: { slug: data.slug }, create: fields, update: fields });
 
-      for (const { hoursAgo: episodeHoursAgo, video, ...episode } of episodes) {
+      for (const { hoursAgo: episodeHoursAgo, kodik, ...episode } of episodes) {
         const episodeFields = { name: null, ...episode, publishedAt: hoursAgo(episodeHoursAgo) };
         const { id: episodeId } = await tx.episode.upsert({
           where: { titleId_number: { titleId: title.id, number: episode.number } },
@@ -333,20 +309,10 @@ async function seed(prisma: PrismaClient): Promise<void> {
         });
         // У Source нет естественного ключа: источники серии пересоздаются целиком.
         await tx.source.deleteMany({ where: { episodeId } });
-        if (video) {
-          await tx.source.create({ data: { episodeId, type: SourceType.HLS, url: video, isDefault: true } });
+        if (kodik) {
+          await tx.source.create({ data: { episodeId, type: SourceType.KODIK, url: kodik, isDefault: true } });
         }
       }
-
-      // У Credit нет естественного ключа, поэтому состав тайтла пересоздаётся целиком.
-      await tx.credit.deleteMany({ where: { titleId: title.id } });
-      await tx.credit.createMany({
-        data: credits.map(({ member, role, isVoice }) => {
-          const memberId = memberIds.get(member);
-          if (!memberId) throw new Error(`seed: участник ${member} не найден в MEMBERS`);
-          return { titleId: title.id, memberId, role, isVoice };
-        }),
-      });
     });
   }
 

@@ -3,14 +3,14 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
-import { EpisodePlayer } from "@/components/player/episode-player";
+import { PlayerSlot } from "@/components/watch/player-slot";
 import { EpisodeList } from "@/components/title/episode-list";
 import { formatEpisodeNumber } from "@/lib/format";
 import { TitleKind } from "@/lib/generated/prisma/enums";
 import { getWatchPage } from "@/lib/queries/watch";
 import { episodeHref, titleHref } from "@/lib/routes";
 
-// docs/02, «Кеширование»: страница просмотра динамическая — подписанный URL короткоживущий и не должен лечь в кеш.
+// docs/02, «Кеширование»: страница просмотра динамическая — скрытие тайтла по жалобе должно действовать сразу.
 export const dynamic = "force-dynamic";
 
 /** Номер серии из URL — внешний вход: «03», «-1», «1.5» и мусор — «не найдено». */
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: PageProps<"/anime/[slug]/[epi
   const { title, episode } = page;
   return {
     title: title.kind === TitleKind.MOVIE ? title.nameRu : `${title.nameRu} — эпизод ${episode.number}`,
-    description: `Смотреть ${title.nameRu} в озвучке BebraDub`,
+    description: `Смотреть ${title.nameRu} онлайн на AnimeWatch`,
   };
 }
 
@@ -39,7 +39,7 @@ export default async function WatchPage({ params }: PageProps<"/anime/[slug]/[ep
   const page = await load(params);
   if (!page) notFound();
 
-  const { title, episode, previous, next, playback } = page;
+  const { title, episode, previous, next, source } = page;
   const isMovie = title.kind === TitleKind.MOVIE;
   const now = new Date();
 
@@ -47,26 +47,7 @@ export default async function WatchPage({ params }: PageProps<"/anime/[slug]/[ep
     <div className="mx-auto max-w-6xl sm:px-4 sm:py-6">
       <div className="grid grid-cols-1 gap-x-8 gap-y-8 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0 space-y-4">
-          {playback.status === "ready" ? (
-            <EpisodePlayer
-              key={episode.id}
-              episodeId={episode.id}
-              src={playback.src}
-              next={
-                next
-                  ? {
-                      episodeId: next.id,
-                      href: episodeHref(title.slug, next.number),
-                      label: `Эпизод ${formatEpisodeNumber(next.number)}`,
-                    }
-                  : null
-              }
-            />
-          ) : (
-            <div className="flex aspect-video w-full items-center justify-center bg-surface p-6 text-center sm:rounded-md">
-              <p className="max-w-[40ch]">Серия ещё обрабатывается, обычно это занимает 10–15 минут.</p>
-            </div>
-          )}
+          <PlayerSlot source={source} titleName={title.nameRu} />
 
           <div className="space-y-2 px-4 sm:px-0">
             <Link

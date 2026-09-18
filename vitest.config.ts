@@ -20,7 +20,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: "unit",
-          include: ["{app,components,lib,scripts,worker/src,tests/unit}/**/*.test.{ts,tsx}"],
+          include: ["{app,components,lib,tests/unit}/**/*.test.{ts,tsx}"],
         },
       },
       {
