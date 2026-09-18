@@ -66,6 +66,8 @@ export interface MappedTitle {
   season: string | null;
   ageRating: string | null;
   genres: string[];
+  /** Оценка Shikimori, 0–10. null — никто не оценил: их 0.0 сюда не доходит. */
+  score: number | null;
   totalEpisodes: number | null;
   /** Длительность серии в секундах: у них минуты, у нас `Episode.duration` в секундах. */
   episodeSeconds: number | null;
@@ -95,6 +97,9 @@ export function mapTitle(node: AnimeNode): MappedTitle | null {
     year: node.airedOn?.year ?? null,
     season: node.season ?? null,
     ageRating: node.rating?.trim() || null,
+    // Их 0.0 значит «никто не оценил». Оставить нулём — значит поставить анонсы ниже провальных тайтлов
+    // в сортировке по рейтингу и нарисовать на карточке бейдж «0».
+    score: node.score ? node.score : null,
     genres: (node.genres ?? []).map((genre) => genre.russian),
     totalEpisodes: node.episodes || null,
     episodeSeconds: node.duration ? node.duration * 60 : null,

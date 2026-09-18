@@ -56,6 +56,8 @@ const TITLES: SeedTitle[] = [
     data: {
       slug: "frieren",
       shikimoriId: 52991,
+      score: 9.25,
+      popularityRank: 12,
       name: "Sousou no Frieren",
       nameRu: "Провожающая в последний путь Фрирен",
       synonyms: ["Фрирен", "Frieren: Beyond Journey's End"],
@@ -86,6 +88,8 @@ const TITLES: SeedTitle[] = [
     data: {
       slug: "kaiju-no-8",
       shikimoriId: 52588,
+      score: 8.21,
+      popularityRank: 48,
       name: "Kaijuu 8-gou",
       nameRu: "Кайдзю №8",
       synonyms: ["Kaiju No. 8", "Кайдзю номер восемь"],
@@ -111,6 +115,8 @@ const TITLES: SeedTitle[] = [
     data: {
       slug: "jujutsu-kaisen-2",
       shikimoriId: 51009,
+      score: 8.69,
+      popularityRank: 18,
       name: "Jujutsu Kaisen 2nd Season",
       nameRu: "Магическая битва 2",
       synonyms: ["Jujutsu Kaisen Season 2"],
@@ -128,6 +134,8 @@ const TITLES: SeedTitle[] = [
     data: {
       slug: "dandadan",
       shikimoriId: 57334,
+      score: 8.39,
+      popularityRank: 63,
       name: "Dandadan",
       nameRu: "Дандадан",
       synonyms: ["Dan Da Dan"],
@@ -145,6 +153,8 @@ const TITLES: SeedTitle[] = [
     data: {
       slug: "kusuriya-no-hitorigoto",
       shikimoriId: 54492,
+      score: 8.84,
+      popularityRank: 31,
       name: "Kusuriya no Hitorigoto",
       nameRu: "Монолог фармацевта",
       synonyms: ["The Apothecary Diaries", "Записки аптекаря"],
@@ -162,6 +172,8 @@ const TITLES: SeedTitle[] = [
     data: {
       slug: "kimi-no-na-wa",
       shikimoriId: 32281,
+      score: 8.82,
+      popularityRank: 22,
       name: "Kimi no Na wa.",
       nameRu: "Твоё имя",
       synonyms: ["Your Name."],
@@ -180,6 +192,8 @@ const TITLES: SeedTitle[] = [
     data: {
       slug: "mushoku-tensei-part-2",
       shikimoriId: 45576,
+      score: 8.6,
+      popularityRank: 57,
       name: "Mushoku Tensei: Isekai Ittara Honki Dasu Part 2",
       nameRu: "Реинкарнация безработного: История о приключениях в другом мире. Часть 2",
       synonyms: ["Mushoku Tensei: Jobless Reincarnation Part 2"],
@@ -198,6 +212,8 @@ const TITLES: SeedTitle[] = [
     data: {
       slug: "chainsaw-man",
       shikimoriId: 44511,
+      score: 8.42,
+      popularityRank: 15,
       name: "Chainsaw Man",
       nameRu: "Человек-бензопила",
       synonyms: ["CSM"],
@@ -215,6 +231,8 @@ const TITLES: SeedTitle[] = [
     data: {
       slug: "naruto",
       shikimoriId: 20,
+      score: 8.02,
+      popularityRank: 9,
       name: "Naruto",
       nameRu: "Наруто",
       synonyms: ["NARUTO"],
@@ -233,6 +251,8 @@ const TITLES: SeedTitle[] = [
     data: {
       slug: "spy-x-family",
       shikimoriId: 50265,
+      score: 8.41,
+      popularityRank: 26,
       name: "Spy x Family",
       nameRu: "Семья шпиона",
       synonyms: [],
@@ -251,6 +271,8 @@ const TITLES: SeedTitle[] = [
     data: {
       slug: "oshi-no-ko",
       shikimoriId: 52034,
+      score: 8.53,
+      popularityRank: 44,
       name: "[Oshi no Ko]",
       nameRu: "Ребёнок идола",
       synonyms: ["Ребёнок айдола"],

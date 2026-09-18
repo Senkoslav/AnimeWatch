@@ -47,6 +47,18 @@ describe("mapTitle на живом ответе API", () => {
   });
 });
 
+describe("оценка", () => {
+  it("их 0.0 — это «никто не оценил», а не ноль", () => {
+    expect(mapTitle({ ...node(16498), score: 0 })?.score).toBeNull();
+    expect(mapTitle({ ...node(16498), score: null })?.score).toBeNull();
+    expect(mapTitle({ ...node(16498), score: undefined })?.score).toBeNull();
+  });
+
+  it("настоящая оценка доходит без округления: округляет показ, а не хранение", () => {
+    expect(mapTitle({ ...node(16498), score: 8.49 })?.score).toBe(8.49);
+  });
+});
+
 describe("episodeCount", () => {
   it("у онгоинга считает вышедшие, у завершённого — заявленные", () => {
     // «Ван-Пис»: episodes 0, episodesAired 1178. «Стальной алхимик»: 64 и 0.

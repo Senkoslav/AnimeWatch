@@ -39,6 +39,7 @@ async function importOne(
   prisma: PrismaClient,
   mapped: MappedTitle,
   now: Date,
+  popularityRank: number | null,
 ): Promise<{ created: boolean; episodesCreated: number }> {
   const existing = await prisma.title.findUnique({
     where: { shikimoriId: mapped.shikimoriId },
@@ -58,6 +59,10 @@ async function importOne(
     season: mapped.season,
     ageRating: mapped.ageRating,
     genres: mapped.genres,
+    score: mapped.score,
+    // Ранг известен только пакетному импорту по популярности. Импорт по id его не знает и потому
+    // не трогает: иначе точечное обновление одного тайтла стёрло бы порядок, собранный пакетом.
+    ...(popularityRank === null ? {} : { popularityRank }),
     totalEpisodes: mapped.totalEpisodes,
   };
 
@@ -101,24 +106,45 @@ async function syncEpisodes(prisma: PrismaClient, titleId: string, mapped: Mappe
 }
 
 /**
+ * Снять все места перед пакетным импортом по популярности. Без этого тайтл, выпавший из топа,
+ * навсегда остаётся со старым номером: он сталкивается с новым владельцем места и вечно висит в
+ * голове сортировки. Ранг — производная от их списка, и потерять его между двумя шагами не страшно:
+ * следующая же строка импорта проставит номера заново, а упавший прогон чинится повторным запуском.
+ */
+export async function resetPopularityRanks(prisma: PrismaClient): Promise<number> {
+  const { count } = await prisma.title.updateMany({
+    where: { popularityRank: { not: null } },
+    data: { popularityRank: null },
+  });
+  return count;
+}
+
+/**
  * Импорт пачки тайтлов. `now` — время появления у нас: дат выхода серий Shikimori не отдаёт,
  * поэтому `publishedAt` серии означает «добавлено на сайт», а не «вышло в эфир» (docs/06).
+ *
+ * `ranks` — места в списке Shikimori по популярности, по `shikimoriId`. Картой, а не позицией в
+ * массиве: вызывающий склеивает тайтлы из нескольких запросов, и порядок массива уже не их.
+ * Тайтла нет в карте — ранг неизвестен, и тогда он не трогается.
  */
 export async function importTitles(
   prisma: PrismaClient,
   nodes: AnimeNode[],
   now: Date = new Date(),
+  ranks: ReadonlyMap<number, number> = new Map(),
 ): Promise<ImportStats> {
   const stats: ImportStats = { created: 0, updated: 0, episodesCreated: 0, skipped: 0 };
 
   for (const node of nodes) {
+    const rank = ranks.get(node.id) ?? null;
+
     const mapped = mapTitle(node);
     if (!mapped) {
       stats.skipped += 1;
       continue;
     }
 
-    const { created, episodesCreated } = await importOne(prisma, mapped, now);
+    const { created, episodesCreated } = await importOne(prisma, mapped, now, rank);
     if (created) stats.created += 1;
     else stats.updated += 1;
     stats.episodesCreated += episodesCreated;

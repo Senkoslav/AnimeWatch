@@ -13,6 +13,8 @@ export interface CatalogItem {
   posterUrl: string | null;
   kind: TitleKind;
   year: number | null;
+  /** Оценка Shikimori. null — тайтл ещё никто не оценил, и бейджа на карточке не будет. */
+  score: number | null;
 }
 
 export interface CatalogPage {
@@ -29,6 +31,10 @@ export interface CatalogFilters {
 // id вторым ключом: без него при равных датах или названиях страницы пагинации теряют и дублируют тайтлы.
 const ORDER_BY: Record<CatalogSort, Prisma.TitleOrderByWithRelationInput[]> = {
   new: [{ publishedAt: "desc" }, { id: "asc" }],
+  // Ранг известен не всем тайтлам: он есть только у пришедших пакетным импортом по популярности.
+  // Неизвестный уезжает в конец, иначе тайтл без ранга возглавил бы список самых популярных.
+  popular: [{ popularityRank: { sort: "asc", nulls: "last" } }, { id: "asc" }],
+  score: [{ score: { sort: "desc", nulls: "last" } }, { id: "asc" }],
   year: [{ year: { sort: "desc", nulls: "last" } }, { id: "asc" }],
   name: [{ nameRu: "asc" }, { id: "asc" }],
 };
@@ -48,7 +54,7 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogPage> {
       orderBy: ORDER_BY[sort],
       skip: (page - 1) * CATALOG_PAGE_SIZE,
       take: CATALOG_PAGE_SIZE,
-      select: { id: true, slug: true, nameRu: true, posterUrl: true, kind: true, year: true },
+      select: { id: true, slug: true, nameRu: true, posterUrl: true, kind: true, year: true, score: true },
     }),
   ]);
 

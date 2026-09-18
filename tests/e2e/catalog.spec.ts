@@ -108,6 +108,38 @@ test("пункт «Каталог» в шапке отмечен текущим"
   ).toHaveAttribute("aria-current", "page");
 });
 
+test("бейдж оценки на карточке", async ({ page }) => {
+  // В seed «Фрирен» — 9.25: показываем одним знаком после запятой, с русской запятой и с округлением.
+  await page.goto("/catalog?genre=%D0%A4%D1%8D%D0%BD%D1%82%D0%B5%D0%B7%D0%B8&sort=score");
+  const first = results(page).first();
+  await expect(first).toContainText("Провожающая в последний путь Фрирен");
+  await expect(first).toContainText("9,3");
+  // Цифра рядом с постером без пояснения — это шум для скринридера.
+  await expect(first.getByText("Оценка Shikimori", { exact: false })).toBeAttached();
+});
+
+test("сортировки по рейтингу и по популярности дают разный порядок", async ({ page }) => {
+  // Внутри одного жанра и по относительному порядку двух тайтлов: абсолютное первое место в каталоге
+  // сломается, как только в локальную базу зальют импорт, а этот инвариант — нет.
+  // «Наруто» у Shikimori популярнее «Фрирен» (9-е место против 12-го), но по оценке ниже (8.02 против 9.25).
+  const order = async (sort: string) => {
+    await page.goto(`/catalog?genre=%D0%A4%D1%8D%D0%BD%D1%82%D0%B5%D0%B7%D0%B8&sort=${sort}`);
+    const texts = await results(page).allInnerTexts();
+    return {
+      naruto: texts.findIndex((text) => text.includes("Наруто")),
+      frieren: texts.findIndex((text) => text.includes("Фрирен")),
+    };
+  };
+
+  const byPopular = await order("popular");
+  const byScore = await order("score");
+
+  expect(byPopular.naruto).toBeGreaterThanOrEqual(0);
+  expect(byScore.frieren).toBeGreaterThanOrEqual(0);
+  expect(byPopular.naruto).toBeLessThan(byPopular.frieren);
+  expect(byScore.naruto).toBeGreaterThan(byScore.frieren);
+});
+
 test("на широком экране панель фильтров стоит справа от выдачи", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/catalog");

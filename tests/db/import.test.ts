@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { prisma } from "@/lib/db";
 import { TitleStatus } from "@/lib/generated/prisma/enums";
-import { importTitles } from "@/lib/shikimori/import";
+import { importTitles, resetPopularityRanks } from "@/lib/shikimori/import";
 import { animeNodeSchema, type AnimeNode } from "@/lib/shikimori/schema";
 
 function node(overrides: Record<string, unknown> = {}): AnimeNode {
@@ -94,6 +94,40 @@ describe("importTitles", () => {
       await importTitles(prisma, [node()]);
 
       expect((await titleBySlug("attack-on-titan"))?.publishedAt).toBeNull();
+    });
+  });
+
+  describe("место по популярности", () => {
+    it("проставляется из карты, а тайтл вне её своего места не получает", async () => {
+      await importTitles(prisma, [node(), node({ id: "2" })], new Date(), new Map([[16498, 7]]));
+
+      const ranked = await prisma.title.findUnique({ where: { shikimoriId: 16498 }, select: { popularityRank: true } });
+      const unranked = await prisma.title.findUnique({ where: { shikimoriId: 2 }, select: { popularityRank: true } });
+      expect(ranked?.popularityRank).toBe(7);
+      expect(unranked?.popularityRank).toBeNull();
+    });
+
+    it("повторный импорт по id место не стирает: его знает только пакетный проход", async () => {
+      await importTitles(prisma, [node()], new Date(), new Map([[16498, 7]]));
+      await importTitles(prisma, [node()]);
+
+      const title = await prisma.title.findUnique({ where: { shikimoriId: 16498 }, select: { popularityRank: true } });
+      expect(title?.popularityRank).toBe(7);
+    });
+
+    it("сброс снимает места у всех: выпавший из топа не должен висеть в его голове", async () => {
+      await importTitles(
+        prisma,
+        [node(), node({ id: "2" })],
+        new Date(),
+        new Map([
+          [16498, 7],
+          [2, 8],
+        ]),
+      );
+
+      expect(await resetPopularityRanks(prisma)).toBe(2);
+      expect(await prisma.title.count({ where: { popularityRank: { not: null } } })).toBe(0);
     });
   });
 

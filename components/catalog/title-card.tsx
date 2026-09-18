@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Poster } from "@/components/ui/poster";
+import { formatScore } from "@/lib/format";
 import { KIND_LABELS } from "@/lib/labels";
 import type { CatalogItem } from "@/lib/queries/catalog";
 import { titleHref } from "@/lib/routes";
@@ -23,7 +24,7 @@ export function TitleCard({ title, eager = false, sizes = POSTER_SIZES, backgrou
   const details = [title.year, KIND_LABELS[title.kind]].filter(Boolean).join(", ");
 
   return (
-    <Link href={titleHref(title.slug)} className="block rounded-md">
+    <Link href={titleHref(title.slug)} className="relative block rounded-md">
       <Poster
         src={title.posterUrl}
         title={title.nameRu}
@@ -34,6 +35,17 @@ export function TitleCard({ title, eager = false, sizes = POSTER_SIZES, backgrou
       <p className="mt-2 line-clamp-2 text-sm font-medium">{title.nameRu}</p>
       {/* Отдельный блок, а не строка внутри того же <p>: скринридер читает «Твоё имя, 2016, Фильм» по частям. */}
       <p className="mt-1 text-xs text-muted">{details}</p>
+      {/*
+       * Последним в разметке, хотя лежит на постере: название карточки должно читаться первым и с
+       * клавиатуры, и голосом. Плашка непрозрачная — постер под ней любой, и на светлом кадре
+       * полупрозрачная не читается. Не янтарная: акцент помечает происходящее сейчас, а оценка просто есть.
+       */}
+      {title.score !== null && (
+        <p className="absolute top-2 left-2 rounded-sm border border-line bg-bg px-1.5 py-0.5 text-xs font-medium">
+          <span className="sr-only">Оценка Shikimori </span>
+          {formatScore(title.score)}
+        </p>
+      )}
     </Link>
   );
 }
