@@ -24,7 +24,6 @@ export default defineConfig([
     "test-results/**",
     "next-env.d.ts",
     "lib/generated/**",
-    "tests/fixtures/hls/**",
   ]),
   {
     rules: {
@@ -39,7 +38,7 @@ export default defineConfig([
   {
     // Интерфейс может появиться в любой папке, поэтому правило действует везде, кроме кода без разметки.
     files: ["**/*.{ts,tsx,js,jsx,mjs}"],
-    ignores: ["scripts/**", "worker/**", "tests/**", "**/*.test.{ts,tsx}", "eslint.config.mjs"],
+    ignores: ["tests/**", "**/*.test.{ts,tsx}", "eslint.config.mjs"],
     rules: {
       "no-restricted-syntax": [
         "error",

@@ -13,13 +13,6 @@ export interface TitleEpisode {
   publishedAt: Date;
 }
 
-export interface TitleCredit {
-  id: string;
-  role: string;
-  isVoice: boolean;
-  nickname: string;
-}
-
 export interface TitlePage {
   id: string;
   slug: string;
@@ -33,11 +26,10 @@ export interface TitlePage {
   genres: string[];
   totalEpisodes: number | null;
   episodes: TitleEpisode[];
-  credits: TitleCredit[];
 }
 
 /**
- * Публичный тайтл с опубликованными сериями и составом; null — нет, черновик или скрыт по жалобе.
+ * Публичный тайтл с опубликованными сериями; null — нет такого, черновик или скрыт по жалобе.
  * cache(): generateMetadata и страница в одном рендере делят один запрос.
  */
 export const getTitlePage = cache(async (slug: string): Promise<TitlePage | null> => {
@@ -64,11 +56,6 @@ export const getTitlePage = cache(async (slug: string): Promise<TitlePage | null
         orderBy: { number: "asc" },
         select: { id: true, number: true, name: true, duration: true, publishedAt: true },
       },
-      credits: {
-        // Сначала голоса, затем остальные роли; внутри — порядок участников из раздела «Команда».
-        orderBy: [{ isVoice: "desc" }, { member: { sortOrder: "asc" } }, { role: "asc" }],
-        select: { id: true, role: true, isVoice: true, member: { select: { nickname: true } } },
-      },
     },
   });
   if (!title) return null;
@@ -78,6 +65,5 @@ export const getTitlePage = cache(async (slug: string): Promise<TitlePage | null
     episodes: title.episodes.flatMap(({ publishedAt, ...episode }) =>
       publishedAt === null ? [] : [{ ...episode, publishedAt }],
     ),
-    credits: title.credits.map(({ member, ...credit }) => ({ ...credit, nickname: member.nickname })),
   };
 });

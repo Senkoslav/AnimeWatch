@@ -24,8 +24,8 @@ const unbounded = Unbounded({
 });
 
 export const metadata: Metadata = {
-  title: { default: "BebraDub", template: "%s — BebraDub" },
-  description: "Аниме в озвучке студии BebraDub",
+  title: { default: "AnimeWatch", template: "%s — AnimeWatch" },
+  description: "Аниме онлайн: каталог, поиск и просмотр с русской озвучкой",
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

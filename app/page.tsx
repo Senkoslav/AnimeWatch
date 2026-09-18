@@ -15,7 +15,7 @@ export default async function HomePage() {
 
   return (
     <>
-      <h1 className="sr-only">Аниме в озвучке BebraDub: новые серии</h1>
+      <h1 className="sr-only">AnimeWatch: аниме онлайн, новые серии</h1>
 
       {hero ? (
         <Hero release={hero} now={now} />

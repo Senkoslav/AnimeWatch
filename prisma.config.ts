@@ -16,5 +16,9 @@ export default defineConfig({
     // CLI (миграции, studio) ходит напрямую, в обход пулера: через pgbouncer миграции ломаются.
     // Не env(): он бросает без переменной, а prisma generate в postinstall должен работать и без базы.
     url: process.env.DIRECT_URL,
+    // Пустая база для «примерки» миграций: нужна `migrate dev` и обязательна для
+    // `migrate diff --from-migrations`, которым генерируются миграции с потерей данных
+    // (`migrate dev` для них требует интерактивного подтверждения).
+    shadowDatabaseUrl: process.env.SHADOW_DATABASE_URL,
   },
 });
