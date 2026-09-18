@@ -22,3 +22,6 @@ next-env.d.ts
 *.tsbuildinfo
 test-results/
 playwright-report/
+
+# Локальная связь с проектом Vercel: id проекта и команды, в репозитории им не место.
+.vercel

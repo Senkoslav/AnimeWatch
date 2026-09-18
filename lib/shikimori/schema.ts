@@ -1,0 +1,40 @@
+/**
+ * Ответ Shikimori — внешний вход, поэтому разбирается zod (`.claude/rules/server.md`).
+ * Схема нарочно снисходительна к полям, которых может не быть: отсутствие описания или постера —
+ * это нормальный тайтл, а не повод уронить импорт целиком.
+ */
+import { z } from "zod";
+
+/** id приходит строкой, хотя у нас `Title.shikimoriId` — число. Проверяем, а не приводим вслепую. */
+const idSchema = z
+  .string()
+  .regex(/^\d{1,9}$/)
+  .transform(Number);
+
+export const animeNodeSchema = z.object({
+  id: idSchema,
+  name: z.string().min(1),
+  russian: z.string().nullish(),
+  english: z.string().nullish(),
+  japanese: z.string().nullish(),
+  synonyms: z.array(z.string()).nullish(),
+  kind: z.string().nullish(),
+  status: z.string().nullish(),
+  season: z.string().nullish(),
+  airedOn: z.object({ year: z.number().int().nullish() }).nullish(),
+  // У завершённых тайтлов число серий лежит в episodes, а episodesAired = 0; у онгоингов наоборот.
+  episodes: z.number().int().min(0).nullish(),
+  episodesAired: z.number().int().min(0).nullish(),
+  duration: z.number().int().min(0).nullish(),
+  rating: z.string().nullish(),
+  description: z.string().nullish(),
+  genres: z.array(z.object({ russian: z.string() })).nullish(),
+  poster: z.object({ originalUrl: z.url() }).nullish(),
+});
+
+export type AnimeNode = z.output<typeof animeNodeSchema>;
+
+export const animesResponseSchema = z.object({
+  data: z.object({ animes: z.array(z.unknown()) }).nullish(),
+  errors: z.array(z.object({ message: z.string() })).nullish(),
+});
