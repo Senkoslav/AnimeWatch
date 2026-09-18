@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { requestedHref, type SearchParams } from "@/lib/canonical";
 import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
+import { searchQuerySchema } from "@/lib/search/query";
 
 export const CATALOG_SORTS = ["new", "popular", "score", "year", "name"] as const;
 export type CatalogSort = (typeof CATALOG_SORTS)[number];
@@ -40,6 +41,8 @@ export const STATUS_OPTIONS = STATUS_PARAMS.map((param) => [param, STATUS_BY_PAR
 export const KIND_OPTIONS = KIND_PARAMS.map((param) => [param, KIND_BY_PARAM[param]] as const);
 
 export interface CatalogParams {
+  /** Поиск по названию. Пустая строка не доходит: её нормализация сводит к undefined. */
+  q?: string;
   genre?: string;
   year?: number;
   status?: PublicStatus;
@@ -52,6 +55,9 @@ export interface CatalogParams {
 const first = (value: unknown) => (Array.isArray(value) ? value[0] : value);
 
 const schema = z.object({
+  // Тот же разбор, что на /search: повторы, массивы и мусор сводятся к одной строке.
+  // Пустая — это «не задано», иначе `?q=` остался бы в каноническом адресе.
+  q: searchQuerySchema.transform((query) => query || undefined),
   // Управляющие символы (в том числе \0, который Postgres не принимает в text) — не жанр.
   genre: z
     .preprocess(
@@ -74,8 +80,9 @@ const schema = z.object({
 });
 
 export function parseCatalogParams(searchParams: SearchParams): CatalogParams {
-  const { genre, year, status, kind, sort, page } = schema.parse(searchParams);
+  const { q, genre, year, status, kind, sort, page } = schema.parse(searchParams);
   return {
+    q,
     genre,
     year,
     status: status && STATUS_BY_PARAM[status],
@@ -94,14 +101,19 @@ export function kindParam(kind: TitleKind): KindParam {
   return kind.toLowerCase() as KindParam;
 }
 
-/** Выбран ли хоть один фильтр (сортировка и страница не в счёт). */
+/** Задан ли хоть один отбор (сортировка и страница не в счёт). */
 export function hasFilters(params: Partial<CatalogParams>): boolean {
-  return Boolean(params.genre || params.year || params.status || params.kind);
+  return Boolean(params.q || params.genre || params.year || params.status || params.kind);
 }
 
 /** URL каталога в каноническом порядке, без пустых и значений по умолчанию. */
 export function catalogHref(params: Partial<CatalogParams> = {}): Route {
   const query = new URLSearchParams();
+  // Порядок здесь обязан совпадать с порядком полей в форме: пришедший адрес собирается как есть
+  // (requestedCatalogHref), и перестановка параметров увела бы страницу в вечный редирект.
+  // Кодирование — только URLSearchParams: encodeURIComponent пишет пробел как «%20» против «+»,
+  // и запрос из двух слов зациклился бы (та же ловушка, что в searchHref).
+  if (params.q) query.set("q", params.q);
   if (params.genre) query.set("genre", params.genre);
   if (params.year) query.set("year", String(params.year));
   if (params.status) query.set("status", statusParam(params.status));

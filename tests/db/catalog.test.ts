@@ -65,6 +65,47 @@ describe("getCatalog", () => {
     expect(byslug.get("plain")).toBeNull();
   });
 
+  describe("поиск по названию", () => {
+    it("складывается с фильтрами, а не заменяет их", async () => {
+      await createTitle({ slug: "frieren", nameRu: "Провожающая в последний путь Фрирен", genres: ["Драма"] });
+      await createTitle({ slug: "frieren-movie", nameRu: "Фрирен: фильм", genres: ["Комедия"] });
+      await createTitle({ slug: "naruto", nameRu: "Наруто", genres: ["Драма"] });
+
+      expect((await slugs({ q: "фрирен" })).sort()).toEqual(["frieren", "frieren-movie"]);
+      expect(await slugs({ q: "фрирен", genre: "Драма" })).toEqual(["frieren"]);
+      expect(await slugs({ q: "фрирен", genre: "Фантастика" })).toEqual([]);
+    });
+
+    it("опечатка находит так же, как на /search: запрос там и тут один", async () => {
+      await createTitle({ slug: "naruto", nameRu: "Наруто" });
+
+      expect(await slugs({ q: "наруот" })).toEqual(["naruto"]);
+    });
+
+    it("непубличный тайтл не находится и не занимает место в счётчике", async () => {
+      await createTitle({ slug: "draft", nameRu: "Наруто", publishedAt: null });
+      await createTitle({ slug: "hidden", nameRu: "Наруто", status: TitleStatus.HIDDEN });
+
+      const { items, total } = await getCatalog({ ...defaults, q: "наруто" });
+      expect(items).toEqual([]);
+      expect(total).toBe(0);
+    });
+
+    it("без запроса обрезки не бывает", async () => {
+      await createTitle({ slug: "naruto", nameRu: "Наруто" });
+
+      expect((await getCatalog({ ...defaults })).truncated).toBe(false);
+      expect((await getCatalog({ ...defaults, q: "наруто" })).truncated).toBe(false);
+    });
+
+    it("ничего не найдено — пустая страница, а не весь каталог", async () => {
+      await createTitle({ slug: "naruto", nameRu: "Наруто" });
+
+      const { items, total, pageCount } = await getCatalog({ ...defaults, q: "квартет фиалок" });
+      expect({ items, total, pageCount }).toEqual({ items: [], total: 0, pageCount: 1 });
+    });
+  });
+
   it("пагинация без дублей и пропусков, даже при одинаковой дате", async () => {
     const publishedAt = hoursAgo(5);
     for (let index = 0; index < CATALOG_PAGE_SIZE + 6; index += 1) {
@@ -83,7 +124,7 @@ describe("getCatalog", () => {
   });
 
   it("пустой каталог — одна пустая страница", async () => {
-    expect(await getCatalog(defaults)).toEqual({ items: [], total: 0, pageCount: 1 });
+    expect(await getCatalog(defaults)).toEqual({ items: [], total: 0, pageCount: 1, truncated: false });
   });
 
   describe("приватность (docs/07)", () => {

@@ -23,6 +23,12 @@ const RELATIVE_SCORE = 0.6;
  */
 const MIN_SUBSTRING_LENGTH = 3;
 
+/**
+ * Сколько совпадений отбирает каталог. Больше, чем показывает /search: там это готовая выдача,
+ * а в каталоге поверх ещё лягут жанр, год и страницы, и слишком короткий список опустеет от фильтра.
+ */
+export const CATALOG_MATCH_LIMIT = 200;
+
 export type SearchResult = {
   titles: CatalogItem[];
   /** Совпадений больше, чем показано: выдача обрезана по SEARCH_LIMIT. */
@@ -31,8 +37,19 @@ export type SearchResult = {
 
 const EMPTY: SearchResult = { titles: [], truncated: false };
 
-export async function searchTitles(query: string): Promise<SearchResult> {
-  if (!query) return EMPTY;
+export interface RankedIds {
+  /** Ровно `limit` штук или меньше, по убыванию счёта. */
+  ids: string[];
+  /** Совпадений было больше лимита: вызывающий обязан сказать об этом, а не молча обрезать. */
+  truncated: boolean;
+}
+
+/**
+ * Идентификаторы совпадений по убыванию счёта. Вынесено из searchTitles, чтобы каталог искал тем же
+ * запросом, а не завёл второй: разойдясь, они дали бы разную выдачу на одно и то же слово.
+ */
+export async function rankTitleIds(query: string, limit: number): Promise<RankedIds> {
+  if (!query) return { ids: [], truncated: false };
 
   const like = `%${query.replaceAll("\\", "\\\\").replaceAll("%", "\\%").replaceAll("_", "\\_")}%`;
   const substringEnabled = query.length >= MIN_SUBSTRING_LENGTH;
@@ -71,11 +88,16 @@ export async function searchTitles(query: string): Promise<SearchResult> {
     SELECT id FROM candidates
     WHERE substring_hit OR score >= GREATEST(${FLOOR_SCORE}, best * ${RELATIVE_SCORE})
     ORDER BY score DESC, name_ru ASC
-    LIMIT ${SEARCH_LIMIT + 1}::int
+    LIMIT ${limit + 1}::int
   `;
-  if (ranked.length === 0) return EMPTY;
+  // Лишняя строка — только сигнал обрезки, наружу она не уходит: иначе вызывающий тихо получил бы limit + 1.
+  return { ids: ranked.slice(0, limit).map((row) => row.id), truncated: ranked.length > limit };
+}
 
-  const ids = ranked.slice(0, SEARCH_LIMIT).map((row) => row.id);
+export async function searchTitles(query: string): Promise<SearchResult> {
+  const { ids, truncated } = await rankTitleIds(query, SEARCH_LIMIT);
+  if (ids.length === 0) return EMPTY;
+
   const found = await prisma.title.findMany({
     where: { AND: [publicTitleWhere(), { id: { in: ids } }] },
     select: { id: true, slug: true, nameRu: true, posterUrl: true, kind: true, year: true, score: true },
@@ -88,6 +110,6 @@ export async function searchTitles(query: string): Promise<SearchResult> {
       const title = byId.get(id);
       return title ? [title] : [];
     }),
-    truncated: ranked.length > SEARCH_LIMIT,
+    truncated,
   };
 }

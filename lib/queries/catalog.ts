@@ -4,6 +4,10 @@ import type { Prisma } from "@/lib/generated/prisma/client";
 import type { TitleKind } from "@/lib/generated/prisma/enums";
 import { publicTitleWhere } from "@/lib/public-where";
 
+// Обратный импорт (search тянет отсюда CatalogItem) — только типовой, он стирается при сборке,
+// так что рантайм-цикла между модулями нет.
+import { CATALOG_MATCH_LIMIT, rankTitleIds } from "./search";
+
 export const CATALOG_PAGE_SIZE = 24;
 
 export interface CatalogItem {
@@ -21,6 +25,8 @@ export interface CatalogPage {
   items: CatalogItem[];
   total: number;
   pageCount: number;
+  /** Совпадений по `q` было больше предела отбора: счётчик считает внутри отобранных, а не по каталогу. */
+  truncated: boolean;
 }
 
 export interface CatalogFilters {
@@ -40,10 +46,23 @@ const ORDER_BY: Record<CatalogSort, Prisma.TitleOrderByWithRelationInput[]> = {
 };
 
 export async function getCatalog(params: CatalogParams): Promise<CatalogPage> {
-  const { genre, year, status, kind, sort, page } = params;
+  const { q, genre, year, status, kind, sort, page } = params;
+
+  // Поиск сужает набор, а не заменяет выдачу: жанр, год, сортировка и страницы работают поверх него
+  // ровно как раньше. Тем же запросом, что и /search: два разных дали бы разное на одно слово.
+  const matched = q ? await rankTitleIds(q, CATALOG_MATCH_LIMIT) : null;
+  // Счёт идёт внутри отобранных совпадений, поэтому при обрезке «Найдено N» — это N среди первых
+  // CATALOG_MATCH_LIMIT, а не во всём каталоге. Страница обязана сказать об этом, а не молча соврать.
+  const truncated = matched?.truncated ?? false;
+  if (matched && matched.ids.length === 0) return { items: [], total: 0, pageCount: 1, truncated };
+
   const where: Prisma.TitleWhereInput = {
     // AND, а не слияние объектов: фильтр статуса не должен перезаписать «не HIDDEN» из publicTitleWhere.
-    AND: [publicTitleWhere(), { genres: genre ? { has: genre } : undefined, year, status, kind }],
+    AND: [
+      publicTitleWhere(),
+      { genres: genre ? { has: genre } : undefined, year, status, kind },
+      ...(matched ? [{ id: { in: matched.ids } }] : []),
+    ],
   };
 
   // Без транзакции: точное совпадение счётчика и страницы не нужно, а транзакция держит соединение из пула.
@@ -58,7 +77,7 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogPage> {
     }),
   ]);
 
-  return { items, total, pageCount: Math.max(1, Math.ceil(total / CATALOG_PAGE_SIZE)) };
+  return { items, total, pageCount: Math.max(1, Math.ceil(total / CATALOG_PAGE_SIZE)), truncated };
 }
 
 /** Значения для фильтров — только из публичных тайтлов: жанр скрытого тайтла не выдаёт его существование. */

@@ -4,7 +4,14 @@ import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 
 import { withTracking } from "@/lib/canonical";
 
-import { catalogHref, hasFilters, parseCatalogParams, requestedCatalogHref, sanitizeCatalogParams } from "./params";
+import {
+  catalogHref,
+  DEFAULT_SORT,
+  hasFilters,
+  parseCatalogParams,
+  requestedCatalogHref,
+  sanitizeCatalogParams,
+} from "./params";
 
 describe("parseCatalogParams", () => {
   it("пустой URL — всё по умолчанию", () => {
@@ -118,5 +125,33 @@ describe("sanitizeCatalogParams", () => {
       sort: "new",
       page: 1,
     });
+  });
+});
+
+describe("поиск в каталоге", () => {
+  it("запрос из двух слов кодируется так же, как собирается пришедший адрес", () => {
+    // Ровно та ловушка, о которой предупреждает docs/02: encodeURIComponent дал бы «%20» вместо «+»,
+    // канонический адрес не совпал бы с пришедшим, и страница ушла бы в вечный редирект.
+    const href = catalogHref({ q: "магическая битва", sort: DEFAULT_SORT, page: 1 });
+    expect(href).toBe(
+      "/catalog?q=%D0%BC%D0%B0%D0%B3%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B0%D1%8F+%D0%B1%D0%B8%D1%82%D0%B2%D0%B0",
+    );
+    expect(requestedCatalogHref(Object.fromEntries(new URL(`https://x${href}`).searchParams))).toBe(href);
+  });
+
+  it("q стоит первым: порядок в адресе повторяет порядок полей формы", () => {
+    expect(catalogHref({ q: "фрирен", genre: "Драма", sort: "name", page: 2 })).toBe(
+      "/catalog?q=%D1%84%D1%80%D0%B8%D1%80%D0%B5%D0%BD&genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&sort=name&page=2",
+    );
+  });
+
+  it("пустое и пробельное поле формы в адрес не попадает", () => {
+    expect(parseCatalogParams({ q: "" }).q).toBeUndefined();
+    expect(parseCatalogParams({ q: "   " }).q).toBeUndefined();
+    expect(catalogHref(parseCatalogParams({ q: "  " }))).toBe("/catalog");
+  });
+
+  it("запрос считается отбором: «Сбросить» появляется и по нему одному", () => {
+    expect(hasFilters({ q: "фрирен" })).toBe(true);
   });
 });

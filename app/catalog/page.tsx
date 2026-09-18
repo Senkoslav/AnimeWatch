@@ -16,8 +16,17 @@ import {
 } from "@/lib/catalog/params";
 import { formatCount } from "@/lib/format";
 import { getCatalog, getCatalogFilters } from "@/lib/queries/catalog";
+import { CATALOG_MATCH_LIMIT } from "@/lib/queries/search";
 
-export const metadata: Metadata = { title: "Каталог" };
+/**
+ * Адрес с поиском из индекса убираем, как и `/search`: `q` — произвольная строка, значит адресов
+ * бесконечно много, и каждый — полный скан `Title`. Фильтры индексируются: их значения конечны и
+ * проверены по каталогу (sanitizeCatalogParams).
+ */
+export async function generateMetadata({ searchParams }: PageProps<"/catalog">): Promise<Metadata> {
+  const { q } = parseCatalogParams(await searchParams);
+  return q ? { title: "Каталог", robots: { index: false, follow: true } } : { title: "Каталог" };
+}
 
 /** Колонок сетки на телефоне: первый ряд виден без прокрутки. */
 const MOBILE_COLUMNS = 2;
@@ -54,10 +63,14 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
         {catalog.items.length > 0 ? (
           <section
             aria-labelledby="catalog-results"
-            className={`mt-6 lg:col-start-1 lg:row-start-1 lg:mt-0 ${CATALOG_PANEL}`}
+            className={`mt-6 lg:col-start-1 lg:row-start-1 lg:mt-0 lg:self-start ${CATALOG_PANEL}`}
           >
             <h2 id="catalog-results" className="text-sm text-muted">
-              Найдено {formatCount(catalog.total, ["тайтл", "тайтла", "тайтлов"])}
+              {catalog.truncated
+                ? // Счётчик при обрезке считает внутри отобранных совпадений: писать его как число по
+                  // каталогу значило бы соврать, поэтому говорим, что показано, и что с этим делать.
+                  `Показаны первые ${formatCount(CATALOG_MATCH_LIMIT, ["совпадение", "совпадения", "совпадений"])}, из них подходит ${catalog.total}: уточните запрос`
+                : `Найдено ${formatCount(catalog.total, ["тайтл", "тайтла", "тайтлов"])}`}
             </h2>
             <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
               {catalog.items.map((title, index) => (
