@@ -22,7 +22,8 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "import:shikimori": "tsx scripts/import-shikimori.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "7.10.0",
