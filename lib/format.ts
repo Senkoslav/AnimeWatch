@@ -59,6 +59,14 @@ export function formatDuration(totalSeconds: number): string {
   return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${rest}` : `${minutes}:${rest}`;
 }
 
+/**
+ * Оценка Shikimori одним знаком после запятой: 8.49 → «8.5», 9 → «9.0».
+ * Их сырое число показывать нельзя — рядом на карточке оно читается как случайные цифры.
+ */
+export function formatScore(score: number): string {
+  return score.toFixed(1).replace(".", ",");
+}
+
 /** Номер серии как номер дубля: 07, 12, 108. */
 export function formatEpisodeNumber(number: number): string {
   return String(number).padStart(2, "0");

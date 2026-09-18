@@ -43,6 +43,28 @@ describe("getCatalog", () => {
     expect(await slugs({ sort: "name" })).toEqual(["a", "b", "v"]);
   });
 
+  it("сортирует по рейтингу и по популярности, неизвестное — в конце", async () => {
+    await createTitle({ slug: "middle", score: 8.5, popularityRank: 30 });
+    await createTitle({ slug: "best", score: 9.2, popularityRank: 100 });
+    // Ранг есть, оценки нет, и наоборот: у тайтла из импорта по id ранга не будет никогда.
+    await createTitle({ slug: "unrated", score: null, popularityRank: 5 });
+    await createTitle({ slug: "unranked", score: 7.1, popularityRank: null });
+
+    // Без оценки — не «ноль», а «неизвестно»: такой тайтл уходит в хвост, а не открывает список худших.
+    expect(await slugs({ sort: "score" })).toEqual(["best", "middle", "unranked", "unrated"]);
+    expect(await slugs({ sort: "popular" })).toEqual(["unrated", "middle", "best", "unranked"]);
+  });
+
+  it("оценка доезжает до карточки, а её отсутствие остаётся null", async () => {
+    await createTitle({ slug: "scored", score: 8.49 });
+    await createTitle({ slug: "plain" });
+
+    const { items } = await getCatalog({ ...defaults, sort: "name" });
+    const byslug = new Map(items.map((item) => [item.slug, item.score]));
+    expect(byslug.get("scored")).toBe(8.49);
+    expect(byslug.get("plain")).toBeNull();
+  });
+
   it("пагинация без дублей и пропусков, даже при одинаковой дате", async () => {
     const publishedAt = hoursAgo(5);
     for (let index = 0; index < CATALOG_PAGE_SIZE + 6; index += 1) {

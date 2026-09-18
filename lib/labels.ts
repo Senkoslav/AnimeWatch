@@ -19,6 +19,8 @@ export const STATUS_LABELS: Record<PublicStatus, string> = {
 
 export const SORT_LABELS: Record<CatalogSort, string> = {
   new: "Сначала новые",
+  popular: "По популярности",
+  score: "По рейтингу",
   year: "По году",
   name: "По названию",
 };

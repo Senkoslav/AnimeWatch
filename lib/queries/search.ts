@@ -78,7 +78,7 @@ export async function searchTitles(query: string): Promise<SearchResult> {
   const ids = ranked.slice(0, SEARCH_LIMIT).map((row) => row.id);
   const found = await prisma.title.findMany({
     where: { AND: [publicTitleWhere(), { id: { in: ids } }] },
-    select: { id: true, slug: true, nameRu: true, posterUrl: true, kind: true, year: true },
+    select: { id: true, slug: true, nameRu: true, posterUrl: true, kind: true, year: true, score: true },
   });
 
   // Порядок задаёт счёт из SQL, findMany его не сохраняет.

@@ -50,32 +50,40 @@ enum WatchState {
 }
 
 model Title {
-  id            String      @id @default(cuid())
-  slug          String      @unique
-  shikimoriId   Int?        @unique
-  name          String // ромадзи/оригинал
-  nameRu        String
-  synonyms      String[] // для поиска
-  description   String?     @db.Text
-  posterUrl     String?
-  bannerUrl     String?
-  kind          TitleKind   @default(TV)
-  status        TitleStatus @default(ONGOING)
-  year          Int?
-  season        String?
-  ageRating     String?
-  genres        String[]
-  totalEpisodes Int? // сколько всего в тайтле
-  airDay        Int? // 1-7, для расписания
-  publishedAt   DateTime? // null = черновик; HIDDEN — только рубильник по жалобе
-  episodes      Episode[]
-  bookmarks     Bookmark[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id             String      @id @default(cuid())
+  slug           String      @unique
+  shikimoriId    Int?        @unique
+  name           String // ромадзи/оригинал
+  nameRu         String
+  synonyms       String[] // для поиска
+  description    String?     @db.Text
+  posterUrl      String?
+  bannerUrl      String?
+  kind           TitleKind   @default(TV)
+  status         TitleStatus @default(ONGOING)
+  year           Int?
+  season         String?
+  ageRating      String?
+  genres         String[]
+  // Оценка Shikimori, 0–10. У тайтла без оценок их API отдаёт 0.0 — при импорте это становится null,
+  // иначе анонс с нулём выглядит как худший тайтл каталога, а не как тайтл без оценки.
+  score          Float?
+  // Место в их списке по популярности на момент импорта: числового поля популярности в их API нет,
+  // есть только сортировка. Известно поэтому лишь для тайтлов из пакетного импорта.
+  popularityRank Int?
+  totalEpisodes  Int? // сколько всего в тайтле
+  airDay         Int? // 1-7, для расписания
+  publishedAt    DateTime? // null = черновик; HIDDEN — только рубильник по жалобе
+  episodes       Episode[]
+  bookmarks      Bookmark[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   @@index([status, updatedAt])
   @@index([publishedAt])
   @@index([year])
+  @@index([score])
+  @@index([popularityRank])
   // Триграммные индексы под поиск. Текущий запрос считает счёт выражением и идёт сканом;
   // индексы понадобятся, когда каталог вырастет и запрос перепишут на оператор % (docs/03).
   @@index([nameRu(ops: raw("gin_trgm_ops"))], type: Gin)

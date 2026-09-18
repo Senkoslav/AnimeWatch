@@ -15,7 +15,7 @@ import { existsSync } from "node:fs";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { createShikimoriClient, MAX_PAGE_SIZE } from "../lib/shikimori/client";
-import { importTitles, type ImportStats } from "../lib/shikimori/import";
+import { importTitles, resetPopularityRanks, type ImportStats } from "../lib/shikimori/import";
 import type { AnimeNode } from "../lib/shikimori/schema";
 import { PrismaClient } from "../lib/generated/prisma/client";
 
@@ -66,9 +66,16 @@ function connectionString(): string {
   return url;
 }
 
-async function collect(args: Args, log: (message: string) => void): Promise<AnimeNode[]> {
+interface Collected {
+  nodes: AnimeNode[];
+  /** Место в списке Shikimori по популярности, по shikimoriId. Пусто, если --top не просили. */
+  ranks: Map<number, number>;
+}
+
+async function collect(args: Args, log: (message: string) => void): Promise<Collected> {
   const client = createShikimoriClient({ onRetry: log });
   const nodes = new Map<number, AnimeNode>();
+  const ranks = new Map<number, number>();
 
   if (args.ids.length > 0) {
     log(`Запрашиваю ${args.ids.length} тайтлов по id`);
@@ -96,19 +103,27 @@ async function collect(args: Args, log: (message: string) => void): Promise<Anim
     const pages = Math.ceil(args.top / MAX_PAGE_SIZE);
     let collected = 0;
     for (let page = 1; page <= pages; page += 1) {
-      // Берём ровно столько, сколько просили: иначе «--top 10» тихо притащит целую страницу в 50.
-      const limit = Math.min(MAX_PAGE_SIZE, args.top - collected);
-      if (limit <= 0) break;
-
       log(`Популярное, страница ${page} из ${pages}`);
-      const batch = await client.animes({ limit, page, order: "popularity", kind: CATALOG_KINDS });
-      batch.forEach((anime) => nodes.set(anime.id, anime));
+      // Страницы всегда полные. Смещение у них — (page - 1) * limit, поэтому «--top 60» с limit 10
+      // на второй странице вернул бы снова тайтлы 11–20 и выдал бы им чужие номера 51–60.
+      // Лишнее отрезаем после цикла, а не сужением limit.
+      const batch = await client.animes({ limit: MAX_PAGE_SIZE, page, order: "popularity", kind: CATALOG_KINDS });
+
+      // Номер — позиция в том, что вернул клиент. Узел со сломанным полем он отбрасывает при разборе,
+      // и тогда следующие за ним сдвигаются на единицу: цена — порядок показа, а не потеря тайтла.
+      for (const [index, anime] of batch.entries()) {
+        const rank = (page - 1) * MAX_PAGE_SIZE + index + 1;
+        if (rank > args.top) break;
+        nodes.set(anime.id, anime);
+        ranks.set(anime.id, rank);
+      }
+
       collected += batch.length;
-      if (batch.length < limit) break;
+      if (batch.length < MAX_PAGE_SIZE || collected >= args.top) break;
     }
   }
 
-  return [...nodes.values()];
+  return { nodes: [...nodes.values()], ranks };
 }
 
 function report(stats: ImportStats, total: number): void {
@@ -127,12 +142,17 @@ async function main(): Promise<void> {
   console.log(`База: ${new URL(url).host}`);
 
   try {
-    const nodes = await collect(args, (message) => console.log(message));
+    const { nodes, ranks } = await collect(args, (message) => console.log(message));
     if (nodes.length === 0) {
       console.log("Shikimori ничего не вернул, база не тронута");
       return;
     }
-    report(await importTitles(prisma, nodes), nodes.length);
+    // Места переписываем целиком, а не поверх: выпавший из топа тайтл иначе навсегда остался бы в голове.
+    if (ranks.size > 0) {
+      const cleared = await resetPopularityRanks(prisma);
+      console.log(`Места по популярности сброшены у ${cleared}, проставляю заново ${ranks.size}`);
+    }
+    report(await importTitles(prisma, nodes, new Date(), ranks), nodes.length);
   } finally {
     await prisma.$disconnect();
   }

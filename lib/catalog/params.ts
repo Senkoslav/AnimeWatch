@@ -8,7 +8,7 @@ import { z } from "zod";
 import { requestedHref, type SearchParams } from "@/lib/canonical";
 import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 
-export const CATALOG_SORTS = ["new", "year", "name"] as const;
+export const CATALOG_SORTS = ["new", "popular", "score", "year", "name"] as const;
 export type CatalogSort = (typeof CATALOG_SORTS)[number];
 /** Порядок по умолчанию: он же отсутствует в каноническом адресе. */
 export const DEFAULT_SORT: CatalogSort = "new";

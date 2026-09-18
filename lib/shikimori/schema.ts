@@ -27,6 +27,8 @@ export const animeNodeSchema = z.object({
   episodesAired: z.number().int().min(0).nullish(),
   duration: z.number().int().min(0).nullish(),
   rating: z.string().nullish(),
+  // 0.0 у тайтла без оценок — это «оценки нет», а не ноль. Разбирается как есть, смысл придаёт mapTitle.
+  score: z.number().min(0).max(10).nullish(),
   description: z.string().nullish(),
   genres: z.array(z.object({ russian: z.string() })).nullish(),
   poster: z.object({ originalUrl: z.url() }).nullish(),

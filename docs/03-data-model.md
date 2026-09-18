@@ -53,32 +53,40 @@ enum WatchState {
 }
 
 model Title {
-  id            String      @id @default(cuid())
-  slug          String      @unique
-  shikimoriId   Int?        @unique
-  name          String // ромадзи/оригинал
-  nameRu        String
-  synonyms      String[] // для поиска
-  description   String?     @db.Text
-  posterUrl     String?
-  bannerUrl     String?
-  kind          TitleKind   @default(TV)
-  status        TitleStatus @default(ONGOING)
-  year          Int?
-  season        String?
-  ageRating     String?
-  genres        String[]
-  totalEpisodes Int? // сколько всего в тайтле
-  airDay        Int? // 1-7, для расписания
-  publishedAt   DateTime? // null = черновик; HIDDEN — только рубильник по жалобе
-  episodes      Episode[]
-  bookmarks     Bookmark[]
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id             String      @id @default(cuid())
+  slug           String      @unique
+  shikimoriId    Int?        @unique
+  name           String // ромадзи/оригинал
+  nameRu         String
+  synonyms       String[] // для поиска
+  description    String?     @db.Text
+  posterUrl      String?
+  bannerUrl      String?
+  kind           TitleKind   @default(TV)
+  status         TitleStatus @default(ONGOING)
+  year           Int?
+  season         String?
+  ageRating      String?
+  genres         String[]
+  // Оценка Shikimori, 0–10. У тайтла без оценок их API отдаёт 0.0 — при импорте это становится null,
+  // иначе анонс с нулём выглядит как худший тайтл каталога, а не как тайтл без оценки.
+  score          Float?
+  // Место в их списке по популярности на момент импорта: числового поля популярности в их API нет,
+  // есть только сортировка. Известно поэтому лишь для тайтлов из пакетного импорта.
+  popularityRank Int?
+  totalEpisodes  Int? // сколько всего в тайтле
+  airDay         Int? // 1-7, для расписания
+  publishedAt    DateTime? // null = черновик; HIDDEN — только рубильник по жалобе
+  episodes       Episode[]
+  bookmarks      Bookmark[]
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   @@index([status, updatedAt])
   @@index([publishedAt])
   @@index([year])
+  @@index([score])
+  @@index([popularityRank])
   // Триграммные индексы под поиск. Текущий запрос считает счёт выражением и идёт сканом;
   // индексы понадобятся, когда каталог вырастет и запрос перепишут на оператор % (docs/03).
   @@index([nameRu(ops: raw("gin_trgm_ops"))], type: Gin)
@@ -192,6 +200,24 @@ model DmcaRequest {
   источника — нормальное состояние, страница просмотра говорит об этом текстом.
 - Серия публична независимо от наличия источника: каталог наполняется импортом
   до того, как появятся ссылки на плееры.
+- Индексы `@@index([score])` и `@@index([popularityRank])` заведены, но
+  сортировками пока не используются: `ORDER BY score DESC NULLS LAST` обычный
+  btree не закрывает — обратный скан даёт `NULLS FIRST`. На сотнях тайтлов это
+  доли миллисекунды; та же история, что с `gin_trgm_ops` у поиска.
+- `score` и `popularityRank` приходят только из импорта и живут по разным
+  правилам. Оценку Shikimori отдаёт полем, и у неоценённого тайтла это `0.0` —
+  `mapTitle()` превращает такой ноль в `null`, иначе анонс возглавил бы список
+  худших, а на карточке появился бы бейдж «0». Числового поля популярности у них
+  нет вовсе, есть только сортировка `order: popularity`, поэтому ранг — это
+  позиция в их ответе, и знает её лишь пакетный импорт: точечный импорт по id
+  ранг не трогает, чтобы не стереть порядок, собранный пакетом. В сортировках
+  каталога неизвестное значение уходит в конец, а не в начало.
+- Пакетный проход сначала снимает места у всех (`resetPopularityRanks`), потом
+  проставляет заново: без этого тайтл, выпавший из топа, навсегда остался бы со
+  старым номером и вечно висел бы в голове сортировки. `--ongoing` мест не
+  ставит вовсе — он тоже идёт `order: popularity`, но внутри одних онгоингов, и
+  позиции в нём не глобальные. Каталог, налитый только им, сортировку «по
+  популярности» получит пустой.
 - Списком выводятся не все серии: `episodeWindow()` из `lib/episodes.ts` даёт
   окно в 100 штук — последние, а на просмотре окно вокруг текущей. У «Ван-Пис»
   1178 серий, и полный список превращает страницу тайтла в километр разметки.

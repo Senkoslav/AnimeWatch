@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formatCount, formatDuration, formatEpisodeNumber, formatRelativeDate, isFresh } from "./format";
+import { formatCount, formatDuration, formatEpisodeNumber, formatRelativeDate, formatScore, isFresh } from "./format";
 
 const now = new Date("2026-09-16T12:00:00Z");
 const ago = (ms: number) => new Date(now.getTime() - ms);
@@ -68,6 +68,20 @@ describe("formatCount", () => {
     [0, "0 тайтлов"],
   ])("%i", (count, expected) => {
     expect(formatCount(count, ["тайтл", "тайтла", "тайтлов"])).toBe(expected);
+  });
+});
+
+describe("formatScore", () => {
+  it("всегда один знак после запятой и запятая, а не точка", () => {
+    expect(formatScore(9)).toBe("9,0");
+    expect(formatScore(10)).toBe("10,0");
+    expect(formatScore(8.49)).toBe("8,5");
+  });
+
+  it("округляет по двоичному представлению: 8.45 уходит вниз", () => {
+    // Не опечатка и не «починить обратно»: 8.45 в double чуть меньше 8.45, и toFixed даёт 8,4.
+    expect(formatScore(8.45)).toBe("8,4");
+    expect(formatScore(9.25)).toBe("9,3");
   });
 });
 
