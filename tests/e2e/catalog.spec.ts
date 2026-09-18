@@ -25,7 +25,10 @@ async function openFilters(page: Page) {
   const viewport = page.viewportSize();
   if (viewport && viewport.width < DESKTOP) {
     // Кликаем подпись, а не сам чекбокс: он sr-only, и Playwright не дотянется до клипнутого элемента.
-    await page.locator('label[for="catalog-filters-open"]').click();
+    const toggle = page.locator('label[for="catalog-filters-open"]');
+    // Спрашиваем состояние чекбокса, а не видимость полей: при заданном отборе панель уже раскрыта,
+    // и безусловный клик её бы закрыл. Видимость зависит от применённого CSS и на медленном прогоне врёт.
+    if (!(await page.locator("#catalog-filters-open").isChecked())) await toggle.click();
   }
   await expect(page.getByLabel("Жанр")).toBeVisible();
 }
@@ -106,6 +109,50 @@ test("пункт «Каталог» в шапке отмечен текущим"
   await expect(
     page.getByRole("navigation", { name: "Разделы" }).getByRole("link", { name: "Каталог" }),
   ).toHaveAttribute("aria-current", "page");
+});
+
+test("поиск в каталоге складывается с фильтром и не зацикливает редирект", async ({ page }) => {
+  await page.goto("/catalog");
+  await openFilters(page);
+
+  // Два слова: encodeURIComponent дал бы «%20» вместо «+», и страница ушла бы в вечный редирект.
+  await page.getByLabel("Поиск по названию").fill("монолог фармацевта");
+  await page.getByRole("button", { name: "Показать" }).click();
+
+  await expect(page).toHaveURL(
+    "/catalog?q=%D0%BC%D0%BE%D0%BD%D0%BE%D0%BB%D0%BE%D0%B3+%D1%84%D0%B0%D1%80%D0%BC%D0%B0%D1%86%D0%B5%D0%B2%D1%82%D0%B0",
+  );
+  // Без точного числа: по роадмапу в локальную базу зальют сотню тайтлов импортом.
+  await expect(results(page).filter({ hasText: "Монолог фармацевта" })).toHaveCount(1);
+  await expect(results(page).filter({ hasText: "Наруто" })).toHaveCount(0);
+
+  // Поле переживает переход: иначе непонятно, почему в каталоге три тайтла вместо девяти.
+  await openFilters(page);
+  await expect(page.getByLabel("Поиск по названию")).toHaveValue("монолог фармацевта");
+
+  await page.getByRole("link", { name: "Сбросить" }).click();
+  await expect(page).toHaveURL("/catalog");
+});
+
+test("поиск в каталоге с фильтром сужает выдачу, пустой запрос в адрес не попадает", async ({ page }) => {
+  // «Фрирен» — драма; под фильтром «Комедия» её быть не должно, и это не пустой каталог, а пустая выдача.
+  await page.goto("/catalog?q=%D1%84%D1%80%D0%B8%D1%80%D0%B5%D0%BD");
+  await expect(results(page).first()).toContainText("Фрирен");
+
+  await page.goto("/catalog?q=%D1%84%D1%80%D0%B8%D1%80%D0%B5%D0%BD&genre=%D0%9A%D0%BE%D0%BC%D0%B5%D0%B4%D0%B8%D1%8F");
+  await expect(page.getByText("Ничего не нашлось")).toBeVisible();
+
+  // Поиск из индекса убран: адресов с произвольным q бесконечно много. Фильтры остаются индексируемыми.
+  await page.goto("/catalog?q=%D1%84%D1%80%D0%B8%D1%80%D0%B5%D0%BD");
+  await expect(page.locator('head meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  await page.goto("/catalog?kind=tv");
+  await expect(page.locator('head meta[name="robots"]')).toHaveCount(0);
+
+  // Пустое поле формы уходит как ?q=, но каноническим адресом остаётся чистый /catalog.
+  await page.goto("/catalog?q=");
+  await expect(page).toHaveURL("/catalog");
+  await page.goto("/catalog?q=%20%20");
+  await expect(page).toHaveURL("/catalog");
 });
 
 test("бейдж оценки на карточке", async ({ page }) => {

@@ -15,6 +15,7 @@ import {
 } from "@/lib/catalog/params";
 import { CATALOG_PANEL } from "@/components/catalog/panel";
 import { KIND_LABELS, SORT_LABELS, STATUS_LABELS } from "@/lib/labels";
+import { MAX_QUERY_LENGTH } from "@/lib/search/query";
 import type { CatalogFilters as FilterOptions } from "@/lib/queries/catalog";
 
 interface CatalogFiltersProps {
@@ -62,6 +63,23 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
 
       <div id={FIELDS_ID} className="hidden peer-checked:block max-lg:peer-checked:mt-4 lg:block">
         <Form action="/catalog" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-1">
+          {/* Первым и здесь, и в catalogHref: пришедший адрес собирается как есть, и перестановка
+              параметров увела бы страницу в вечный редирект на саму себя. */}
+          <div className="col-span-2 flex min-w-0 flex-col gap-1 sm:col-span-3 lg:col-span-1">
+            <label htmlFor="catalog-q" className="text-xs text-muted">
+              Поиск по названию
+            </label>
+            <input
+              id="catalog-q"
+              name="q"
+              type="search"
+              defaultValue={params.q ?? ""}
+              maxLength={MAX_QUERY_LENGTH}
+              placeholder="Название или часть"
+              // 16px на телефоне: iOS Safari увеличивает страницу при фокусе на поле с шрифтом мельче.
+              className="h-11 w-full min-w-0 rounded-sm border border-line bg-bg px-3 text-base text-text placeholder:text-muted sm:text-sm"
+            />
+          </div>
           <Field label="Жанр" name="genre" defaultValue={params.genre ?? ""}>
             <option value="">Все</option>
             {genres.map((genre) => (
