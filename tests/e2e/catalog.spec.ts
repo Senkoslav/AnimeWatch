@@ -106,6 +106,15 @@ test("карточка ведёт на страницу тайтла", async ({ 
 
 test("пункт «Каталог» в шапке отмечен текущим", async ({ page }) => {
   await page.goto("/catalog");
+
+  // На телефоне навигация живёт в свёрнутом меню, на широком экране стоит прямо в шапке.
+  // Ширина — то же значение, что и у lg в разметке шапки.
+  const viewport = page.viewportSize();
+  if (viewport && viewport.width < 1024) {
+    // Элементом, а не ролью: Chrome выставляет <summary> не как button, и роль ненадёжна.
+    await page.locator("header summary").click();
+  }
+
   await expect(
     page.getByRole("navigation", { name: "Разделы" }).getByRole("link", { name: "Каталог" }),
   ).toHaveAttribute("aria-current", "page");

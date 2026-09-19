@@ -69,7 +69,7 @@ export default async function TitlePageView({ params }: PageProps<"/anime/[slug]
           )}
         </header>
 
-        <aside className="col-start-1 row-start-1 space-y-4 md:sticky md:top-6 md:row-span-2">
+        <aside className="col-start-1 row-start-1 space-y-4 md:sticky md:top-sticky md:row-span-2">
           <Poster src={title.posterUrl} title={title.nameRu} sizes="(min-width: 768px) 240px, 50vw" loading="preload" />
           {firstEpisode && (
             <Link
