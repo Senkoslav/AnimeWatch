@@ -19,7 +19,7 @@ async function fill(page: Page, overrides: Record<string, string> = {}) {
 test("обращение отправляется и показывает подтверждение", async ({ page }) => {
   await page.goto("/dmca");
   await fill(page);
-  await page.getByRole("checkbox").check();
+  await page.getByRole("checkbox", { name: /Подтверждаю/ }).check();
   await page.getByRole("button", { name: "Отправить обращение" }).click();
 
   await expect(page.getByRole("status")).toContainText("Обращение принято");
@@ -28,7 +28,7 @@ test("обращение отправляется и показывает под
 test("ошибка в поле называет поле и сохраняет введённое", async ({ page }) => {
   await page.goto("/dmca");
   await fill(page, { "Адрес для ответа": "не почта" });
-  await page.getByRole("checkbox").check();
+  await page.getByRole("checkbox", { name: /Подтверждаю/ }).check();
   await page.getByRole("button", { name: "Отправить обращение" }).click();
 
   await expect(page.getByText("Проверьте адрес: на него придёт наш ответ")).toBeVisible();

@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="flex min-h-dvh flex-col">
         <a
           href="#content"
-          className="sr-only rounded-sm bg-text text-bg focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-10 focus:inline-flex focus:min-h-11 focus:items-center focus:px-4"
+          className="sr-only rounded-sm bg-text text-bg focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-30 focus:inline-flex focus:min-h-11 focus:items-center focus:px-4"
         >
           К содержанию
         </a>

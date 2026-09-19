@@ -43,7 +43,7 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
   return (
     // key: при переходе по ссылке «Сбросить» или «Назад» в истории панель пересоздаётся, иначе
     // неуправляемые <select> и чекбокс остались бы с прежними значениями.
-    <div key={catalogHref({ ...params, page: 1 })} className={`lg:sticky lg:top-6 ${CATALOG_PANEL}`}>
+    <div key={catalogHref({ ...params, page: 1 })} className={`lg:sticky lg:top-sticky ${CATALOG_PANEL}`}>
       {/* sr-only, а не hidden: элемент должен остаться фокусируемым с клавиатуры. */}
       <input
         type="checkbox"

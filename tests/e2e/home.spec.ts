@@ -68,3 +68,22 @@ function outlineOf(page: Page): Promise<string> {
     return element ? getComputedStyle(element).outlineStyle : "none";
   });
 }
+
+test("мобильное меню закрывается после перехода и не нарушает axe раскрытым", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/");
+
+  // Элементом, а не ролью: Chrome выставляет <summary> не как button, и роль ненадёжна.
+  const menu = page.locator("header details");
+  await menu.locator("summary").click();
+  await expect(menu).toHaveAttribute("open", "");
+
+  const { violations } = await new AxeBuilder({ page }).analyze();
+  expect(violations.filter(({ impact }) => impact === "critical" || impact === "serious")).toEqual([]);
+
+  // Шапка живёт в рутовом лэйауте и при переходе не перемонтируется: если меню не закрыть руками,
+  // оно останется раскрытым поверх новой страницы.
+  await menu.getByRole("link", { name: "Каталог" }).click();
+  await expect(page).toHaveURL("/catalog");
+  await expect(menu).not.toHaveAttribute("open", "");
+});

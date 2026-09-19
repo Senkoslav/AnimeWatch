@@ -7,13 +7,31 @@ function results(page: Page) {
   return page.getByRole("region", { name: /Найдено/ }).getByRole("listitem");
 }
 
-test("приёмка роадмапа: «наруот» находит «Наруто»", async ({ page }) => {
-  await page.goto("/");
+/** Ширина, с которой в шапке поле поиска вместо лупы (md в tailwind). */
+const HEADER_FIELD = 768;
+
+/**
+ * Дорога до выдачи из шапки. На широком экране поиск начинается прямо в ней, на телефоне поле
+ * туда не помещается и там лупа, ведущая на страницу. Ветвимся по ширине окна, а не по видимости:
+ * isVisible не ретраится и на медленном прогоне соврал бы.
+ */
+async function searchFromHeader(page: Page, query: string) {
+  const viewport = page.viewportSize();
+  if (viewport && viewport.width >= HEADER_FIELD) {
+    await page.getByLabel("Поиск аниме").fill(query);
+    await page.getByLabel("Поиск аниме").press("Enter");
+    return;
+  }
+
   await page.getByRole("link", { name: "Поиск" }).click();
   await expect(page).toHaveURL("/search");
-
-  await page.getByLabel("Название аниме").fill("наруот");
+  await page.getByLabel("Название аниме").fill(query);
   await page.getByRole("button", { name: "Найти" }).click();
+}
+
+test("приёмка роадмапа: «наруот» находит «Наруто»", async ({ page }) => {
+  await page.goto("/");
+  await searchFromHeader(page, "наруот");
 
   await expect(page).toHaveURL("/search?q=%D0%BD%D0%B0%D1%80%D1%83%D0%BE%D1%82");
   await expect(results(page).first()).toContainText("Наруто");
