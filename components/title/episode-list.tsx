@@ -44,7 +44,7 @@ export function EpisodeList({ title, now, currentNumber }: EpisodeListProps) {
         <ol className="mt-3 border-y border-line">
           {episodes.map((episode) => {
             const number = formatEpisodeNumber(episode.number);
-            const label = isMovie ? "Фильм" : (episode.name ?? `Эпизод ${episode.number}`);
+            const label = isMovie ? "Фильм" : episode.name;
             const duration = episode.duration ? formatDuration(episode.duration) : null;
             const fresh = isFresh(episode.publishedAt, now);
             const current = episode.number === currentNumber;
@@ -68,7 +68,9 @@ export function EpisodeList({ title, now, currentNumber }: EpisodeListProps) {
                 >
                   {/* Янтарный номер — серия, которая идёт прямо сейчас (docs/04). */}
                   {!isMovie && (
-                    <span className={`w-10 shrink-0 font-display text-lg font-bold ${current ? "text-signal" : ""}`}>
+                    <span
+                      className={`min-w-10 shrink-0 font-display text-lg font-bold tabular-nums ${current ? "text-signal" : ""}`}
+                    >
                       {number}
                     </span>
                   )}
