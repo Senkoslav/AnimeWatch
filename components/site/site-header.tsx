@@ -25,6 +25,12 @@ export function SiteHeader() {
           <nav aria-label="Разделы" className="flex flex-col">
             <NavLink href="/catalog">Каталог</NavLink>
           </nav>
+          <Link
+            href="/login"
+            className="mt-2 inline-flex min-h-11 items-center justify-center rounded-sm bg-text px-5 font-medium text-bg hover:bg-muted"
+          >
+            Войти
+          </Link>
         </MobileMenu>
 
         <Link
@@ -50,11 +56,13 @@ export function SiteHeader() {
           <SearchIcon />
         </Link>
 
-        {/*
-         * Место под «Войти» и меню профиля. Кнопки пока нет намеренно: входа в проекте ещё нет,
-         * а кнопка, которая никуда не ведёт, хуже её отсутствия (docs/04, «Текст в интерфейсе»).
-         * Заполняется задачей про вход через Google.
-         */}
+        {/* На телефоне «Войти» уходит в меню: в строку 360px оно не встаёт рядом с логотипом и лупой. */}
+        <Link
+          href="/login"
+          className="-mr-2 hidden min-h-11 shrink-0 items-center rounded-sm px-2 text-sm font-medium hover:text-muted md:inline-flex"
+        >
+          Войти
+        </Link>
       </div>
     </header>
   );
