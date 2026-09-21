@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Страница тайтла — AnimeWatch</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@600;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Golos Text',system-ui,sans-serif;background:#0B0E13;color:#EDF1F7}
+a{color:#EDF1F7;text-decoration:none;text-underline-offset:0.2em;text-decoration-thickness:from-font}
+a:hover{color:#FFFFFF}
+::selection{background:#4A3410;color:#FFFFFF}
+:root{caret-color:#FFB02E;scrollbar-color:#2A313D #0B0E13;scrollbar-width:thin}
+:where(time,output,[data-numeric]){font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid #FFB02E;outline-offset:2px}
+::placeholder{color:#8A94A4;opacity:1}
+</style>
+</helmet>
+
+<div style="width: 1440px; height: 1560px; background: #0B0E13; display: flex; flex-direction: column;">
+
+  <header style="height: 64px; display: flex; align-items: center; gap: 24px; padding: 0 32px; background: rgba(14,18,25,0.72); backdrop-filter: blur(20px) saturate(140%); border-bottom: 1px solid rgba(255,255,255,0.08); position: relative; z-index: 3;">
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 7px; font-family: Unbounded, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.03em;">animewatch<span style="width: 6px; height: 6px; border-radius: 999px; background: {{accent}};"></span></a>
+    <nav style="display: flex; align-items: center; gap: 2px;">
+      <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; font-size: 14px; font-weight: 500; color: #99A4B4;">Каталог</a>
+      <a href="Main.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; font-size: 14px; font-weight: 500; color: #99A4B4;">Расписание</a>
+      <a href="Main.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; font-size: 14px; font-weight: 500; color: #99A4B4;">Случайное</a>
+    </nav>
+    <form style="margin-left: auto; position: relative; width: 320px;">
+      <label for="t-hdr-q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">Поиск аниме</label>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#8A94A4" stroke-width="2" style="position: absolute; left: 12px; top: 12px; width: 18px; height: 18px;"><circle cx="11" cy="11" r="6"></circle><line x1="15.5" y1="15.5" x2="20" y2="20" stroke-linecap="round"></line></svg>
+      <input id="t-hdr-q" type="search" placeholder="Название, студия, жанр" style="width: 100%; height: 42px; padding: 0 60px 0 38px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.05); color: #EDF1F7; font-family: inherit; font-size: 14px;">
+      <span style="position: absolute; right: 10px; top: 11px; height: 20px; padding: 0 7px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.14); font-size: 11px; line-height: 19px; color: #8A94A4;">Ctrl K</span>
+    </form>
+    <a href="Auth.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); font-size: 14px; font-weight: 600;">Войти</a>
+  </header>
+
+  <div style="position: relative; height: 320px;">
+    <div style="position: absolute; inset: -40px -40px 0; background: #433A5E; filter: blur(52px); transform: scale(1.12);"></div>
+    <div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,14,19,0.55) 0%, rgba(11,14,19,0.82) 55%, #0B0E13 100%);"></div>
+    <nav style="position: relative; padding: 18px 32px; display: flex; align-items: center; gap: 10px; font-size: 13px; color: #99A4B4;">
+      <a href="Main.dc.html" style="color: #99A4B4;">Главная</a><span>/</span><a href="Catalog.dc.html" style="color: #99A4B4;">Каталог</a><span>/</span><a href="Catalog.dc.html" style="color: #99A4B4;">Фэнтези</a>
+    </nav>
+  </div>
+
+  <div style="position: relative; z-index: 2; margin-top: -196px; padding: 0 32px; display: grid; grid-template-columns: 296px minmax(0, 1fr); gap: 32px; align-items: start;">
+
+    <aside style="display: flex; flex-direction: column; gap: 14px;">
+      <div style="position: relative; aspect-ratio: 2 / 3; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,255,255,0.14); background: #453A5E; box-shadow: 0 24px 60px rgba(0,0,0,0.55);"></div>
+      <a href="Watch.dc.html" style="display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 54px; border-radius: 14px; background: {{accent}}; color: {{accentInk}}; font-size: 16px; font-weight: 600;"><svg viewBox="0 0 24 24" fill="currentColor" style="width: 17px; height: 17px;"><path d="M7 4.5l13 7.5-13 7.5z"></path></svg>Смотреть эпизод 1</a>
+      <div style="display: flex; gap: 10px;">
+        <a href="Auth.dc.html" style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; border-radius: 13px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.07); backdrop-filter: blur(14px); font-size: 14px; font-weight: 600;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width: 16px; height: 16px;"><path d="M12 5v14M5 12h14"></path></svg>В список</a>
+        <a href="Auth.dc.html" aria-label="Поделиться" style="width: 48px; display: inline-flex; align-items: center; justify-content: center; height: 48px; border-radius: 13px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.07);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 17px; height: 17px;"><path d="M12 4v11M8 8l4-4 4 4M5 15v4h14v-4"></path></svg></a>
+      </div>
+      <div style="border-radius: 16px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; overflow: hidden;">
+        <sc-for list="{{facts}}" as="f" hint-placeholder-count="5">
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 46px; padding: 0 14px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <span style="font-size: 13px; color: #8A94A4;">{{f.k}}</span>
+            <span style="font-size: 13px; font-weight: 500; text-align: right;">{{f.v}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </aside>
+
+    <div style="display: flex; flex-direction: column; gap: 24px; padding-top: 44px;">
+      <div style="display: flex; align-items: flex-start; gap: 32px;">
+        <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px;">
+          <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 40px; line-height: 1.05; font-weight: 700; letter-spacing: -0.035em;">Провожающая в последний путь Фрирен</h1>
+          <p style="margin: 0; font-size: 15px; color: #99A4B4;">Sousou no Frieren</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px;">
+            <span style="display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); font-size: 13px;">2023</span>
+            <span style="display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); font-size: 13px;">ТВ-сериал</span>
+            <span style="display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); font-size: 13px;">28 серий</span>
+            <span style="display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 10px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: {{accent}}; font-size: 13px; font-weight: 600;"><span style="width: 6px; height: 6px; border-radius: 999px; background: {{accent}};"></span>выходит</span>
+          </div>
+        </div>
+
+        <div style="width: 212px; flex-shrink: 0; padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); background: #14181F;">
+          <p style="margin: 0; font-size: 12px; color: #8A94A4;">Оценка Shikimori</p>
+          <p style="margin: 6px 0 0; font-family: Unbounded, sans-serif; font-size: 34px; font-weight: 700; letter-spacing: -0.03em; color: {{accent}};">9.12</p>
+          <div style="margin-top: 10px; height: 5px; border-radius: 999px; background: rgba(255,255,255,0.10); overflow: hidden;"><span style="display: block; width: 91%; height: 100%; background: {{accent}};"></span></div>
+          <p style="margin: 10px 0 0; font-size: 12px; line-height: 1.45; color: #8A94A4;">Своих оценок у сайта пока нет — появятся вместе с аккаунтами.</p>
+        </div>
+      </div>
+
+      <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 8px;">
+        <sc-for list="{{genres}}" as="g" hint-placeholder-count="6">
+          <li><a href="Catalog.dc.html" style="display: inline-flex; align-items: center; height: 36px; padding: 0 13px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: #C9D2DD;">{{g}}</a></li>
+        </sc-for>
+      </ul>
+
+      <div>
+        <p style="margin: 0; max-width: 78ch; font-size: 15px; line-height: 1.65; color: #C9D2DD;">Волшебница Фрирен прожила больше тысячи лет и вместе с отрядом героя победила короля демонов. Для её спутников это было делом всей жизни, для неё — коротким эпизодом. Спустя полвека, стоя у могилы героя, она впервые понимает, что так и не узнала людей, с которыми прошла полмира, и отправляется в путь, чтобы это исправить.</p>
+        <button type="button" style="margin-top: 10px; height: 36px; padding: 0; border: none; background: none; color: {{accent}}; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Читать дальше</button>
+      </div>
+
+      <section style="border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; overflow: hidden;">
+        <div style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <span style="width: 3px; height: 18px; border-radius: 2px; background: {{accent}};"></span>
+          <h2 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 17px; font-weight: 600; letter-spacing: -0.02em;">Серии</h2>
+          <span style="font-size: 13px; color: #8A94A4;">вышло 7 из 28</span>
+          <div style="margin-left: auto; display: flex; gap: 6px;">
+            <a href="Title.dc.html" style="display: inline-flex; align-items: center; height: 34px; padding: 0 12px; border-radius: 9px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: {{accent}}; font-size: 13px; font-weight: 600;">1—100</a>
+            <a href="Title.dc.html" style="display: inline-flex; align-items: center; height: 34px; padding: 0 12px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: #99A4B4;">101—200</a>
+            <a href="Title.dc.html" style="display: inline-flex; align-items: center; height: 34px; padding: 0 12px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: #99A4B4;">201—280</a>
+          </div>
+        </div>
+        <ol style="margin: 0; padding: 0; list-style: none;">
+          <sc-for list="{{episodes}}" as="e" hint-placeholder-count="7">
+            <li>
+              <a href="Watch.dc.html" style="display: flex; align-items: center; gap: 18px; height: 60px; padding: 0 18px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <span style="width: 40px; font-family: Unbounded, sans-serif; font-size: 15px; font-weight: 600; color: {{e.numColor}};">{{e.num}}</span>
+                <span style="width: 74px; height: 42px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.09); background: {{e.art}}; flex-shrink: 0;"></span>
+                <span style="flex-grow: 1; min-width: 0; font-size: 14px; color: {{e.nameColor}};">{{e.name}}</span>
+                <sc-if value="{{e.fresh}}" hint-placeholder-val="{{true}}"><span style="display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border-radius: 8px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: {{accent}}; font-size: 12px; font-weight: 600;">новая</span></sc-if>
+                <span style="width: 54px; text-align: right; font-size: 13px; color: #8A94A4;">{{e.dur}}</span>
+              </a>
+            </li>
+          </sc-for>
+        </ol>
+        <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 18px;">
+          <span style="font-size: 12px; color: #8A94A4;">Показаны 1—7 из 28. Остальные выйдут по расписанию, по четвергам.</span>
+          <a href="Watch.dc.html" style="display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); font-size: 14px; font-weight: 600;">Начать с первой</a>
+        </div>
+      </section>
+
+      <section style="border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; overflow: hidden;">
+        <div style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <span style="width: 3px; height: 18px; border-radius: 2px; background: rgba(255,255,255,0.26);"></span>
+          <h2 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 17px; font-weight: 600; letter-spacing: -0.02em;">Отзывы</h2>
+          <span style="font-size: 13px; color: #8A94A4;">2 от зрителей</span>
+          <a href="Auth.dc.html" style="margin-left: auto; display: inline-flex; align-items: center; height: 40px; padding: 0 16px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); font-size: 14px; font-weight: 600;">Написать отзыв</a>
+        </div>
+
+        <article style="padding: 18px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="width: 36px; height: 36px; border-radius: 999px; background: #4C4A63; border: 1px solid rgba(255,255,255,0.14);"></span>
+            <span style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-size: 14px; font-weight: 600;">Марина</span>
+              <span style="font-size: 12px; color: #8A94A4;">18 сентября, посмотрела 7 серий</span>
+            </span>
+            <span style="margin-left: auto; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px; border-radius: 10px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: {{accent}}; font-size: 13px; font-weight: 600;">9<span style="color: {{accentMuted}}; font-weight: 500;">её оценка</span></span>
+          </div>
+          <p style="margin: 12px 0 0; max-width: 72ch; font-size: 14px; line-height: 1.65; color: #C9D2DD;">Редкий случай, когда медленный темп — это приём, а не бюджет. Половина серии может уйти на разговор у костра, и именно из таких сцен потом собирается вся драма. Смотреть лучше по одной серии за вечер.</p>
+        </article>
+
+        <article style="padding: 18px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <span style="width: 36px; height: 36px; border-radius: 999px; background: #2F5148; border: 1px solid rgba(255,255,255,0.14);"></span>
+            <span style="display: flex; flex-direction: column; gap: 2px;">
+              <span style="font-size: 14px; font-weight: 600;">Тимур</span>
+              <span style="font-size: 12px; color: #8A94A4;">16 сентября, посмотрел 4 серии</span>
+            </span>
+            <span style="margin-left: auto; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px; border-radius: 10px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: {{accent}}; font-size: 13px; font-weight: 600;">7<span style="color: {{accentMuted}}; font-weight: 500;">его оценка</span></span>
+          </div>
+          <p style="margin: 12px 0 0; max-width: 72ch; font-size: 14px; line-height: 1.65; color: #C9D2DD;">Первые три серии держат, дальше темп проседает. Дочитал мангу и вернулся — с ней заходит лучше, но как самостоятельная вещь спорно.</p>
+          <button type="button" style="margin-top: 12px; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 12px; border-radius: 10px; border: 1px dashed rgba(255,255,255,0.20); background: none; color: #99A4B4; font-family: inherit; font-size: 13px; cursor: pointer;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width: 15px; height: 15px;"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"></path><path d="M4 4l16 16"></path></svg>
+            Показать абзац со спойлером
+          </button>
+        </article>
+      </section>
+    </div>
+  </div>
+
+  <footer style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.08); padding: 22px 32px; display: flex; gap: 40px; align-items: center;">
+    <p style="margin: 0; max-width: 70ch; font-size: 13px; line-height: 1.6; color: #8A94A4;">Видеофайлы мы не храним и не раздаём: воспроизведение идёт во фрейме сторонних поставщиков. По обращению правообладателя тайтл скрывается целиком.</p>
+    <nav style="margin-left: auto; display: flex; gap: 22px;">
+      <a href="Main.dc.html" style="font-size: 13px; color: #99A4B4;">Обращение правообладателя</a>
+      <a href="Main.dc.html" style="font-size: 13px; color: #99A4B4;">Соглашение</a>
+      <a href="Main.dc.html" style="font-size: 13px; color: #99A4B4;">Конфиденциальность</a>
+    </nav>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFB02E","options":["#FFB02E","#7CC4FF","#FF6B8A","#57D9A3"],"section":"Палитра"},"$preview":{"width":1440,"height":1560}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const hex = this.props.accent || '#FFB02E';
+    const s = hex.replace('#', '');
+    const r = parseInt(s.slice(0, 2), 16), g = parseInt(s.slice(2, 4), 16), b = parseInt(s.slice(4, 6), 16);
+    const art = [
+      '#453A5E',
+      '#2F5148',
+      '#3C2C4C',
+      '#2C4A50',
+      '#55384A',
+      '#3E4A2E',
+      '#414A63'
+    ];
+    const eps = [
+      ['01', 'Конец путешествия', '23:40', false],
+      ['02', 'Священная особа', '23:40', false],
+      ['03', 'Убийца магов', '23:40', false],
+      ['04', 'Желание души', '23:40', false],
+      ['05', 'Ужин на двоих', '23:40', false],
+      ['06', 'Аура Гильотина', '23:40', false],
+      ['07', 'Настоящий герой', '23:40', true]
+    ];
+    return {
+      accent: hex,
+      accentSoft: 'rgba(' + r + ', ' + g + ', ' + b + ', 0.14)',
+      accentLine: 'rgba(' + r + ', ' + g + ', ' + b + ', 0.34)',
+      accentMuted: 'rgb(' + Math.round(r * 0.45 + 237 * 0.55) + ', ' + Math.round(g * 0.45 + 241 * 0.55) + ', ' + Math.round(b * 0.45 + 247 * 0.55) + ')',
+      accentInk: '#17110A',
+      genres: ['Приключения', 'Драма', 'Фэнтези', 'Сёнэн', 'Магия', 'Путешествия'],
+      facts: [
+        { k: 'Студия', v: 'Madhouse' },
+        { k: 'Страна', v: 'Япония' },
+        { k: 'Сезон', v: 'осень 2023' },
+        { k: 'Возраст', v: '16+' },
+        { k: 'Выходит', v: 'по четвергам' }
+      ],
+      episodes: eps.map((e, i) => ({
+        num: e[0], name: e[1], dur: e[2], fresh: e[3],
+        numColor: e[3] ? hex : '#8A94A4',
+        nameColor: '#EDF1F7',
+        art: art[i % art.length]
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

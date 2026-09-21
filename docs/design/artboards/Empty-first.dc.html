@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Первое состояние обсуждения</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@600;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Golos Text',system-ui,sans-serif;background:#0B0E13;color:#EDF1F7}
+a{color:#EDF1F7;text-decoration:none;text-underline-offset:0.2em;text-decoration-thickness:from-font}
+a:hover{color:#FFFFFF}
+::selection{background:#4A3410;color:#FFFFFF}
+:root{caret-color:#FFB02E;scrollbar-color:#2A313D #0B0E13;scrollbar-width:thin}
+:focus-visible{outline:2px solid #FFB02E;outline-offset:2px}
+::placeholder{color:#8A94A4;opacity:1}
+</style>
+</helmet>
+
+<div style="width: 560px; height: 620px; background: #0B0E13; padding: 24px; display: flex; flex-direction: column; gap: 22px;">
+
+  <div>
+    <h1 style="margin: 0 0 12px; font-family: Unbounded, sans-serif; font-size: 17px; font-weight: 600; letter-spacing: -0.02em;">День запуска: комментариев ноль</h1>
+    <div style="border-radius: 16px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; padding: 20px;">
+      <p style="margin: 0; font-size: 16px; font-weight: 600;">Об этой серии ещё никто не написал</p>
+      <p style="margin: 8px 0 0; max-width: 46ch; font-size: 14px; line-height: 1.6; color: #99A4B4;">Первый комментарий увидят все, кто придёт за вами. Спойлеры прячьте кнопкой.</p>
+      <form style="margin-top: 14px; display: flex; flex-direction: column; gap: 12px;">
+        <label for="e-body" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">Комментарий</label>
+        <textarea id="e-body" rows="2" placeholder="Что думаете о серии?" style="width: 100%; min-height: 72px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(11,14,19,0.6); color: #EDF1F7; font-family: inherit; font-size: 15px; line-height: 1.55; resize: none;"></textarea>
+        <button type="submit" style="align-self: flex-start; height: 44px; padding: 0 20px; border-radius: 12px; border: none; background: {{accent}}; color: #17110A; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Написать первым</button>
+      </form>
+    </div>
+  </div>
+
+  <div>
+    <h2 style="margin: 0 0 12px; font-family: Unbounded, sans-serif; font-size: 17px; font-weight: 600; letter-spacing: -0.02em;">Тот же блок без входа</h2>
+    <div style="border-radius: 16px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; padding: 20px;">
+      <p style="margin: 0; font-size: 16px; font-weight: 600;">Комментарии пишут те, кто вошёл</p>
+      <p style="margin: 8px 0 0; max-width: 46ch; font-size: 14px; line-height: 1.6; color: #99A4B4;">Смотреть можно и так: вход нужен только чтобы подписать комментарий и вести списки.</p>
+      <div style="margin-top: 14px; display: flex; align-items: center; gap: 12px;">
+        <a href="Auth.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border-radius: 12px; background: {{accent}}; color: #17110A; font-size: 14px; font-weight: 600;">Войти</a>
+        <a href="Watch.dc.html" style="display: inline-flex; align-items: center; height: 44px; font-size: 14px; color: #99A4B4;">Вернуться к серии</a>
+      </div>
+    </div>
+  </div>
+
+  <p style="margin: auto 0 0; font-size: 12px; line-height: 1.55; color: #8A94A4;">Оба состояния обязательны к сдаче вместе с заполненным: на живом сайте сначала будет именно это, и счётчиков, которых нет, здесь не рисуется.</p>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFB02E","options":["#FFB02E","#7CC4FF","#FF6B8A","#57D9A3"],"section":"Палитра"},"$preview":{"width":560,"height":620}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { accent: this.props.accent || '#FFB02E' };
+  }
+}
+</script>
+</body>
+</html>

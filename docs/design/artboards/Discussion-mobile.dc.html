@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Обсуждение на телефоне — AnimeWatch</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@600;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Golos Text',system-ui,sans-serif;background:#0B0E13;color:#EDF1F7}
+a{color:#EDF1F7;text-decoration:none;text-underline-offset:0.2em;text-decoration-thickness:from-font}
+a:hover{color:#FFFFFF}
+::selection{background:#4A3410;color:#FFFFFF}
+:root{caret-color:#FFB02E;scrollbar-color:#2A313D #0B0E13;scrollbar-width:thin}
+:where(time,output,[data-numeric]){font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid #FFB02E;outline-offset:2px}
+::placeholder{color:#8A94A4;opacity:1}
+</style>
+</helmet>
+
+<div style="width: 390px; height: 1360px; background: #0B0E13; position: relative; display: flex; flex-direction: column;">
+
+  <header style="height: 56px; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: rgba(14,18,25,0.78); backdrop-filter: blur(20px) saturate(140%); border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <a href="Watch.dc.html" aria-label="К плееру" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px;"><svg viewBox="0 0 24 24" fill="none" stroke="#EDF1F7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 20px; height: 20px;"><path d="M14 6l-6 6 6 6"></path></svg></a>
+    <span style="display: flex; flex-direction: column; gap: 1px; min-width: 0;">
+      <span style="font-family: Unbounded, sans-serif; font-size: 15px; font-weight: 600; letter-spacing: -0.02em;">Обсуждение</span>
+      <span style="font-size: 11px; color: #8A94A4;">Фрирен, эпизод 05</span>
+    </span>
+    <span style="margin-left: auto; margin-right: 6px; font-size: 13px; color: #8A94A4;">24</span>
+  </header>
+
+  <div style="padding: 14px 16px 0; display: flex; gap: 8px;">
+    <a href="Discussion-mobile.dc.html" style="display: inline-flex; align-items: center; height: 40px; padding: 0 13px; border-radius: 12px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: {{accent}}; font-size: 13px; font-weight: 600;">сначала новые</a>
+    <a href="Discussion-mobile.dc.html" style="display: inline-flex; align-items: center; height: 40px; padding: 0 13px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: #99A4B4;">с ответами</a>
+  </div>
+
+  <form style="margin: 14px 16px 0; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.10); background: #14181F;">
+    <label for="dm-body" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">Комментарий к эпизоду</label>
+    <textarea id="dm-body" rows="2" placeholder="Что думаете о серии?" style="width: 100%; min-height: 68px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(11,14,19,0.6); color: #EDF1F7; font-family: inherit; font-size: 16px; line-height: 1.55; resize: none;"></textarea>
+    <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px;">
+      <button type="button" aria-label="Спрятать как спойлер" style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.05); cursor: pointer;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#C9D2DD" stroke-width="2" stroke-linecap="round" style="width: 17px; height: 17px;"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"></path><path d="M4 4l16 16"></path></svg>
+      </button>
+      <span style="font-size: 12px; color: #8A94A4;">Спойлеры прячьте кнопкой</span>
+      <button type="submit" style="margin-left: auto; height: 44px; padding: 0 18px; border-radius: 12px; border: none; background: {{accent}}; color: {{accentInk}}; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Отправить</button>
+    </div>
+  </form>
+
+  <div style="padding: 4px 16px 0;">
+    <sc-for list="{{comments}}" as="c" hint-placeholder-count="2">
+      <article style="padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.07);">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="width: 32px; height: 32px; border-radius: 999px; background: {{c.avatar}}; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0;"></span>
+          <span style="font-size: 14px; font-weight: 600;">{{c.name}}</span>
+          <span style="font-size: 11px; color: #8A94A4;">{{c.at}}</span>
+        </div>
+        <p style="margin: 10px 0 0; font-size: 15px; line-height: 1.6; color: #C9D2DD;">{{c.body}}</p>
+        <sc-if value="{{c.spoiler}}" hint-placeholder-val="{{true}}">
+          <button type="button" style="margin-top: 10px; display: inline-flex; align-items: center; gap: 9px; height: 44px; padding: 0 14px; border-radius: 12px; border: 1px dashed rgba(255,255,255,0.22); background: none; color: #99A4B4; font-family: inherit; font-size: 13px; cursor: pointer;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width: 15px; height: 15px;"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"></path><path d="M4 4l16 16"></path></svg>
+            Спойлер к финалу. Показать
+          </button>
+        </sc-if>
+        <div style="margin-top: 8px; display: flex; align-items: center; gap: 4px;">
+          <button type="button" style="height: 44px; padding: 0 12px; border-radius: 10px; border: none; background: none; color: #99A4B4; font-family: inherit; font-size: 13px; cursor: pointer;">Ответить</button>
+          <button type="button" style="height: 44px; padding: 0 12px; border-radius: 10px; border: none; background: none; color: #8A94A4; font-family: inherit; font-size: 13px; cursor: pointer;">Пожаловаться</button>
+        </div>
+        <sc-if value="{{c.reply}}" hint-placeholder-val="{{true}}">
+          <div style="margin: 12px 0 0 16px; padding-left: 16px; border-left: 1px solid rgba(255,255,255,0.12);">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="width: 28px; height: 28px; border-radius: 999px; background: #2F5148; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0;"></span>
+              <span style="font-size: 13px; font-weight: 600;">Тимур</span>
+              <span style="font-size: 11px; color: #8A94A4;">40 минут назад</span>
+            </div>
+            <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.6; color: #C9D2DD;">В манге эта сцена занимает две страницы, так что растянули осознанно.</p>
+          </div>
+        </sc-if>
+      </article>
+    </sc-for>
+
+    <button type="button" style="margin-top: 16px; width: 100%; height: 48px; border-radius: 13px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.05); color: #EDF1F7; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Показать ещё 18</button>
+  </div>
+
+  <section style="padding: 26px 16px 0;">
+    <div style="border-radius: 16px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; padding: 18px;">
+      <p style="margin: 0; font-size: 15px; font-weight: 600;">Оценить тайтл и написать отзыв</p>
+      <p style="margin: 8px 0 0; font-size: 13px; line-height: 1.55; color: #99A4B4;">Отзыв виден на странице тайтла и в вашем профиле. Оценка от 1 до 10, как на Shikimori.</p>
+      <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 6px;">
+        <sc-for list="{{scores}}" as="n" hint-placeholder-count="10">
+          <label style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid {{n.line}}; background: {{n.fill}}; color: {{n.color}}; font-size: 14px; font-weight: 600;"><input type="radio" name="rate-m" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">{{n.v}}</label>
+        </sc-for>
+      </div>
+      <button type="button" style="margin-top: 14px; width: 100%; height: 48px; border-radius: 13px; border: none; background: {{accent}}; color: {{accentInk}}; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer;">Написать отзыв</button>
+    </div>
+  </section>
+
+  <footer style="margin-top: auto; padding: 22px 16px 96px; border-top: 1px solid rgba(255,255,255,0.08);">
+    <p style="margin: 0; font-size: 12px; line-height: 1.55; color: #8A94A4;">Комментарии пишут зрители, их мнение не совпадает с нашим. Ссылки на другие площадки удаляются.</p>
+  </footer>
+
+  <nav style="position: absolute; left: 12px; right: 12px; bottom: 12px; height: 64px; display: flex; align-items: center; border-radius: 20px; border: 1px solid rgba(255,255,255,0.13); background: rgba(20,25,33,0.82); backdrop-filter: blur(26px) saturate(150%); box-shadow: 0 16px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.10);">
+    <a href="Home-mobile.dc.html" style="flex-grow: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #99A4B4;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" style="width: 19px; height: 19px;"><path d="M4 11l8-6 8 6v8H4z"></path></svg>
+      <span style="font-size: 11px;">Главная</span>
+    </a>
+    <a href="Catalog-mobile.dc.html" style="flex-grow: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #99A4B4;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" style="width: 19px; height: 19px;"><rect x="4" y="4" width="7" height="16" rx="1.5"></rect><rect x="13" y="4" width="7" height="9" rx="1.5"></rect></svg>
+      <span style="font-size: 11px;">Каталог</span>
+    </a>
+    <a href="Catalog-mobile.dc.html" style="flex-grow: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #99A4B4;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 19px; height: 19px;"><circle cx="11" cy="11" r="6"></circle><line x1="15.5" y1="15.5" x2="20" y2="20" stroke-linecap="round"></line></svg>
+      <span style="font-size: 11px;">Поиск</span>
+    </a>
+    <a href="Profile-mobile.dc.html" style="flex-grow: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #99A4B4;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width: 19px; height: 19px;"><circle cx="12" cy="9" r="3.4"></circle><path d="M5.5 19a6.5 6.5 0 0 1 13 0"></path></svg>
+      <span style="font-size: 11px;">Профиль</span>
+    </a>
+  </nav>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFB02E","options":["#FFB02E","#7CC4FF","#FF6B8A","#57D9A3"],"section":"Палитра"},"$preview":{"width":390,"height":1360}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const hex = this.props.accent || '#FFB02E';
+    const s = hex.replace('#', '');
+    const r = parseInt(s.slice(0, 2), 16), g = parseInt(s.slice(2, 4), 16), b = parseInt(s.slice(4, 6), 16);
+    const soft = 'rgba(' + r + ', ' + g + ', ' + b + ', 0.14)';
+    const line = 'rgba(' + r + ', ' + g + ', ' + b + ', 0.34)';
+    const picked = 9;
+    return {
+      accent: hex,
+      accentSoft: soft,
+      accentLine: line,
+      accentInk: '#17110A',
+      comments: [
+        {
+          name: 'Марина', at: '20 минут назад', avatar: '#4C4A63',
+          body: 'Сцена на кухне идёт почти четыре минуты без единой реплики, и это лучшее, что было в сезоне.',
+          spoiler: false, reply: true
+        },
+        {
+          name: 'Кей', at: 'час назад', avatar: '#2C4A50',
+          body: 'Саундтрек хороший, но в прошлой работе студии был сильнее. Картинка при этом заметно чище.',
+          spoiler: true, reply: false
+        }
+      ],
+      scores: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v) => ({
+        v: String(v),
+        fill: v === picked ? soft : 'transparent',
+        line: v === picked ? line : 'rgba(255,255,255,0.12)',
+        color: v === picked ? hex : '#C9D2DD'
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

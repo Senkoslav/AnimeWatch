@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Профиль — AnimeWatch</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@600;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Golos Text',system-ui,sans-serif;background:#0B0E13;color:#EDF1F7}
+a{color:#EDF1F7;text-decoration:none;text-underline-offset:0.2em;text-decoration-thickness:from-font}
+a:hover{color:#FFFFFF}
+::selection{background:#4A3410;color:#FFFFFF}
+:root{caret-color:#FFB02E;scrollbar-color:#2A313D #0B0E13;scrollbar-width:thin}
+:where(time,output,[data-numeric]){font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid #FFB02E;outline-offset:2px}
+::placeholder{color:#8A94A4;opacity:1}
+</style>
+</helmet>
+
+<div style="width: 1440px; height: 1560px; background: #0B0E13; display: flex; flex-direction: column;">
+
+  <header style="height: 64px; display: flex; align-items: center; gap: 24px; padding: 0 32px; background: rgba(14,18,25,0.72); backdrop-filter: blur(20px) saturate(140%); border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 7px; font-family: Unbounded, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.03em;">animewatch<span style="width: 6px; height: 6px; border-radius: 999px; background: {{accent}};"></span></a>
+    <nav style="display: flex; align-items: center; gap: 2px;">
+      <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; font-size: 14px; font-weight: 500; color: #99A4B4;">Каталог</a>
+      <a href="Main.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; font-size: 14px; font-weight: 500; color: #99A4B4;">Расписание</a>
+    </nav>
+    <a href="Profile.dc.html" style="margin-left: auto; display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 6px 0 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); font-size: 14px; font-weight: 600;">Ярослав<span style="width: 32px; height: 32px; border-radius: 999px; background: #4C4A63; border: 1px solid rgba(255,255,255,0.16);"></span></a>
+  </header>
+
+  <div style="padding: 30px 32px 0; display: grid; grid-template-columns: 296px minmax(0, 1fr); gap: 32px; align-items: start;">
+
+    <aside style="display: flex; flex-direction: column; gap: 18px;">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <span style="width: 72px; height: 72px; border-radius: 999px; background: #4C4A63; border: 1px solid rgba(255,255,255,0.16); flex-shrink: 0;"></span>
+        <span style="display: flex; flex-direction: column; gap: 5px; min-width: 0;">
+          <span style="font-family: Unbounded, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.03em;">Ярослав</span>
+          <span style="font-size: 13px; color: #8A94A4;">на сайте с 14 сентября 2026</span>
+        </span>
+      </div>
+
+      <dl style="margin: 0; border-top: 1px solid rgba(255,255,255,0.10);">
+        <sc-for list="{{facts}}" as="f" hint-placeholder-count="5">
+          <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 14px; padding: 11px 0; border-bottom: 1px solid rgba(255,255,255,0.07);">
+            <dt style="font-size: 13px; color: #99A4B4;">{{f.k}}</dt>
+            <dd style="margin: 0; font-size: 14px; font-weight: 600;">{{f.v}}</dd>
+          </div>
+        </sc-for>
+      </dl>
+
+      <div style="display: flex; flex-direction: column; gap: 10px;">
+        <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; justify-content: center; height: 48px; border-radius: 13px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); font-size: 14px; font-weight: 600;">Продолжить смотреть</a>
+        <a href="Profile.dc.html" style="display: inline-flex; align-items: center; justify-content: center; height: 44px; font-size: 13px; color: #99A4B4;">Настройки аккаунта</a>
+      </div>
+    </aside>
+
+    <div style="display: flex; flex-direction: column; gap: 34px;">
+
+      <section>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+          <span style="width: 3px; height: 18px; border-radius: 2px; background: rgba(255,255,255,0.26);"></span>
+          <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">Списки</h1>
+          <span style="font-size: 13px; color: #8A94A4;">156 тайтлов</span>
+        </div>
+        <div style="border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; padding: 24px; display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 32px; align-items: center;">
+
+          <div style="position: relative; width: 224px; height: 224px; justify-self: center;">
+            <svg viewBox="0 0 200 200" style="width: 224px; height: 224px; transform: rotate(-90deg);" role="img" aria-label="Распределение списков: просмотрено 96, запланировано 41, смотрю 12, брошено 7">
+              <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="22"></circle>
+              <sc-for list="{{ring}}" as="s" hint-placeholder-count="4">
+                <circle cx="100" cy="100" r="70" fill="none" stroke="{{s.color}}" stroke-width="22" stroke-dasharray="{{s.dash}}" stroke-dashoffset="{{s.offset}}"></circle>
+              </sc-for>
+            </svg>
+            <span style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;">
+              <span style="font-family: Unbounded, sans-serif; font-size: 30px; font-weight: 700; letter-spacing: -0.03em;">156</span>
+              <span style="font-size: 12px; color: #8A94A4;">в списках</span>
+            </span>
+            <span style="position: absolute; left: 186px; top: 36px; display: flex; flex-direction: column; gap: 3px; padding: 9px 12px; border-radius: 12px; background: rgba(22,27,36,0.94); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.16); box-shadow: 0 16px 36px rgba(0,0,0,0.55); white-space: nowrap;">
+              <span style="font-size: 12px; color: #99A4B4;">Просмотрено</span>
+              <span style="font-size: 14px; font-weight: 600;">96 тайтлов, 62 процента</span>
+            </span>
+          </div>
+
+          <table style="width: 100%; border-collapse: collapse;">
+            <caption style="text-align: left; font-size: 12px; color: #8A94A4; padding-bottom: 10px;">Отметки, которые вы поставили</caption>
+            <tbody>
+              <sc-for list="{{lists}}" as="l" hint-placeholder-count="4">
+                <tr style="border-top: 1px solid rgba(255,255,255,0.08);">
+                  <td style="padding: 12px 0; width: 22px;"><span style="display: block; width: 10px; height: 10px; border-radius: 3px; background: {{l.color}};"></span></td>
+                  <th scope="row" style="padding: 12px 0; text-align: left; font-size: 14px; font-weight: 500;">{{l.name}}</th>
+                  <td style="padding: 12px 0; text-align: right; font-size: 14px; font-weight: 600; width: 64px;">{{l.count}}</td>
+                  <td style="padding: 12px 0; text-align: right; font-size: 13px; color: #8A94A4; width: 64px;">{{l.share}}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+          <span style="width: 3px; height: 18px; border-radius: 2px; background: rgba(255,255,255,0.26);"></span>
+          <h2 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">Оценки</h2>
+          <span style="font-size: 13px; color: #8A94A4;">83 поставлено, средняя 7.9</span>
+        </div>
+        <div style="border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; padding: 24px 24px 18px;">
+          <div style="position: relative; height: 152px; display: flex; align-items: flex-end; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.12); padding-bottom: 0;">
+            <sc-for list="{{bars}}" as="b" hint-placeholder-count="10">
+              <span style="position: relative; width: 28px; display: flex; flex-direction: column; align-items: center; justify-content: flex-end;">
+                <sc-if value="{{b.peak}}" hint-placeholder-val="{{true}}"><span style="font-size: 12px; font-weight: 600; color: #C9D2DD; margin-bottom: 6px;">{{b.count}}</span></sc-if>
+                <span style="display: block; width: 28px; height: {{b.h}}; border-radius: 4px 4px 0 0; background: {{b.fill}};"></span>
+              </span>
+            </sc-for>
+            <span style="position: absolute; left: 276px; top: 0; bottom: 0; width: 1px; background: rgba(255,255,255,0.28);"></span>
+            <span style="position: absolute; left: 284px; top: 2px; font-size: 12px; color: #99A4B4;">средняя 7.9</span>
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 8px;">
+            <sc-for list="{{bars}}" as="b" hint-placeholder-count="10">
+              <span style="width: 28px; text-align: center; font-size: 12px; color: #8A94A4;">{{b.score}}</span>
+            </sc-for>
+          </div>
+          <p style="margin: 14px 0 0; font-size: 12px; color: #8A94A4;">Своя оценка от 1 до 10. Оценка Shikimori живёт отдельно и в это распределение не входит.</p>
+        </div>
+      </section>
+
+      <section style="display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+            <span style="width: 3px; height: 18px; border-radius: 2px; background: {{accent}};"></span>
+            <h2 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">Последнее</h2>
+          </div>
+          <div style="border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; overflow: hidden;">
+            <sc-for list="{{recent}}" as="r" hint-placeholder-count="4">
+              <a href="Title.dc.html" style="display: flex; align-items: center; gap: 14px; height: 66px; padding: 0 16px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+                <span style="width: 34px; height: 48px; border-radius: 7px; border: 1px solid rgba(255,255,255,0.09); background: {{r.art}}; flex-shrink: 0;"></span>
+                <span style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px;">
+                  <span style="font-size: 14px; font-weight: 500;">{{r.name}}</span>
+                  <span style="font-size: 12px; color: #8A94A4;">{{r.note}}</span>
+                </span>
+                <span style="display: inline-flex; align-items: center; gap: 7px; height: 28px; padding: 0 10px; border-radius: 9px; border: 1px solid {{r.line}}; color: {{r.color}}; font-size: 12px; font-weight: 600;"><span style="width: 7px; height: 7px; border-radius: 2px; background: {{r.color}};"></span>{{r.state}}</span>
+                <span style="width: 32px; text-align: right; font-size: 14px; font-weight: 600; color: {{r.rateColor}};">{{r.rate}}</span>
+              </a>
+            </sc-for>
+          </div>
+        </div>
+
+        <div>
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 14px;">
+            <span style="width: 3px; height: 18px; border-radius: 2px; background: rgba(255,255,255,0.26);"></span>
+            <h2 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 20px; font-weight: 600; letter-spacing: -0.02em;">Мои отзывы</h2>
+            <span style="font-size: 13px; color: #8A94A4;">3</span>
+          </div>
+          <div style="border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; overflow: hidden;">
+            <article style="padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+              <div style="display: flex; align-items: baseline; gap: 10px;">
+                <a href="Title.dc.html" style="font-size: 14px; font-weight: 600;">Фрирен</a>
+                <span style="margin-left: auto; font-size: 13px; font-weight: 600; color: {{accent}};">9</span>
+              </div>
+              <p style="margin: 8px 0 0; font-size: 13px; line-height: 1.6; color: #99A4B4;">Медленный темп здесь приём, а не бюджет. Смотреть по одной серии за вечер.</p>
+              <p style="margin: 8px 0 0; font-size: 12px; color: #8A94A4;">18 сентября</p>
+            </article>
+            <article style="padding: 16px;">
+              <div style="display: flex; align-items: baseline; gap: 10px;">
+                <a href="Title.dc.html" style="font-size: 14px; font-weight: 600;">Дандадан</a>
+                <span style="margin-left: auto; font-size: 13px; font-weight: 600; color: {{accent}};">8</span>
+              </div>
+              <p style="margin: 8px 0 0; font-size: 13px; line-height: 1.6; color: #99A4B4;">Первый эпизод задаёт тон, дальше держится на монтаже. Озвучка догоняет с задержкой в неделю.</p>
+              <p style="margin: 8px 0 0; font-size: 12px; color: #8A94A4;">11 сентября</p>
+            </article>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <footer style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.08); padding: 22px 32px; display: flex; gap: 40px; align-items: center;">
+    <p style="margin: 0; max-width: 70ch; font-size: 13px; line-height: 1.6; color: #8A94A4;">Списки, оценки и отзывы живут в аккаунте и переживают смену устройства. Видеофайлы мы не храним и не раздаём.</p>
+    <nav style="margin-left: auto; display: flex; gap: 22px;">
+      <a href="Main.dc.html" style="font-size: 13px; color: #99A4B4;">Обращение правообладателя</a>
+      <a href="Main.dc.html" style="font-size: 13px; color: #99A4B4;">Соглашение</a>
+      <a href="Main.dc.html" style="font-size: 13px; color: #99A4B4;">Конфиденциальность</a>
+    </nav>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFB02E","options":["#FFB02E","#7CC4FF","#FF6B8A","#57D9A3"],"section":"Палитра"},"$preview":{"width":1440,"height":1560}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const hex = this.props.accent || '#FFB02E';
+    const s = hex.replace('#', '');
+    const r = parseInt(s.slice(0, 2), 16), g = parseInt(s.slice(2, 4), 16), b = parseInt(s.slice(4, 6), 16);
+
+    // Палитра диаграммы своя и не зависит от акцента: четыре опознаваемых цвета,
+    // проверенные на тёмной поверхности и на три вида дальтонизма.
+    const SERIES = { watching: '#C98500', planned: '#3987e5', done: '#199e70', dropped: '#d95926' };
+    const C = 2 * Math.PI * 70;
+    const counts = [['done', 96], ['planned', 41], ['watching', 12], ['dropped', 7]];
+    const total = counts.reduce((a, c) => a + c[1], 0);
+    let start = 0;
+    const ring = counts.map((c) => {
+      const len = (c[1] / total) * C;
+      const seg = { color: SERIES[c[0]], dash: (len - 2).toFixed(1) + ' ' + (C - len + 2).toFixed(1), offset: (-start).toFixed(1) };
+      start += len;
+      return seg;
+    });
+
+    const raw = [0, 0, 1, 2, 3, 7, 14, 26, 21, 9];
+    const max = Math.max.apply(null, raw);
+    const bars = raw.map((n, i) => ({
+      score: String(i + 1),
+      count: String(n),
+      peak: n === max,
+      h: n === 0 ? '2px' : Math.round((n / max) * 120) + 'px',
+      fill: n === 0 ? 'rgba(255,255,255,0.14)' : hex
+    }));
+
+    const art = ['#453A5E', '#2F5148', '#5A3327', '#2C4A50'];
+    const recent = [
+      ['Провожающая в последний путь Фрирен', 'серия 7 из 28, вчера', 'смотрю', SERIES.watching, '9'],
+      ['Дандадан', 'серия 5 из 12, 3 дня назад', 'смотрю', SERIES.watching, '8'],
+      ['Человек-бензопила', 'досмотрено 12 из 12, неделю назад', 'просмотрено', SERIES.done, '8'],
+      ['Синий оркестр', 'остановился на 4 серии', 'брошено', SERIES.dropped, '5']
+    ];
+
+    return {
+      accent: hex,
+      accentSoft: 'rgba(' + r + ', ' + g + ', ' + b + ', 0.14)',
+      accentLine: 'rgba(' + r + ', ' + g + ', ' + b + ', 0.34)',
+      accentMuted: 'rgb(' + Math.round(r * 0.45 + 237 * 0.55) + ', ' + Math.round(g * 0.45 + 241 * 0.55) + ', ' + Math.round(b * 0.45 + 247 * 0.55) + ')',
+      ring: ring,
+      lists: [
+        { name: 'Просмотрено', count: '96', share: '62 %', color: SERIES.done },
+        { name: 'Запланировано', count: '41', share: '26 %', color: SERIES.planned },
+        { name: 'Смотрю', count: '12', share: '8 %', color: SERIES.watching },
+        { name: 'Брошено', count: '7', share: '4 %', color: SERIES.dropped }
+      ],
+      bars: bars,
+      facts: [
+        { k: 'В списках', v: '156' },
+        { k: 'Серий просмотрено', v: '1 284' },
+        { k: 'Часов просмотра', v: '512' },
+        { k: 'Средняя оценка', v: '7.9' },
+        { k: 'Отзывов', v: '3' }
+      ],
+      recent: recent.map((x, i) => ({
+        name: x[0], note: x[1], state: x[2], color: x[3], rate: x[4],
+        line: x[3] + '66',
+        rateColor: hex,
+        art: art[i % art.length]
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

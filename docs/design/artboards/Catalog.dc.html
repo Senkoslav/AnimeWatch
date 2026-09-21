@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Каталог — AnimeWatch</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@600;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Golos Text',system-ui,sans-serif;background:#0B0E13;color:#EDF1F7}
+a{color:#EDF1F7;text-decoration:none;text-underline-offset:0.2em;text-decoration-thickness:from-font}
+a:hover{color:#FFFFFF}
+::selection{background:#4A3410;color:#FFFFFF}
+:root{caret-color:#FFB02E;scrollbar-color:#2A313D #0B0E13;scrollbar-width:thin}
+:where(time,output,[data-numeric]){font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid #FFB02E;outline-offset:2px}
+::placeholder{color:#8A94A4;opacity:1}
+</style>
+</helmet>
+
+<div style="width: 1440px; height: 1520px; background: #0B0E13; display: flex; flex-direction: column;">
+
+  <header style="height: 64px; display: flex; align-items: center; gap: 24px; padding: 0 32px; background: rgba(14,18,25,0.72); backdrop-filter: blur(20px) saturate(140%); border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 7px; font-family: Unbounded, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.03em;">animewatch<span style="width: 6px; height: 6px; border-radius: 999px; background: {{accent}};"></span></a>
+    <nav style="display: flex; align-items: center; gap: 2px;">
+      <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; background: rgba(255,255,255,0.07); font-size: 14px; font-weight: 600; color: #EDF1F7;">Каталог</a>
+      <a href="Main.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; font-size: 14px; font-weight: 500; color: #99A4B4;">Расписание</a>
+      <a href="Main.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; font-size: 14px; font-weight: 500; color: #99A4B4;">Случайное</a>
+    </nav>
+    <form style="margin-left: auto; position: relative; width: 320px;">
+      <label for="cat-hdr-q" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">Поиск аниме</label>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#8A94A4" stroke-width="2" style="position: absolute; left: 12px; top: 12px; width: 18px; height: 18px;"><circle cx="11" cy="11" r="6"></circle><line x1="15.5" y1="15.5" x2="20" y2="20" stroke-linecap="round"></line></svg>
+      <input id="cat-hdr-q" type="search" placeholder="Название, студия, жанр" style="width: 100%; height: 42px; padding: 0 60px 0 38px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.05); color: #EDF1F7; font-family: inherit; font-size: 14px;">
+      <span style="position: absolute; right: 10px; top: 11px; height: 20px; padding: 0 7px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.14); font-size: 11px; line-height: 19px; color: #8A94A4;">Ctrl K</span>
+    </form>
+    <a href="Auth.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); font-size: 14px; font-weight: 600;">Войти</a>
+  </header>
+
+  <div style="padding: 26px 32px 0; display: flex; align-items: flex-end; gap: 16px;">
+    <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 28px; font-weight: 700; letter-spacing: -0.03em;">Каталог</h1>
+    <p style="margin: 0 0 4px; font-size: 14px; color: #8A94A4;">348 тайтлов, 11 240 серий</p>
+    <div style="margin-left: auto; display: flex; gap: 8px;">
+      <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 10px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: {{accent}}; font-size: 13px; font-weight: 600;">Онгоинги</a>
+      <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: #C9D2DD;">Топ сезона</a>
+      <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: #C9D2DD;">Популярное</a>
+      <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; height: 38px; padding: 0 14px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: #C9D2DD;">Фильмы</a>
+    </div>
+  </div>
+
+  <div style="padding: 20px 32px 0; display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 24px; align-items: start;">
+
+    <form style="border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; overflow: hidden;">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <span style="font-family: Unbounded, sans-serif; font-size: 14px; font-weight: 600;">Отбор</span>
+        <a href="Catalog.dc.html" style="font-size: 13px; color: #8A94A4;">Сбросить</a>
+      </div>
+
+      <div style="padding: 16px; display: flex; flex-direction: column; gap: 20px;">
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <label for="f-q" style="font-size: 13px; font-weight: 500; color: #C9D2DD;">Название</label>
+          <input id="f-q" type="search" placeholder="Например, Фрирен" style="width: 100%; height: 44px; padding: 0 14px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.12); background: rgba(11,14,19,0.55); color: #EDF1F7; font-family: inherit; font-size: 14px;">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 500; color: #C9D2DD;">Жанр</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <sc-for list="{{genres}}" as="g" hint-placeholder-count="9">
+              <label style="display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid {{g.line}}; background: {{g.fill}}; color: {{g.color}}; font-size: 13px; font-weight: 500; cursor: pointer;">
+                <input type="checkbox" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">{{g.name}}
+              </label>
+            </sc-for>
+            <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 10px; font-size: 13px; color: #8A94A4;">ещё 18</a>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 500; color: #C9D2DD;">Год выхода</span>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <label for="f-y1" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">Год от</label>
+            <select id="f-y1" style="flex-grow: 1; height: 44px; padding: 0 12px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.12); background: rgba(11,14,19,0.55); color: #EDF1F7; font-family: inherit; font-size: 14px; appearance: none;"><option>2018</option></select>
+            <span style="font-size: 13px; color: #8A94A4;">—</span>
+            <label for="f-y2" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">Год до</label>
+            <select id="f-y2" style="flex-grow: 1; height: 44px; padding: 0 12px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.12); background: rgba(11,14,19,0.55); color: #EDF1F7; font-family: inherit; font-size: 14px; appearance: none;"><option>2026</option></select>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 500; color: #C9D2DD;">Статус</span>
+          <div style="display: flex; padding: 4px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.10); background: rgba(11,14,19,0.5); gap: 4px;">
+            <label style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; height: 36px; border-radius: 9px; font-size: 13px; color: #99A4B4; cursor: pointer;"><input type="radio" name="status" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">Любой</label>
+            <label style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; height: 36px; border-radius: 9px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: {{accent}}; font-size: 13px; font-weight: 600; cursor: pointer;"><input type="radio" name="status" checked style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">Выходит</label>
+            <label style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; height: 36px; border-radius: 9px; font-size: 13px; color: #99A4B4; cursor: pointer;"><input type="radio" name="status" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">Вышло</label>
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 500; color: #C9D2DD;">Тип</span>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+            <label style="display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: #C9D2DD; cursor: pointer;"><input type="checkbox" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">ТВ-сериал</label>
+            <label style="display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: #C9D2DD; cursor: pointer;"><input type="checkbox" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">Фильм</label>
+            <label style="display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: #C9D2DD; cursor: pointer;"><input type="checkbox" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">OVA</label>
+            <label style="display: inline-flex; align-items: center; height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: #C9D2DD; cursor: pointer;"><input type="checkbox" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">ONA</label>
+          </div>
+        </div>
+
+        <button type="submit" style="height: 48px; border-radius: 13px; border: none; background: {{accent}}; color: {{accentInk}}; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer;">Показать 348</button>
+      </div>
+    </form>
+
+    <div>
+      <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
+        <span style="font-size: 14px; color: #99A4B4;">Показано 1–15 из 348</span>
+        <div style="display: flex; gap: 8px; margin-left: 16px;">
+          <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px 0 12px; border-radius: 9px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); font-size: 13px;">Выходит<svg viewBox="0 0 16 16" fill="none" stroke="#8A94A4" stroke-width="2" stroke-linecap="round" style="width: 13px; height: 13px;"><path d="M4 4l8 8M12 4l-8 8"></path></svg></a>
+          <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px 0 12px; border-radius: 9px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); font-size: 13px;">2018—2026<svg viewBox="0 0 16 16" fill="none" stroke="#8A94A4" stroke-width="2" stroke-linecap="round" style="width: 13px; height: 13px;"><path d="M4 4l8 8M12 4l-8 8"></path></svg></a>
+        </div>
+        <div style="margin-left: auto; display: flex; align-items: center; gap: 10px;">
+          <label for="f-sort" style="font-size: 13px; color: #8A94A4;">Сортировка</label>
+          <select id="f-sort" style="height: 38px; padding: 0 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); color: #EDF1F7; font-family: inherit; font-size: 13px; appearance: none;"><option>по популярности</option></select>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px;">
+        <sc-for list="{{cards}}" as="item" hint-placeholder-count="15">
+          <a href="Title.dc.html" style="display: flex; flex-direction: column; gap: 10px;">
+            <span style="position: relative; display: block; aspect-ratio: 2 / 3; border-radius: 13px; overflow: hidden; border: 1px solid rgba(255,255,255,0.09); background: {{item.art}};">
+              <span style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11,14,19,0) 58%, rgba(11,14,19,0.8));"></span>
+              <span style="position: absolute; left: 9px; top: 9px; display: inline-flex; align-items: center; height: 24px; padding: 0 8px; border-radius: 7px; background: rgba(11,14,19,0.6); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.16); font-size: 12px; font-weight: 600; color: #FFFFFF;">{{item.score}}</span>
+              <span style="position: absolute; left: 9px; bottom: 8px; font-size: 12px; color: #C9D2DD;">{{item.ep}}</span>
+            </span>
+            <span style="font-size: 13px; line-height: 1.35; font-weight: 500; height: 36px; overflow: hidden;">{{item.name}}</span>
+            <span style="display: flex; align-items: center; justify-content: space-between; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; color: #8A94A4;">{{item.meta}}<span style="color: {{item.stateColor}};">{{item.state}}</span></span>
+          </a>
+        </sc-for>
+      </div>
+
+      <div style="margin-top: 24px; display: flex; align-items: center; gap: 8px;">
+        <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; padding: 0 12px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.12); font-size: 14px; color: #8A94A4;">Назад</a>
+        <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; border-radius: 11px; background: {{accent}}; color: {{accentInk}}; font-size: 14px; font-weight: 600;">1</a>
+        <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.12); font-size: 14px;">2</a>
+        <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.12); font-size: 14px;">3</a>
+        <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; font-size: 14px; color: #8A94A4;">…</span>
+        <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.12); font-size: 14px;">24</a>
+        <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 44px; padding: 0 12px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.12); font-size: 14px;">Дальше</a>
+        <p style="margin: 0 0 0 auto; font-size: 12px; color: #8A94A4;">Числа на постерах — оценка Shikimori.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.08); padding: 22px 32px; display: flex; gap: 40px; align-items: center;">
+    <p style="margin: 0; max-width: 70ch; font-size: 13px; line-height: 1.6; color: #8A94A4;">AnimeWatch — каталог аниме. Видеофайлы мы не храним и не раздаём: воспроизведение идёт во фрейме сторонних поставщиков.</p>
+    <nav style="margin-left: auto; display: flex; gap: 22px;">
+      <a href="Main.dc.html" style="font-size: 13px; color: #99A4B4;">Обращение правообладателя</a>
+      <a href="Main.dc.html" style="font-size: 13px; color: #99A4B4;">Соглашение</a>
+      <a href="Main.dc.html" style="font-size: 13px; color: #99A4B4;">Конфиденциальность</a>
+    </nav>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFB02E","options":["#FFB02E","#7CC4FF","#FF6B8A","#57D9A3"],"section":"Палитра"},"$preview":{"width":1440,"height":1520}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const hex = this.props.accent || '#FFB02E';
+    const s = hex.replace('#', '');
+    const r = parseInt(s.slice(0, 2), 16), g = parseInt(s.slice(2, 4), 16), b = parseInt(s.slice(4, 6), 16);
+    const soft = 'rgba(' + r + ', ' + g + ', ' + b + ', 0.14)';
+    const line = 'rgba(' + r + ', ' + g + ', ' + b + ', 0.34)';
+    const art = [
+      '#453A5E',
+      '#2F5148',
+      '#3C2C4C',
+      '#5A3327',
+      '#2C4A50',
+      '#55384A',
+      '#3E4A2E',
+      '#414A63'
+    ];
+    const picked = ['Драма', 'Сёнэн'];
+    const genres = ['Экшен', 'Драма', 'Комедия', 'Фэнтези', 'Сёнэн', 'Романтика', 'Спорт', 'Меха', 'Детектив'].map((name) => ({
+      name: name,
+      fill: picked.indexOf(name) >= 0 ? soft : 'transparent',
+      line: picked.indexOf(name) >= 0 ? line : 'rgba(255,255,255,0.12)',
+      color: picked.indexOf(name) >= 0 ? hex : '#C9D2DD'
+    }));
+    const names = [
+      ['Провожающая в последний путь Фрирен', '9.12', '7 из 28', '2023, ТВ', 'выходит'],
+      ['Магическая битва', '8.64', '24 серии', '2020, ТВ', 'вышло'],
+      ['Клинок, рассекающий демонов', '8.51', '3 из 12', '2019, ТВ', 'выходит'],
+      ['Человек-бензопила', '8.42', '12 серий', '2022, ТВ', 'вышло'],
+      ['Дандадан', '8.33', '5 из 12', '2024, ТВ', 'выходит'],
+      ['Атака титанов', '9.02', '25 серий', '2013, ТВ', 'вышло'],
+      ['Стальной алхимик: Братство', '9.31', '64 серии', '2009, ТВ', 'вышло'],
+      ['Ван-Пис', '8.58', '1178 серий', '1999, ТВ', 'выходит'],
+      ['Синий оркестр', '8.05', '9 из 24', '2023, ТВ', 'выходит'],
+      ['Госпожа Кагуя', '8.21', '12 серий', '2019, ТВ', 'вышло'],
+      ['Апофеоз', '7.88', '2 из 13', '2025, ТВ', 'выходит'],
+      ['Тетрадь смерти', '8.62', '37 серий', '2006, ТВ', 'вышло'],
+      ['Унесённые призраками', '9.05', 'фильм', '2001, фильм', 'вышло'],
+      ['Твоё имя', '8.84', 'фильм', '2016, фильм', 'вышло'],
+      ['Ковбой Бибоп', '8.77', '26 серий', '1998, ТВ', 'вышло']
+    ];
+    return {
+      accent: hex,
+      accentSoft: soft,
+      accentLine: line,
+      accentMuted: 'rgb(' + Math.round(r * 0.45 + 237 * 0.55) + ', ' + Math.round(g * 0.45 + 241 * 0.55) + ', ' + Math.round(b * 0.45 + 247 * 0.55) + ')',
+      accentInk: '#17110A',
+      genres: genres,
+      cards: names.map((n, i) => ({
+        name: n[0], score: n[1], ep: n[2], meta: n[3], state: n[4],
+        stateColor: n[4] === 'выходит' ? hex : '#8A94A4',
+        art: art[i % art.length]
+      }))
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Вход на телефоне — AnimeWatch</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@600;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Golos Text',system-ui,sans-serif;background:#0B0E13;color:#EDF1F7}
+a{color:#EDF1F7;text-decoration:none;text-underline-offset:0.2em;text-decoration-thickness:from-font}
+a:hover{color:#FFFFFF}
+::selection{background:#4A3410;color:#FFFFFF}
+:root{caret-color:#FFB02E;scrollbar-color:#2A313D #0B0E13;scrollbar-width:thin}
+:where(time,output,[data-numeric]){font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid #FFB02E;outline-offset:2px}
+::placeholder{color:#8A94A4;opacity:1}
+</style>
+</helmet>
+
+<div style="width: 390px; height: 844px; background: #0B0E13; position: relative; overflow: hidden;">
+
+  <div style="position: absolute; inset: 0; display: flex; flex-direction: column;">
+    <header style="height: 56px; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: rgba(14,18,25,0.78); border-bottom: 1px solid rgba(255,255,255,0.08);">
+      <span style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center;"><svg viewBox="0 0 24 24" fill="none" stroke="#EDF1F7" stroke-width="2" stroke-linecap="round" style="width: 20px; height: 20px;"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></span>
+      <span style="display: flex; align-items: center; gap: 6px; font-family: Unbounded, sans-serif; font-weight: 700; font-size: 16px; letter-spacing: -0.03em;">animewatch<span style="width: 5px; height: 5px; border-radius: 999px; background: {{accent}};"></span></span>
+    </header>
+    <div style="padding: 14px 16px;">
+      <span style="display: block; aspect-ratio: 16 / 9; border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: #5A3327;"></span>
+      <p style="margin: 14px 0 0; font-family: Unbounded, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.03em;">Человек-бензопила</p>
+      <div style="margin-top: 16px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px;">
+        <span style="display: block; aspect-ratio: 2 / 3; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: #453A5E;"></span>
+        <span style="display: block; aspect-ratio: 2 / 3; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: #2F5148;"></span>
+        <span style="display: block; aspect-ratio: 2 / 3; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: #3C2C4C;"></span>
+      </div>
+    </div>
+  </div>
+
+  <div style="position: absolute; inset: 0; background: rgba(8,10,14,0.7); backdrop-filter: blur(9px) saturate(115%);"></div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; border-radius: 26px 26px 0 0; border: 1px solid rgba(255,255,255,0.15); border-bottom: none; background: rgba(21,26,35,0.9); backdrop-filter: blur(34px) saturate(160%); box-shadow: 0 -20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.13);">
+    <div style="display: flex; justify-content: center; padding: 10px 0 2px;"><span style="width: 42px; height: 4px; border-radius: 999px; background: rgba(255,255,255,0.22);"></span></div>
+
+    <div style="padding: 14px 20px 0; display: flex; align-items: flex-start; gap: 12px;">
+      <div style="flex-grow: 1; min-width: 0;">
+        <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 21px; line-height: 1.15; font-weight: 700; letter-spacing: -0.03em;">Вход в AnimeWatch</h1>
+        <p style="margin: 9px 0 0; font-size: 14px; line-height: 1.5; color: #99A4B4;">Каталог и просмотр работают без аккаунта. Вход нужен, чтобы сайт помнил вас.</p>
+      </div>
+      <button type="button" aria-label="Закрыть" style="width: 44px; height: 44px; flex-shrink: 0; margin-top: -4px; display: inline-flex; align-items: center; justify-content: center; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(255,255,255,0.05); cursor: pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="#C9D2DD" stroke-width="2" stroke-linecap="round" style="width: 16px; height: 16px;"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    </div>
+
+    <div style="padding: 18px 20px 0;">
+      <button type="button" style="width: 100%; height: 54px; display: inline-flex; align-items: center; justify-content: center; gap: 12px; border-radius: 15px; border: none; background: #FFFFFF; color: #16181D; font-family: inherit; font-size: 16px; font-weight: 600; cursor: pointer;">
+        <span style="width: 24px; height: 24px; border-radius: 999px; border: 1px solid rgba(0,0,0,0.14); display: inline-flex; align-items: center; justify-content: center; font-family: Unbounded, sans-serif; font-size: 12px; font-weight: 700;">G</span>
+        Продолжить с Google
+      </button>
+      <div style="margin-top: 12px; display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: 14px; background: {{accentSoft}}; border: 1px solid {{accentLine}};">
+        <svg viewBox="0 0 24 24" fill="none" stroke="{{accent}}" stroke-width="2" stroke-linecap="round" style="width: 17px; height: 17px; flex-shrink: 0; margin-top: 1px;"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16h0.01"></path></svg>
+        <p style="margin: 0; font-size: 13px; line-height: 1.45; color: {{accentMuted}};">Вход ещё подключается: ключи Google пока не выданы.</p>
+      </div>
+    </div>
+
+    <div style="padding: 18px 20px 0;">
+      <div style="border-radius: 16px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; overflow: hidden;">
+        <sc-for list="{{benefits}}" as="b" hint-placeholder-count="3">
+          <div style="display: flex; align-items: center; gap: 16px; height: 52px; padding: 0 14px; border-bottom: 1px solid rgba(255,255,255,0.06);">
+            <span style="flex-grow: 1; min-width: 0; font-size: 14px;">{{b.name}}</span>
+            <span style="font-size: 12px; color: #8A94A4;">{{b.note}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+    <div style="padding: 16px 20px 26px;">
+      <p style="margin: 0; font-size: 12px; line-height: 1.5; color: #8A94A4;">Отдельной регистрации нет: первый вход через Google создаёт аккаунт. Продолжая, вы принимаете <a href="Auth-mobile.dc.html" style="color: #C9D2DD; border-bottom: 1px solid rgba(255,255,255,0.25);">соглашение</a> и <a href="Auth-mobile.dc.html" style="color: #C9D2DD; border-bottom: 1px solid rgba(255,255,255,0.25);">политику конфиденциальности</a>.</p>
+      <a href="Auth-mobile.dc.html" style="margin-top: 8px; display: inline-flex; align-items: center; height: 44px; font-size: 13px; color: #99A4B4; border-bottom: 1px solid rgba(255,255,255,0.18);">Открыть отдельной страницей</a>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFB02E","options":["#FFB02E","#7CC4FF","#FF6B8A","#57D9A3"],"section":"Палитра"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const hex = this.props.accent || '#FFB02E';
+    const s = hex.replace('#', '');
+    const r = parseInt(s.slice(0, 2), 16), g = parseInt(s.slice(2, 4), 16), b = parseInt(s.slice(4, 6), 16);
+    return {
+      accent: hex,
+      accentSoft: 'rgba(' + r + ', ' + g + ', ' + b + ', 0.13)',
+      accentLine: 'rgba(' + r + ', ' + g + ', ' + b + ', 0.32)',
+      accentMuted: 'rgb(' + Math.round(r * 0.45 + 237 * 0.55) + ', ' + Math.round(g * 0.45 + 241 * 0.55) + ', ' + Math.round(b * 0.45 + 247 * 0.55) + ')',
+      benefits: [
+        { mark: '01', name: 'Списки', note: 'смотрю, брошено' },
+        { mark: '02', name: 'Оценки', note: 'своя от 1 до 10' },
+        { mark: '03', name: 'Прогресс', note: 'на всех устройствах' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Обсуждение эпизода — AnimeWatch</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@600;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Golos Text',system-ui,sans-serif;background:#0B0E13;color:#EDF1F7}
+a{color:#EDF1F7;text-decoration:none;text-underline-offset:0.2em;text-decoration-thickness:from-font}
+a:hover{color:#FFFFFF}
+::selection{background:#4A3410;color:#FFFFFF}
+:root{caret-color:#FFB02E;scrollbar-color:#2A313D #0B0E13;scrollbar-width:thin}
+:where(time,output,[data-numeric]){font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid #FFB02E;outline-offset:2px}
+::placeholder{color:#8A94A4;opacity:1}
+</style>
+</helmet>
+
+<div style="width: 1440px; height: 1300px; background: #0B0E13; display: flex; flex-direction: column;">
+
+  <header style="height: 64px; display: flex; align-items: center; gap: 24px; padding: 0 32px; background: rgba(14,18,25,0.72); backdrop-filter: blur(20px) saturate(140%); border-bottom: 1px solid rgba(255,255,255,0.08);">
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 7px; font-family: Unbounded, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.03em;">animewatch<span style="width: 6px; height: 6px; border-radius: 999px; background: {{accent}};"></span></a>
+    <nav style="display: flex; align-items: center; gap: 2px;">
+      <a href="Catalog.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; font-size: 14px; font-weight: 500; color: #99A4B4;">Каталог</a>
+      <a href="Main.dc.html" style="display: inline-flex; align-items: center; height: 44px; padding: 0 14px; border-radius: 10px; font-size: 14px; font-weight: 500; color: #99A4B4;">Расписание</a>
+    </nav>
+    <a href="Profile.dc.html" style="margin-left: auto; display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 6px 0 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.06); font-size: 14px; font-weight: 600;">Ярослав<span style="width: 32px; height: 32px; border-radius: 999px; background: #4C4A63; border: 1px solid rgba(255,255,255,0.16);"></span></a>
+  </header>
+
+  <div style="padding: 20px 32px 0;">
+    <a href="Watch.dc.html" style="display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.10); background: #14181F;">
+      <span style="width: 96px; height: 54px; border-radius: 9px; border: 1px solid rgba(255,255,255,0.10); background: #453A5E; flex-shrink: 0;"></span>
+      <span style="display: flex; flex-direction: column; gap: 4px; min-width: 0;">
+        <span style="font-size: 14px; font-weight: 600;">Провожающая в последний путь Фрирен</span>
+        <span style="font-size: 13px; color: #8A94A4;">эпизод 05, Ужин на двоих</span>
+      </span>
+      <span style="margin-left: auto; display: inline-flex; align-items: center; gap: 9px; height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14); font-size: 14px; font-weight: 600;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px;"><path d="M14 6l-6 6 6 6"></path></svg>
+        Вернуться к плееру
+      </span>
+    </a>
+  </div>
+
+  <div style="padding: 26px 32px 0; display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 32px; align-items: start;">
+
+    <div>
+      <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 16px;">
+        <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 22px; font-weight: 700; letter-spacing: -0.03em;">Обсуждение эпизода</h1>
+        <span style="font-size: 13px; color: #8A94A4;">24 комментария</span>
+        <div style="margin-left: auto; display: flex; gap: 6px;">
+          <a href="Discussion.dc.html" style="display: inline-flex; align-items: center; height: 36px; padding: 0 13px; border-radius: 10px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: {{accent}}; font-size: 13px; font-weight: 600;">сначала новые</a>
+          <a href="Discussion.dc.html" style="display: inline-flex; align-items: center; height: 36px; padding: 0 13px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.12); font-size: 13px; color: #99A4B4;">с ответами</a>
+        </div>
+      </div>
+
+      <form style="display: flex; gap: 14px; padding: 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.10); background: #14181F;">
+        <span style="width: 40px; height: 40px; border-radius: 999px; background: #4C4A63; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0;"></span>
+        <div style="flex-grow: 1; min-width: 0; display: flex; flex-direction: column; gap: 12px;">
+          <label for="d-body" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">Комментарий к эпизоду</label>
+          <textarea id="d-body" rows="2" placeholder="Что думаете о серии? Спойлеры спрячьте кнопкой ниже." style="width: 100%; min-height: 76px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(11,14,19,0.6); color: #EDF1F7; font-family: inherit; font-size: 15px; line-height: 1.55; resize: none;"></textarea>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <button type="button" style="display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 13px; border-radius: 11px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.05); color: #C9D2DD; font-family: inherit; font-size: 13px; cursor: pointer;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width: 15px; height: 15px;"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"></path><path d="M4 4l16 16"></path></svg>
+              Спрятать как спойлер
+            </button>
+            <span style="font-size: 12px; color: #8A94A4;">Осталось 1 800 знаков</span>
+            <button type="submit" style="margin-left: auto; height: 44px; padding: 0 20px; border-radius: 12px; border: none; background: {{accent}}; color: {{accentInk}}; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Отправить</button>
+          </div>
+        </div>
+      </form>
+
+      <div style="margin-top: 8px;">
+        <sc-for list="{{comments}}" as="c" hint-placeholder-count="3">
+          <article style="padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.07);">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span style="width: 36px; height: 36px; border-radius: 999px; background: {{c.avatar}}; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0;"></span>
+              <span style="font-size: 14px; font-weight: 600;">{{c.name}}</span>
+              <span style="font-size: 12px; color: #8A94A4;">{{c.at}}</span>
+              <span style="display: inline-flex; align-items: center; height: 26px; padding: 0 9px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.12); font-size: 12px; color: #99A4B4;">{{c.progress}}</span>
+            </div>
+            <p style="margin: 11px 0 0 48px; max-width: 70ch; font-size: 15px; line-height: 1.65; color: #C9D2DD;">{{c.body}}</p>
+            <sc-if value="{{c.spoiler}}" hint-placeholder-val="{{true}}">
+              <button type="button" style="margin: 11px 0 0 48px; display: inline-flex; align-items: center; gap: 9px; height: 40px; padding: 0 14px; border-radius: 11px; border: 1px dashed rgba(255,255,255,0.22); background: none; color: #99A4B4; font-family: inherit; font-size: 13px; cursor: pointer;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="width: 15px; height: 15px;"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"></path><path d="M4 4l16 16"></path></svg>
+                Здесь спойлер к финалу. Показать
+              </button>
+            </sc-if>
+            <div style="margin: 11px 0 0 48px; display: flex; align-items: center; gap: 6px;">
+              <button type="button" style="height: 40px; padding: 0 12px; border-radius: 10px; border: none; background: none; color: #99A4B4; font-family: inherit; font-size: 13px; cursor: pointer;">Ответить</button>
+              <button type="button" style="height: 40px; padding: 0 12px; border-radius: 10px; border: none; background: none; color: #8A94A4; font-family: inherit; font-size: 13px; cursor: pointer;">Пожаловаться</button>
+            </div>
+
+            <sc-if value="{{c.reply}}" hint-placeholder-val="{{true}}">
+              <div style="margin: 14px 0 0 48px; padding: 16px 0 0 20px; border-left: 1px solid rgba(255,255,255,0.12);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <span style="width: 32px; height: 32px; border-radius: 999px; background: #2F5148; border: 1px solid rgba(255,255,255,0.14); flex-shrink: 0;"></span>
+                  <span style="font-size: 14px; font-weight: 600;">Тимур</span>
+                  <span style="font-size: 12px; color: #8A94A4;">40 минут назад</span>
+                </div>
+                <p style="margin: 10px 0 0 44px; max-width: 68ch; font-size: 14px; line-height: 1.65; color: #C9D2DD;">В манге эта сцена занимает две страницы, так что растянули её осознанно. И правильно сделали.</p>
+              </div>
+            </sc-if>
+          </article>
+        </sc-for>
+
+        <button type="button" style="margin-top: 18px; width: 100%; height: 48px; border-radius: 13px; border: 1px solid rgba(255,255,255,0.14); background: rgba(255,255,255,0.05); color: #EDF1F7; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer;">Показать ещё 18 комментариев</button>
+      </div>
+    </div>
+
+    <aside style="display: flex; flex-direction: column; gap: 24px;">
+      <div style="border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; overflow: hidden;">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <span style="width: 3px; height: 18px; border-radius: 2px; background: {{accent}};"></span>
+          <h2 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 15px; font-weight: 600; letter-spacing: -0.02em;">Ваш отзыв на тайтл</h2>
+        </div>
+        <div style="padding: 16px;">
+          <p style="margin: 0 0 12px; font-size: 13px; color: #99A4B4;">Оценка от 1 до 10, как на Shikimori</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <sc-for list="{{scores}}" as="n" hint-placeholder-count="10">
+              <label style="width: 44px; height: 44px; display: inline-flex; align-items: center; justify-content: center; border-radius: 11px; border: 1px solid {{n.line}}; background: {{n.fill}}; color: {{n.color}}; font-size: 14px; font-weight: 600; cursor: pointer;"><input type="radio" name="rate" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%);">{{n.v}}</label>
+            </sc-for>
+          </div>
+          <label for="d-review" style="display: block; margin-top: 16px; font-size: 13px; color: #99A4B4;">Коротко, чем зацепило</label>
+          <textarea id="d-review" rows="3" placeholder="Отзыв виден на странице тайтла и в вашем профиле" style="margin-top: 8px; width: 100%; min-height: 92px; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: rgba(11,14,19,0.6); color: #EDF1F7; font-family: inherit; font-size: 14px; line-height: 1.55; resize: none;"></textarea>
+          <button type="submit" style="margin-top: 12px; width: 100%; height: 48px; border-radius: 13px; border: none; background: {{accent}}; color: {{accentInk}}; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer;">Опубликовать отзыв</button>
+        </div>
+      </div>
+
+      <div style="border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; overflow: hidden;">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 14px 16px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+          <span style="width: 3px; height: 18px; border-radius: 2px; background: rgba(255,255,255,0.26);"></span>
+          <h2 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 15px; font-weight: 600; letter-spacing: -0.02em;">Как здесь принято</h2>
+        </div>
+        <dl style="margin: 0; padding: 4px 16px 14px;">
+          <sc-for list="{{rules}}" as="r" hint-placeholder-count="3">
+            <div style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);">
+              <dt style="font-size: 13px; font-weight: 600;">{{r.k}}</dt>
+              <dd style="margin: 5px 0 0; font-size: 13px; line-height: 1.55; color: #99A4B4;">{{r.v}}</dd>
+            </div>
+          </sc-for>
+        </dl>
+      </div>
+    </aside>
+  </div>
+
+  <footer style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.08); padding: 22px 32px; display: flex; gap: 40px; align-items: center;">
+    <p style="margin: 0; max-width: 70ch; font-size: 13px; line-height: 1.6; color: #8A94A4;">Комментарии пишут зрители, их мнение не совпадает с нашим. Видеофайлы мы не храним и не раздаём.</p>
+    <nav style="margin-left: auto; display: flex; gap: 22px;">
+      <a href="Main.dc.html" style="font-size: 13px; color: #99A4B4;">Обращение правообладателя</a>
+      <a href="Main.dc.html" style="font-size: 13px; color: #99A4B4;">Соглашение</a>
+      <a href="Main.dc.html" style="font-size: 13px; color: #99A4B4;">Конфиденциальность</a>
+    </nav>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFB02E","options":["#FFB02E","#7CC4FF","#FF6B8A","#57D9A3"],"section":"Палитра"},"$preview":{"width":1440,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const hex = this.props.accent || '#FFB02E';
+    const s = hex.replace('#', '');
+    const r = parseInt(s.slice(0, 2), 16), g = parseInt(s.slice(2, 4), 16), b = parseInt(s.slice(4, 6), 16);
+    const soft = 'rgba(' + r + ', ' + g + ', ' + b + ', 0.14)';
+    const line = 'rgba(' + r + ', ' + g + ', ' + b + ', 0.34)';
+    const picked = 9;
+    return {
+      accent: hex,
+      accentSoft: soft,
+      accentLine: line,
+      accentInk: '#17110A',
+      accentMuted: 'rgb(' + Math.round(r * 0.45 + 237 * 0.55) + ', ' + Math.round(g * 0.45 + 241 * 0.55) + ', ' + Math.round(b * 0.45 + 247 * 0.55) + ')',
+      comments: [
+        {
+          name: 'Марина', at: '20 минут назад', progress: 'смотрит 5 серию', avatar: '#4C4A63',
+          body: 'Сцена на кухне идёт почти четыре минуты без единой реплики, и это лучшее, что было в сезоне. Хотелось бы такой же выдержки в экшен-эпизодах.',
+          spoiler: false, reply: true
+        },
+        {
+          name: 'Кей', at: 'час назад', progress: 'досмотрел тайтл', avatar: '#2C4A50',
+          body: 'Не понял восторгов по поводу саундтрека: он хороший, но в предыдущей работе студии был сильнее. Картинка при этом заметно чище.',
+          spoiler: true, reply: false
+        },
+        {
+          name: 'Аня', at: '3 часа назад', progress: 'смотрит 5 серию', avatar: '#5A3327',
+          body: 'Пришла из каталога по жанру и залипла. Подскажите, после какой серии становится понятно, стоит ли продолжать?',
+          spoiler: false, reply: false
+        }
+      ],
+      scores: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v) => ({
+        v: String(v),
+        fill: v === picked ? soft : 'transparent',
+        line: v === picked ? line : 'rgba(255,255,255,0.12)',
+        color: v === picked ? hex : '#C9D2DD'
+      })),
+      rules: [
+        { k: 'Спойлеры прячем', v: 'Кнопка скрывает текст до нажатия. Открытый спойлер модератор скроет за вас.' },
+        { k: 'Ссылки на другие площадки удаляются', v: 'Это требование к нам как к каталогу, а не придирка к вам.' },
+        { k: 'Правообладателю — не сюда', v: 'Обращение идёт через форму на странице «Обращение правообладателя» и рассматривается отдельно.' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

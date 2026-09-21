@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Токены и компоненты — AnimeWatch</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Unbounded:wght@600;700&display=swap">
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:'Golos Text',system-ui,sans-serif;background:#0B0E13;color:#EDF1F7}
+a{color:#EDF1F7;text-decoration:none;text-underline-offset:0.2em;text-decoration-thickness:from-font}
+a:hover{color:#FFFFFF}
+::selection{background:#4A3410;color:#FFFFFF}
+:root{caret-color:#FFB02E;scrollbar-color:#2A313D #0B0E13;scrollbar-width:thin}
+:where(time,output,[data-numeric]){font-variant-numeric:tabular-nums}
+:focus-visible{outline:2px solid #FFB02E;outline-offset:2px}
+::placeholder{color:#8A94A4;opacity:1}
+</style>
+</helmet>
+
+<div style="width: 1280px; height: 1680px; background: #0B0E13; padding: 44px 48px; display: flex; flex-direction: column; gap: 36px;">
+
+  <div style="display: flex; align-items: flex-end; gap: 24px;">
+    <div>
+      <h1 style="margin: 0; font-family: Unbounded, sans-serif; font-size: 34px; font-weight: 700; letter-spacing: -0.035em;">Ночное стекло</h1>
+      <p style="margin: 10px 0 0; max-width: 78ch; font-size: 15px; line-height: 1.6; color: #99A4B4;">Холодная графитовая база, один янтарный сигнал и стекло только там, где слой действительно висит над содержимым: шапка, модалка, панель отбора, подложка плеера. Цвет на страницу по-прежнему приносят постеры.</p>
+    </div>
+    <span style="margin-left: auto; display: inline-flex; align-items: center; gap: 9px; height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid {{accentLine}}; background: {{accentSoft}}; color: {{accent}}; font-size: 13px; font-weight: 600;">оба сброса проверены: без backdrop-filter и при prefers-reduced-transparency</span>
+  </div>
+
+  <section>
+    <h2 style="margin: 0 0 16px; font-family: Unbounded, sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.02em;">Палитра</h2>
+    <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px;">
+      <sc-for list="{{swatches}}" as="s" hint-placeholder-count="12">
+        <div style="border-radius: 14px; border: 1px solid rgba(255,255,255,0.10); overflow: hidden;">
+          <span style="display: block; height: 68px; background: {{s.fill}};"></span>
+          <span style="display: block; padding: 10px 12px 12px; background: rgba(255,255,255,0.03);">
+            <span style="display: block; font-size: 13px; font-weight: 600;">{{s.name}}</span>
+            <span style="display: block; margin-top: 3px; font-size: 12px; color: #8A94A4;">{{s.hex}}</span>
+            <span style="display: block; margin-top: 6px; font-size: 11px; line-height: 1.4; color: #8A94A4;">{{s.use}}</span>
+          </span>
+        </div>
+      </sc-for>
+    </div>
+  </section>
+
+  <section>
+    <h2 style="margin: 0 0 16px; font-family: Unbounded, sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.02em;">Стекло: три уровня и ни одним больше</h2>
+    <div style="position: relative; border-radius: 18px; overflow: hidden; border: 1px solid rgba(255,255,255,0.10); padding: 26px;">
+      <div style="position: absolute; inset: 0; background: #433A5E;"></div>
+      <div style="position: absolute; inset: 0; background: rgba(11,14,19,0.55);"></div>
+      <div style="position: relative; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px;">
+        <div style="border-radius: 14px; padding: 18px; background: rgba(14,18,25,0.72); backdrop-filter: blur(20px) saturate(140%); border: 1px solid rgba(255,255,255,0.08);">
+          <p style="margin: 0; font-size: 14px; font-weight: 600;">Уровень 1 — хром</p>
+          <p style="margin: 8px 0 0; font-size: 12px; line-height: 1.5; color: #C9D2DD;">blur 20, saturate 140, фон 72 процента. Липкая шапка, нижняя панель на телефоне, строка статуса под плеером.</p>
+        </div>
+        <div style="border-radius: 14px; padding: 18px; background: rgba(255,255,255,0.055); backdrop-filter: blur(18px) saturate(140%); border: 1px solid rgba(255,255,255,0.10); box-shadow: inset 0 1px 0 rgba(255,255,255,0.09);">
+          <p style="margin: 0; font-size: 14px; font-weight: 600;">Уровень 2 — панель</p>
+          <p style="margin: 8px 0 0; font-size: 12px; line-height: 1.5; color: #C9D2DD;">Светлая плёнка поверх подложки. Отбор, блок оценки, список серий рядом с плеером. Сверху волосяной блик.</p>
+        </div>
+        <div style="border-radius: 14px; padding: 18px; background: rgba(22,27,36,0.86); backdrop-filter: blur(34px) saturate(160%); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 30px 70px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.14);">
+          <p style="margin: 0; font-size: 14px; font-weight: 600;">Уровень 3 — модалка</p>
+          <p style="margin: 8px 0 0; font-size: 12px; line-height: 1.5; color: #C9D2DD;">Единственное место с тенью. Вход, нижний лист фильтров, меню профиля. Под ним затемнение 72 процента.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: 1fr 1fr; gap: 28px;">
+    <div>
+      <h2 style="margin: 0 0 16px; font-family: Unbounded, sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.02em;">Шрифт</h2>
+      <div style="border-radius: 16px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; padding: 20px;">
+        <p style="margin: 0; font-size: 12px; color: #8A94A4;">Unbounded 700 — заголовки, номера, логотип</p>
+        <p style="margin: 8px 0 0; font-family: Unbounded, sans-serif; font-size: 40px; line-height: 1.05; font-weight: 700; letter-spacing: -0.035em;">Фрирен 09</p>
+        <p style="margin: 22px 0 0; font-size: 12px; color: #8A94A4;">Golos Text 400 и 500 — весь остальной текст</p>
+        <p style="margin: 8px 0 0; font-size: 16px; line-height: 1.6; color: #C9D2DD;">Волшебница прожила больше тысячи лет и впервые собралась узнать людей, с которыми прошла полмира.</p>
+        <p style="margin: 18px 0 0; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; line-height: 1.6; color: #8A94A4;">Шкала 11 / 12 / 13 / 14 / 15 / 17 / 20 / 24 / 30 / 40. Межстрочный 1.5 для текста, 1.05 для дисплейных. Ни один заголовок не набирается капслоком, ни одно слово в заголовке не красится отдельно.</p>
+      </div>
+    </div>
+    <div>
+      <h2 style="margin: 0 0 16px; font-family: Unbounded, sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.02em;">Радиусы и плотность</h2>
+      <div style="border-radius: 16px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; padding: 20px; display: flex; flex-direction: column; gap: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <span style="width: 54px; height: 54px; border-radius: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);"></span>
+          <span style="width: 54px; height: 54px; border-radius: 14px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);"></span>
+          <span style="width: 54px; height: 54px; border-radius: 20px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);"></span>
+          <span style="width: 54px; height: 54px; border-radius: 26px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);"></span>
+          <span style="width: 54px; height: 54px; border-radius: 999px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);"></span>
+        </div>
+        <p style="margin: 0; font-size: 12px; line-height: 1.6; color: #8A94A4;">10 поля и мелкие кнопки, 14 карточки и крупные кнопки, 20 постеры и плеер, 26 модалка и нижний лист, 999 только аватар. Границы всегда 1 пиксель, тень одна — у третьего уровня стекла.</p>
+        <p style="margin: 0; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); font-size: 12px; line-height: 1.6; color: #8A94A4;">Тач-цель не меньше 44 на 44 везде, включая ссылки в подвале. Шаг сетки 4, поля страницы 16 на телефоне и 32 на десктопе.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2 style="margin: 0 0 16px; font-family: Unbounded, sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.02em;">Компоненты</h2>
+    <div style="border-radius: 18px; border: 1px solid rgba(255,255,255,0.10); background: #14181F; padding: 24px; display: flex; flex-direction: column; gap: 22px;">
+
+      <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+        <button type="button" style="height: 50px; padding: 0 22px; border-radius: 14px; border: none; background: {{accent}}; color: {{accentInk}}; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer;">Смотреть</button>
+        <button type="button" style="height: 50px; padding: 0 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.07); color: #EDF1F7; font-family: inherit; font-size: 15px; font-weight: 600; cursor: pointer;">В список</button>
+        <button type="button" style="height: 50px; padding: 0 20px; border-radius: 14px; border: none; background: none; color: #99A4B4; font-family: inherit; font-size: 15px; cursor: pointer;">Отмена</button>
+        <button type="button" disabled style="height: 50px; padding: 0 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.10); background: rgba(255,255,255,0.03); color: #8A94A4; font-family: inherit; font-size: 15px; font-weight: 600;">Вход подключается</button>
+        <span style="width: 1px; height: 36px; background: rgba(255,255,255,0.10);"></span>
+        <span style="display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 10px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: {{accent}}; font-size: 13px; font-weight: 600;"><span style="width: 6px; height: 6px; border-radius: 999px; background: {{accent}};"></span>новая</span>
+        <span style="display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px; border-radius: 10px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: {{accent}}; font-size: 13px; font-weight: 600;">9.12<span style="color: {{accentMuted}}; font-weight: 500;">Shikimori</span></span>
+        <span style="display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 10px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); font-size: 13px; color: #C9D2DD;">2023, ТВ-сериал</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 300px 260px 1fr; gap: 22px; align-items: start;">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <label for="tok-input" style="font-size: 13px; font-weight: 500; color: #C9D2DD;">Поле ввода</label>
+          <input id="tok-input" type="search" placeholder="Например, Фрирен" style="height: 48px; padding: 0 14px; border-radius: 13px; border: 1px solid rgba(255,255,255,0.12); background: rgba(11,14,19,0.6); color: #EDF1F7; font-family: inherit; font-size: 15px;">
+          <span style="height: 48px; padding: 0 14px; border-radius: 13px; border: 1px solid {{accent}}; background: rgba(11,14,19,0.6); color: #EDF1F7; font-size: 15px; display: flex; align-items: center; outline: 2px solid {{accentLine}}; outline-offset: 2px;">в фокусе</span>
+          <span style="font-size: 12px; color: #8A94A4;">Фокус — янтарная рамка плюс обводка, видна на любом фоне.</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <span style="font-size: 13px; font-weight: 500; color: #C9D2DD;">Переключатель</span>
+          <div style="display: flex; padding: 4px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.10); background: rgba(11,14,19,0.55); gap: 4px;">
+            <span style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; height: 40px; border-radius: 11px; font-size: 13px; color: #99A4B4;">Любой</span>
+            <span style="flex-grow: 1; display: inline-flex; align-items: center; justify-content: center; height: 40px; border-radius: 11px; background: {{accentSoft}}; border: 1px solid {{accentLine}}; color: {{accent}}; font-size: 13px; font-weight: 600;">Выходит</span>
+          </div>
+          <span style="font-size: 12px; color: #8A94A4;">Собран из радиокнопок: работает без JavaScript, состояние уходит в адрес.</span>
+        </div>
+
+        <div style="display: flex; gap: 18px;">
+          <div style="width: 220px; border-radius: 18px; border: 1px solid rgba(255,255,255,0.13); background: rgba(22,27,36,0.9); backdrop-filter: blur(30px); box-shadow: 0 24px 60px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.12); overflow: hidden;">
+            <div style="display: flex; align-items: center; gap: 11px; padding: 13px 14px; border-bottom: 1px solid rgba(255,255,255,0.08);">
+              <span style="width: 34px; height: 34px; border-radius: 999px; background: #4C4A63; border: 1px solid rgba(255,255,255,0.14);"></span>
+              <span style="display: flex; flex-direction: column; gap: 2px; min-width: 0;"><span style="font-size: 13px; font-weight: 600;">Ярослав</span><span style="font-size: 11px; color: #8A94A4;">аккаунт Google</span></span>
+            </div>
+            <a href="Tokens.dc.html" style="display: flex; align-items: center; height: 44px; padding: 0 14px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05);">Мои списки</a>
+            <a href="Tokens.dc.html" style="display: flex; align-items: center; height: 44px; padding: 0 14px; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.05);">Оценки</a>
+            <a href="Tokens.dc.html" style="display: flex; align-items: center; height: 44px; padding: 0 14px; font-size: 13px; color: #99A4B4;">Выйти</a>
+          </div>
+          <div style="flex-grow: 1; display: flex; flex-direction: column; gap: 10px;">
+            <span style="font-size: 13px; font-weight: 500; color: #C9D2DD;">Пустое состояние</span>
+            <div style="border-radius: 16px; border: 1px dashed rgba(255,255,255,0.14); background: #14181F; padding: 20px;">
+              <p style="margin: 0; font-size: 15px; font-weight: 600;">Здесь появятся серии, которые вы начали смотреть</p>
+              <p style="margin: 8px 0 0; font-size: 13px; line-height: 1.55; color: #99A4B4;">Пустое зовёт в каталог и не извиняется. Ошибка называет, что случилось и что делать: «Источник для этой серии ещё не подключён», а не «Ошибка загрузки».</p>
+              <a href="Catalog.dc.html" style="margin-top: 12px; display: inline-flex; align-items: center; height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.06); font-size: 14px; font-weight: 600;">В каталог</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section style="margin-top: auto;">
+    <h2 style="margin: 0 0 14px; font-family: Unbounded, sans-serif; font-size: 18px; font-weight: 600; letter-spacing: -0.02em;">Три закона мира</h2>
+    <dl style="margin: 0; border-top: 1px solid rgba(255,255,255,0.10);">
+      <div style="display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <dt style="font-size: 14px; font-weight: 600;">Янтарь означает «сейчас»</dt>
+        <dd style="margin: 0; font-size: 13px; line-height: 1.6; color: #99A4B4;">Свежая серия, играющая строка, оценка, текущий фильтр, заполненная часть полосы. Появился там, где ничего не происходит, — это ошибка, а не украшение.</dd>
+      </div>
+      <div style="display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <dt style="font-size: 14px; font-weight: 600;">Стекло только над содержимым</dt>
+        <dd style="margin: 0; font-size: 13px; line-height: 1.6; color: #99A4B4;">Слой размывает то, что под ним реально есть: постер, кадр, прокрученную выдачу. Панель отбора, карточка оценки и список серий стоят на плотной поверхности — им размывать нечего.</dd>
+      </div>
+      <div style="display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 24px; padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+        <dt style="font-size: 14px; font-weight: 600;">Движение ограничено слоями</dt>
+        <dd style="margin: 0; font-size: 13px; line-height: 1.6; color: #99A4B4;">Двигаются только модалка и нижний лист: 180 миллисекунд, затухающее ускорение из уже видимого состояния. Карточки не растут, секции не выплывают, цифры не крутятся.</dd>
+      </div>
+    </dl>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"accent":{"editor":"color","default":"#FFB02E","options":["#FFB02E","#7CC4FF","#FF6B8A","#57D9A3"],"section":"Палитра"},"$preview":{"width":1280,"height":1680}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const hex = this.props.accent || '#FFB02E';
+    const s = hex.replace('#', '');
+    const r = parseInt(s.slice(0, 2), 16), g = parseInt(s.slice(2, 4), 16), b = parseInt(s.slice(4, 6), 16);
+    return {
+      accent: hex,
+      accentSoft: 'rgba(' + r + ', ' + g + ', ' + b + ', 0.14)',
+      accentLine: 'rgba(' + r + ', ' + g + ', ' + b + ', 0.34)',
+      accentMuted: 'rgb(' + Math.round(r * 0.45 + 237 * 0.55) + ', ' + Math.round(g * 0.45 + 241 * 0.55) + ', ' + Math.round(b * 0.45 + 247 * 0.55) + ')',
+      accentInk: '#17110A',
+      swatches: [
+        { name: 'bg', hex: '#0B0E13', fill: '#0B0E13', use: 'фон страницы, холодный графит' },
+        { name: 'surface', hex: '#161B23', fill: '#161B23', use: 'сплошная подложка там, где стекла нет' },
+        { name: 'glass', hex: 'white 5%', fill: 'rgba(255,255,255,0.05)', use: 'плёнка панелей второго уровня' },
+        { name: 'line', hex: 'white 10%', fill: 'rgba(255,255,255,0.10)', use: 'все границы, всегда 1 пиксель' },
+        { name: 'text', hex: '#EDF1F7', fill: '#EDF1F7', use: '16.8 к 1 на фоне' },
+        { name: 'text-2', hex: '#C9D2DD', fill: '#C9D2DD', use: 'абзацы на стекле, 12 к 1' },
+        { name: 'muted', hex: '#99A4B4', fill: '#99A4B4', use: 'вторичный текст, 7.6 к 1' },
+        { name: 'dim', hex: '#8A94A4', fill: '#8A94A4', use: 'подписи 11 и 12 пикселей, 6.3 к 1' },
+        { name: 'accent', hex: '#FFB02E', fill: '#FFB02E', use: 'сигнал «сейчас», 10.4 к 1' },
+        { name: 'accent-ink', hex: '#17110A', fill: '#17110A', use: 'текст на янтарной кнопке, 11 к 1' },
+        { name: 'accent 14%', hex: 'янтарь 14%', fill: 'rgba(255,176,46,0.14)', use: 'заливка активного состояния' },
+        { name: 'danger', hex: '#FF6B6B', fill: '#FF6B6B', use: 'только ошибки формы' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
