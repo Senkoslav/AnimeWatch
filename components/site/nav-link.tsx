@@ -14,8 +14,9 @@ export function NavLink({ href, children }: { href: Route; children: ReactNode }
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      // Активный пункт — подчёркивание, не янтарь: янтарь только у того, что идёт прямо сейчас.
-      className="inline-flex min-h-11 items-center rounded-sm px-2 text-sm text-muted decoration-2 underline-offset-8 hover:text-text aria-[current=page]:text-text aria-[current=page]:underline"
+      // Активный пункт — светлая пилюля, не янтарь: раздел это место, а не то, что происходит
+      // сейчас, и заливка сигналом здесь обесценила бы сам сигнал (docs/04, «Токены»).
+      className="inline-flex min-h-11 items-center rounded-sm px-3.5 text-sm font-medium text-muted hover:bg-fill hover:text-text aria-[current=page]:bg-fill aria-[current=page]:text-text"
     >
       {children}
     </Link>

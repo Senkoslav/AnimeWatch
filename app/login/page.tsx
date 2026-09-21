@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { Band } from "@/components/ui/band";
+import { button, TEXT_LINK } from "@/components/ui/controls";
+import { SectionHeading } from "@/components/ui/section-heading";
 
 export const metadata: Metadata = {
   title: "Вход",
@@ -25,9 +26,12 @@ const BENEFITS = [
 export default function LoginPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-6 md:py-10">
-      <div className="overflow-hidden rounded-md border border-line bg-surface md:grid md:grid-cols-[1fr_1fr]">
+      {/* Плотная поверхность: страница входа стоит на пустом фоне, размывать ей нечего. */}
+      <div className="overflow-hidden rounded-lg border border-line bg-surface md:grid md:grid-cols-[1fr_1fr]">
         <section className="border-b border-line md:border-r md:border-b-0">
-          <Band>Зачем аккаунт</Band>
+          <div className="border-b border-line px-4 py-3 md:px-6">
+            <SectionHeading>Зачем аккаунт</SectionHeading>
+          </div>
           <div className="p-4 md:p-6">
             <p className="max-w-[38ch] text-muted">
               Каталог, поиск и просмотр работают без входа. Аккаунт нужен, чтобы сайт помнил вас — и ни для чего больше.
@@ -45,23 +49,18 @@ export default function LoginPage() {
         </section>
 
         <section>
-          <Band as="h1">Вход в аккаунт</Band>
+          <div className="border-b border-line px-4 py-3 md:px-6">
+            <SectionHeading as="h1">Вход в аккаунт</SectionHeading>
+          </div>
           <div className="p-4 md:p-6">
             {configured ? (
               // Ссылка, а не кнопка: уход на сторону Google — это переход, и он обязан работать без JS.
-              <a
-                href="/api/auth/google"
-                className="inline-flex min-h-11 w-full items-center justify-center rounded-sm bg-text px-5 font-medium text-bg hover:bg-muted"
-              >
+              <a href="/api/auth/google" className={`${button()} w-full`}>
                 Войти через Google
               </a>
             ) : (
               <>
-                <button
-                  type="button"
-                  disabled
-                  className="inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center rounded-sm border border-line bg-bg px-5 font-medium text-muted"
-                >
+                <button type="button" disabled className={`${button("disabled")} w-full`}>
                   Войти через Google
                 </button>
                 {/* Говорим, что произошло и что делать, а не «ошибка». */}
@@ -76,17 +75,17 @@ export default function LoginPage() {
             </p>
             <p className="mt-3 text-sm text-muted">
               Входя, вы соглашаетесь с{" "}
-              <Link href="/terms" className="text-text underline">
+              <Link href="/terms" className={TEXT_LINK}>
                 пользовательским соглашением
               </Link>{" "}
               и{" "}
-              <Link href="/privacy" className="text-text underline">
+              <Link href="/privacy" className={TEXT_LINK}>
                 политикой конфиденциальности
               </Link>
               .
             </p>
             <p className="mt-6">
-              <Link href="/" className="text-sm text-muted underline hover:text-text">
+              <Link href="/" className="inline-flex min-h-11 items-center text-sm text-dim underline hover:text-text">
                 Вернуться в каталог
               </Link>
             </p>

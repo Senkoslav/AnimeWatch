@@ -3,8 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
-import { PlayerSlot } from "@/components/watch/player-slot";
 import { EpisodeList } from "@/components/title/episode-list";
+import { button } from "@/components/ui/controls";
+import { PlayerSlot } from "@/components/watch/player-slot";
 import { formatEpisodeNumber } from "@/lib/format";
 import { TitleKind } from "@/lib/generated/prisma/enums";
 import { getWatchPage } from "@/lib/queries/watch";
@@ -52,35 +53,27 @@ export default async function WatchPage({ params }: PageProps<"/anime/[slug]/[ep
           <div className="space-y-2 px-4 sm:px-0">
             <Link
               href={titleHref(title.slug)}
-              className="inline-flex min-h-11 items-center text-sm text-muted underline"
+              className="inline-flex min-h-11 items-center text-sm text-dim underline hover:text-text"
             >
               {title.nameRu}
             </Link>
-            <h1 className="text-xl leading-tight font-semibold">
+            <h1 className="font-display text-xl leading-tight font-bold tracking-tight">
               {isMovie ? title.nameRu : `Эпизод ${formatEpisodeNumber(episode.number)}`}
             </h1>
-            {!isMovie && episode.name && <p className="text-muted">{episode.name}</p>}
+            {!isMovie && episode.name && <p className="text-text-2">{episode.name}</p>}
           </div>
 
           {(previous || next) && (
             <nav aria-label="Соседние серии" className="flex justify-between gap-4 px-4 sm:px-0">
               {previous ? (
-                <Link
-                  href={episodeHref(title.slug, previous.number)}
-                  rel="prev"
-                  className="inline-flex min-h-11 items-center rounded-sm border border-line px-4 text-sm hover:bg-surface-2"
-                >
+                <Link href={episodeHref(title.slug, previous.number)} rel="prev" className={button("secondary", "sm")}>
                   Предыдущая
                 </Link>
               ) : (
                 <span />
               )}
               {next && (
-                <Link
-                  href={episodeHref(title.slug, next.number)}
-                  rel="next"
-                  className="inline-flex min-h-11 items-center rounded-sm border border-line px-4 text-sm hover:bg-surface-2"
-                >
+                <Link href={episodeHref(title.slug, next.number)} rel="next" className={button("secondary", "sm")}>
                   Следующая
                 </Link>
               )}

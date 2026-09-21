@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
  */
 export function ToCheck({ children }: { children: ReactNode }) {
   return (
-    <aside className="rounded-md border border-line bg-surface p-4 text-sm text-muted">
+    <aside className="rounded-lg border border-line bg-surface p-4 text-sm text-muted">
       <p className="font-medium text-text">Требует проверки перед запуском</p>
       <p className="mt-1">{children}</p>
     </aside>

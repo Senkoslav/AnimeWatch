@@ -6,7 +6,7 @@ import { CATALOG_PAGE_SIZE, getCatalog, getCatalogFilters } from "@/lib/queries/
 
 import { createTitle, hoursAgo } from "../factories/catalog";
 
-const defaults: CatalogParams = { sort: "new", page: 1 };
+const defaults: CatalogParams = { genres: [], kinds: [], sort: "new", page: 1 };
 
 async function slugs(params: Partial<CatalogParams> = {}): Promise<string[]> {
   const { items } = await getCatalog({ ...defaults, ...params });
@@ -25,12 +25,39 @@ describe("getCatalog", () => {
       status: TitleStatus.COMPLETED,
     });
 
-    expect((await slugs({ genre: "Драма" })).sort()).toEqual(["drama-movie-2016", "drama-tv-2023"]);
-    expect((await slugs({ year: 2023 })).sort()).toEqual(["action-tv-2023-completed", "drama-tv-2023"]);
+    expect((await slugs({ genres: ["Драма"] })).sort()).toEqual(["drama-movie-2016", "drama-tv-2023"]);
+    expect((await slugs({ yearFrom: 2023, yearTo: 2023 })).sort()).toEqual([
+      "action-tv-2023-completed",
+      "drama-tv-2023",
+    ]);
     expect(await slugs({ status: TitleStatus.COMPLETED })).toEqual(["action-tv-2023-completed"]);
-    expect(await slugs({ kind: TitleKind.MOVIE })).toEqual(["drama-movie-2016"]);
-    expect(await slugs({ genre: "Драма", year: 2023, kind: TitleKind.TV })).toEqual(["drama-tv-2023"]);
-    expect(await slugs({ genre: "Комедия" })).toEqual([]);
+    expect(await slugs({ kinds: [TitleKind.MOVIE] })).toEqual(["drama-movie-2016"]);
+    expect(await slugs({ genres: ["Драма"], yearFrom: 2023, kinds: [TitleKind.TV] })).toEqual(["drama-tv-2023"]);
+    expect(await slugs({ genres: ["Комедия"] })).toEqual([]);
+  });
+
+  it("несколько жанров и типов — это «или», а не «и»", async () => {
+    await createTitle({ slug: "drama-tv", genres: ["Драма"], kind: TitleKind.TV });
+    await createTitle({ slug: "comedy-movie", genres: ["Комедия"], kind: TitleKind.MOVIE });
+    await createTitle({ slug: "action-ova", genres: ["Экшен"], kind: TitleKind.OVA });
+
+    // «И» по двум жанрам дало бы пустоту почти всегда: у тайтла редко стоят оба выбранных сразу.
+    expect((await slugs({ genres: ["Драма", "Комедия"] })).sort()).toEqual(["comedy-movie", "drama-tv"]);
+    expect((await slugs({ kinds: [TitleKind.TV, TitleKind.OVA] })).sort()).toEqual(["action-ova", "drama-tv"]);
+    // Разные группы между собой складываются по «и»: жанр И тип.
+    expect(await slugs({ genres: ["Драма", "Комедия"], kinds: [TitleKind.MOVIE] })).toEqual(["comedy-movie"]);
+  });
+
+  it("год диапазоном: границы включительно, каждая работает в одиночку", async () => {
+    await createTitle({ slug: "y2016", year: 2016 });
+    await createTitle({ slug: "y2020", year: 2020 });
+    await createTitle({ slug: "y2024", year: 2024 });
+    // Тайтл без года не попадает ни в один диапазон: год неизвестен, а не «любой».
+    await createTitle({ slug: "no-year", year: null });
+
+    expect((await slugs({ yearFrom: 2016, yearTo: 2020 })).sort()).toEqual(["y2016", "y2020"]);
+    expect((await slugs({ yearFrom: 2020 })).sort()).toEqual(["y2020", "y2024"]);
+    expect((await slugs({ yearTo: 2020 })).sort()).toEqual(["y2016", "y2020"]);
   });
 
   it("сортирует: недавно добавленные, по году (без года в конце), по названию", async () => {
@@ -72,8 +99,8 @@ describe("getCatalog", () => {
       await createTitle({ slug: "naruto", nameRu: "Наруто", genres: ["Драма"] });
 
       expect((await slugs({ q: "фрирен" })).sort()).toEqual(["frieren", "frieren-movie"]);
-      expect(await slugs({ q: "фрирен", genre: "Драма" })).toEqual(["frieren"]);
-      expect(await slugs({ q: "фрирен", genre: "Фантастика" })).toEqual([]);
+      expect(await slugs({ q: "фрирен", genres: ["Драма"] })).toEqual(["frieren"]);
+      expect(await slugs({ q: "фрирен", genres: ["Фантастика"] })).toEqual([]);
     });
 
     it("опечатка находит так же, как на /search: запрос там и тут один", async () => {
@@ -133,7 +160,7 @@ describe("getCatalog", () => {
       await createTitle({ slug: "draft", genres: ["Драма"], year: 2023, publishedAt: null });
       await createTitle({ slug: "hidden", genres: ["Драма"], year: 2023, status: TitleStatus.HIDDEN });
 
-      const catalog = await getCatalog({ ...defaults, genre: "Драма", year: 2023 });
+      const catalog = await getCatalog({ ...defaults, genres: ["Драма"], yearFrom: 2023, yearTo: 2023 });
       expect(catalog.items.map((item) => item.slug)).toEqual(["public"]);
       expect(catalog.total).toBe(1);
     });

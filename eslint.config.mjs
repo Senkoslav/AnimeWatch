@@ -20,6 +20,8 @@ export default defineConfig([
   globalIgnores([
     ".next/**",
     ".tmp/**",
+    // Инструменты агента, поставленные пакетом: чужой код, который мы не правим и не сдаём.
+    ".claude/skills/**",
     "playwright-report/**",
     "test-results/**",
     "next-env.d.ts",

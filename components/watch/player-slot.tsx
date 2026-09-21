@@ -13,7 +13,7 @@ export function PlayerSlot({ source, titleName }: { source: WatchSource | null; 
 
   if (!src) {
     return (
-      <div className="flex aspect-video w-full items-center justify-center bg-surface p-6 text-center sm:rounded-md">
+      <div className="flex aspect-video w-full items-center justify-center border-line bg-surface p-6 text-center sm:rounded-lg sm:border">
         <p className="max-w-[40ch] text-muted">
           Источник для этой серии ещё не подключён. Мы добавляем озвучки по мере их появления.
         </p>
@@ -22,7 +22,7 @@ export function PlayerSlot({ source, titleName }: { source: WatchSource | null; 
   }
 
   return (
-    <div className="aspect-video w-full overflow-hidden bg-surface sm:rounded-md">
+    <div className="aspect-video w-full overflow-hidden bg-surface sm:rounded-lg">
       <iframe
         src={src}
         title={`${titleName} — плеер`}

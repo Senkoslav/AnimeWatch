@@ -1,5 +1,6 @@
 import { Hero } from "@/components/home/hero";
 import { ReleaseCard } from "@/components/home/release-card";
+import { SectionHeading } from "@/components/ui/section-heading";
 import { getHomeFeed } from "@/lib/queries/home";
 
 // docs/02, «Кеширование»: главная — ISR раз в минуту.
@@ -21,15 +22,17 @@ export default async function HomePage() {
         <Hero release={hero} now={now} />
       ) : (
         <section className="mx-auto max-w-6xl px-4 py-16">
-          <p className="text-lg">Скоро здесь появятся новые серии.</p>
+          <p className="text-lg font-semibold">Скоро здесь появятся новые серии</p>
+          <p className="mt-2 max-w-[60ch] text-muted">Каталог уже открыт — там есть что выбрать на вечер.</p>
         </section>
       )}
 
       {releases.length > 0 && (
         <section aria-labelledby="fresh-title" className="mx-auto max-w-6xl px-4 pt-8">
-          <h2 id="fresh-title" className="text-lg font-semibold">
+          {/* Засечка янтарная: свежие серии — ровно то, что происходит сейчас. */}
+          <SectionHeading id="fresh-title" tone="signal">
             Свежее
-          </h2>
+          </SectionHeading>
           <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {releases.map((release, index) => (
               <li key={release.episodeId}>

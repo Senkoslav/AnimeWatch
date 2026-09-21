@@ -1,21 +1,28 @@
 import Form from "next/form";
-import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { CATALOG_PANEL, CATALOG_PANEL_BODY } from "@/components/catalog/panel";
-import { Band } from "@/components/ui/band";
+import { CATALOG_PANEL_HEAD } from "@/components/catalog/panel";
 import {
-  CATALOG_SORTS,
+  button,
+  CHIP,
+  CHIP_ACTIVE,
+  FIELD,
+  FIELD_LABEL,
+  FOCUS_WITHIN,
+  SEGMENT,
+  SEGMENT_ITEM,
+  SEGMENT_ITEM_ACTIVE,
+} from "@/components/ui/controls";
+import { SectionHeading } from "@/components/ui/section-heading";
+import {
+  activeFilters,
   catalogHref,
-  DEFAULT_SORT,
-  hasFilters,
-  kindParam,
-  KIND_OPTIONS,
-  statusParam,
-  STATUS_OPTIONS,
   type CatalogParams,
+  DEFAULT_SORT,
+  KIND_OPTIONS,
+  STATUS_OPTIONS,
 } from "@/lib/catalog/params";
-import { KIND_LABELS, SORT_LABELS, STATUS_LABELS } from "@/lib/labels";
+import { KIND_LABELS, STATUS_LABELS } from "@/lib/labels";
 import type { CatalogFilters as FilterOptions } from "@/lib/queries/catalog";
 import { MAX_QUERY_LENGTH } from "@/lib/search/query";
 
@@ -25,129 +32,175 @@ interface CatalogFiltersProps {
 }
 
 const TOGGLE_ID = "catalog-filters-open";
-const FIELDS_ID = "catalog-filters-fields";
+const PANEL_ID = "catalog-filters-panel";
 
-/** Поле и подпись одной высоты по всему сайту: колонки в панели должны собираться в линейку. */
-const FIELD =
-  "h-10 w-full min-w-0 rounded-sm border border-line bg-bg px-2 text-base text-text placeholder:text-muted sm:text-sm";
+/** Сколько жанров стоит открытыми. Остальные — под «ещё N»: в панели их бывает под полсотни. */
+const GENRES_SHOWN = 12;
 
 /**
- * GET-форма через next/form: без своего JS, состояние только в URL. Страница не
- * отправляется — после смены фильтров всегда первая. Выбранные значения берутся из URL.
+ * Отбор каталога. GET-форма через next/form: без своего JS, состояние только в URL. Страница не
+ * отправляется — после смены отбора всегда первая. Выбранные значения берутся из URL.
  *
- * На телефоне панель свёрнута, на десктопе раскрыта всегда. Это скрытый чекбокс, а не
- * <details>: CSS умеет прятать, но не раскрывать, и содержимое <details> нельзя
- * принудительно показать на широком экране — ::details-content поддерживают только
- * свежие браузеры, а без него фильтры на десктопе просто исчезли бы. У чекбокса базовое
- * состояние hidden снимают два независимых правила: peer-checked (телефон) и lg (десктоп).
+ * На десктопе это липкая колонка справа от выдачи, на телефоне — нижний лист поверх страницы.
+ * И там, и там один и тот же DOM и одна и та же форма: два комплекта полей с одинаковыми именами
+ * отправлялись бы оба.
+ *
+ * Раскрытие — скрытый чекбокс, а не <details>: CSS умеет прятать, но не раскрывать, и содержимое
+ * <details> нельзя принудительно показать на широком экране. Роль `dialog` листу не даётся: без JS
+ * фокус в нём не удержать, а заявленный диалог, из которого фокус уходит на страницу под ним, хуже
+ * честного раскрытия.
  */
 export function CatalogFilters({ params, options }: CatalogFiltersProps) {
-  // Значения вне вариантов сюда не доходят: страница уводит такой адрес на канонический (sanitizeCatalogParams).
+  // Значения вне вариантов сюда не доходят: страница уводит такой адрес на канонический.
   const { genres, years } = options;
+  const active = activeFilters(params);
+
+  // Выбранные жанры идут первыми: иначе отмеченный жанр мог бы оказаться под «ещё» и выглядел бы
+  // как не выбранный. Порядок полей в форме от этого расходится с каноническим, и отправка даёт
+  // один лишний редирект — ровно как пустые поля формы сегодня.
+  const sortedGenres = [...genres].sort(
+    (a, b) => Number(params.genres.includes(b)) - Number(params.genres.includes(a)),
+  );
+  const shownGenres = sortedGenres.slice(0, GENRES_SHOWN);
+  const hiddenGenres = sortedGenres.slice(GENRES_SHOWN);
 
   return (
-    // key: при переходе по ссылке «Сбросить» или «Назад» в истории панель пересоздаётся, иначе
-    // неуправляемые <select> и чекбокс остались бы с прежними значениями.
-    <div key={catalogHref({ ...params, page: 1 })} className={`lg:sticky lg:top-sticky ${CATALOG_PANEL}`}>
+    // key: при переходе по ссылке «Сбросить», по метке отбора или «Назад» в истории панель
+    // пересоздаётся, иначе неуправляемые поля и чекбокс остались бы с прежними значениями.
+    <div key={catalogHref({ ...params, page: 1 })}>
       {/* sr-only, а не hidden: элемент должен остаться фокусируемым с клавиатуры. */}
-      <input
-        type="checkbox"
-        id={TOGGLE_ID}
-        aria-controls={FIELDS_ID}
-        // Отбор уже задан — панель открыта, иначе непонятно, почему выдача неполная. Сортировка считается
-        // наравне с фильтрами: свёрнутая панель иначе прячет единственный признак, что порядок не обычный.
-        defaultChecked={hasFilters(params) || params.sort !== DEFAULT_SORT}
-        className="peer sr-only lg:hidden"
-      />
+      <input type="checkbox" id={TOGGLE_ID} aria-controls={PANEL_ID} className="peer sr-only lg:hidden" />
 
-      {/* На телефоне полоса раздела работает кнопкой, на десктопе — просто полосой. */}
+      {/*
+        Открывашка на телефоне. Счётчик рядом, потому что лист закрыт и отбор иначе не виден.
+        Янтарной кнопка становится, только когда отбор задан: действующий фильтр — это «сейчас»,
+        а пустая форма ничего не делает и заливку сигнала не заслуживает.
+      */}
       <label
         htmlFor={TOGGLE_ID}
-        className="flex cursor-pointer items-center justify-between gap-4 bg-ink px-4 py-2 text-text peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink-bright lg:hidden peer-checked:[&_svg]:rotate-180"
+        className={`${active.length > 0 ? button() : button("secondary")} w-full cursor-pointer peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal lg:hidden`}
       >
-        <span className="font-display text-sm font-bold tracking-tight">Отбор</span>
-        {/* Нарисованный шеврон, а не глиф: иконки в проекте рисуются, а не берутся из юникода. */}
-        <svg viewBox="0 0 16 16" aria-hidden="true" className="size-4 shrink-0" fill="none" stroke="currentColor">
-          <path d="M4 6l4 4 4-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+        <FiltersIcon />
+        Фильтры
+        {active.length > 0 && <span data-numeric="">{active.length}</span>}
       </label>
-      <div className="hidden lg:block">
-        <Band>Отбор</Band>
-      </div>
 
-      <div id={FIELDS_ID} className={`hidden peer-checked:block lg:block ${CATALOG_PANEL_BODY}`}>
-        <Form action="/catalog" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-1">
-          {/* Первым и здесь, и в catalogHref: пришедший адрес собирается как есть, и перестановка
-              параметров увела бы страницу в вечный редирект на саму себя. */}
-          <div className="col-span-2 flex min-w-0 flex-col gap-1 sm:col-span-3 lg:col-span-1">
-            <label htmlFor="catalog-q" className="text-xs text-muted">
-              Поиск по названию
-            </label>
-            <input
-              id="catalog-q"
-              name="q"
-              type="search"
-              defaultValue={params.q ?? ""}
-              maxLength={MAX_QUERY_LENGTH}
-              placeholder="Название или часть"
-              className={FIELD}
-            />
+      {/* Затемнение под листом. Оно же — вторая кнопка закрытия: нажатие мимо листа закрывает его. */}
+      <label htmlFor={TOGGLE_ID} className="fixed inset-0 z-30 hidden bg-bg/70 peer-checked:block lg:hidden">
+        {/* Подпись текстом, а не aria-label: у <label> нет роли, и ARIA-подписи на нём запрещены. */}
+        <span className="sr-only">Закрыть отбор</span>
+      </label>
+
+      {/* Липкая панель выше экрана прокручивается внутри себя: иначе кнопка «Показать» уезжает
+          под нижний край, и в длинной выдаче отбор становится недостижим. */}
+      <div
+        id={PANEL_ID}
+        className="sheet-surface fixed inset-x-0 bottom-0 z-40 hidden max-h-[85dvh] flex-col overflow-hidden peer-checked:flex lg:sticky lg:inset-x-auto lg:top-sticky lg:bottom-auto lg:z-auto lg:flex lg:max-h-[calc(100dvh_-_var(--spacing-sticky)_-_1rem)]"
+      >
+        <div className={CATALOG_PANEL_HEAD}>
+          <SectionHeading>Отбор</SectionHeading>
+          {/*
+            Крестик только на телефоне: на десктопе панель не закрывается. «Сбросить» здесь нет —
+            оно стоит рядом с метками действующего отбора над выдачей, где видно при любой ширине
+            и при закрытом листе.
+          */}
+          <label
+            htmlFor={TOGGLE_ID}
+            className="ml-auto inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-sm border border-line bg-fill text-text-2 hover:text-text lg:hidden"
+          >
+            <span className="sr-only">Закрыть отбор</span>
+            <CloseIcon />
+          </label>
+        </div>
+
+        <Form action="/catalog" className="flex min-h-0 flex-col">
+          <div className="flex min-h-0 flex-col gap-5 overflow-y-auto p-4 md:p-5">
+            {/* Первым и здесь, и в catalogHref: пришедший адрес собирается как есть, и перестановка
+                параметров увела бы страницу в вечный редирект. */}
+            <div className="flex min-w-0 flex-col gap-2">
+              <label htmlFor="catalog-q" className={FIELD_LABEL}>
+                Название
+              </label>
+              <input
+                id="catalog-q"
+                name="q"
+                type="search"
+                defaultValue={params.q ?? ""}
+                maxLength={MAX_QUERY_LENGTH}
+                placeholder="Например, Фрирен"
+                className={FIELD}
+              />
+            </div>
+
+            <Group legend="Жанр">
+              <div className="flex flex-wrap gap-2">
+                {shownGenres.map((genre) => (
+                  <CheckChip key={genre} name="genre" value={genre} checked={params.genres.includes(genre)}>
+                    {genre}
+                  </CheckChip>
+                ))}
+              </div>
+              {hiddenGenres.length > 0 && (
+                // Остальные жанры остаются в форме и отправляются наравне с открытыми: <details>
+                // прячет их от глаз, но не из разметки. Выбранные сюда не попадают по построению.
+                <details className="mt-2">
+                  <summary className="inline-flex min-h-11 cursor-pointer items-center text-sm text-dim hover:text-text">
+                    ещё {hiddenGenres.length}
+                  </summary>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {hiddenGenres.map((genre) => (
+                      <CheckChip key={genre} name="genre" value={genre} checked={false}>
+                        {genre}
+                      </CheckChip>
+                    ))}
+                  </div>
+                </details>
+              )}
+            </Group>
+
+            <Group legend="Год выхода">
+              <div className="flex items-center gap-2">
+                <YearSelect name="year_from" label="Год от" value={params.yearFrom} years={years} />
+                <span aria-hidden="true" className="text-sm text-dim">
+                  —
+                </span>
+                <YearSelect name="year_to" label="Год до" value={params.yearTo} years={years} />
+              </div>
+            </Group>
+
+            <Group legend="Статус">
+              <div className={SEGMENT}>
+                <RadioSegment name="status" value="" checked={!params.status}>
+                  Любой
+                </RadioSegment>
+                {STATUS_OPTIONS.map(([param, status]) => (
+                  <RadioSegment key={param} name="status" value={param} checked={params.status === status}>
+                    {STATUS_LABELS[status]}
+                  </RadioSegment>
+                ))}
+              </div>
+            </Group>
+
+            <Group legend="Тип">
+              <div className="flex flex-wrap gap-2">
+                {KIND_OPTIONS.map(([param, kind]) => (
+                  <CheckChip key={param} name="kind" value={param} checked={params.kinds.includes(kind)}>
+                    {KIND_LABELS[kind]}
+                  </CheckChip>
+                ))}
+              </div>
+            </Group>
+
+            {/* Сортировка живёт над выдачей ссылками, но обязана пережить отправку формы. */}
+            {params.sort !== DEFAULT_SORT && <input type="hidden" name="sort" value={params.sort} />}
           </div>
-          <Field label="Жанр" name="genre" defaultValue={params.genre ?? ""}>
-            <option value="">Все</option>
-            {genres.map((genre) => (
-              <option key={genre} value={genre}>
-                {genre}
-              </option>
-            ))}
-          </Field>
-          <Field label="Год" name="year" defaultValue={params.year ? String(params.year) : ""}>
-            <option value="">Любой</option>
-            {years.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </Field>
-          <Field label="Статус" name="status" defaultValue={params.status ? statusParam(params.status) : ""}>
-            <option value="">Любой</option>
-            {STATUS_OPTIONS.map(([param, status]) => (
-              <option key={param} value={param}>
-                {STATUS_LABELS[status]}
-              </option>
-            ))}
-          </Field>
-          <Field label="Тип" name="kind" defaultValue={params.kind ? kindParam(params.kind) : ""}>
-            <option value="">Любой</option>
-            {KIND_OPTIONS.map(([param, kind]) => (
-              <option key={param} value={param}>
-                {KIND_LABELS[kind]}
-              </option>
-            ))}
-          </Field>
-          <Field label="Сортировка" name="sort" defaultValue={params.sort} className="col-span-2 sm:col-span-1">
-            {CATALOG_SORTS.map((sort) => (
-              <option key={sort} value={sort}>
-                {SORT_LABELS[sort]}
-              </option>
-            ))}
-          </Field>
 
-          <div className="col-span-2 flex items-center gap-4 sm:col-span-3 lg:col-span-1 lg:mt-2 lg:flex-col lg:items-stretch lg:gap-2">
-            <button
-              type="submit"
-              className="inline-flex min-h-11 flex-1 items-center justify-center rounded-sm bg-text px-5 font-medium text-bg hover:bg-muted lg:flex-none"
-            >
+          {/* Кнопка прижата к низу листа и не уезжает вместе с полями. Числа на ней нет: без JS оно
+              относилось бы к уже применённому отбору, а не к набранному, — счёт стоит над выдачей. */}
+          <div className="border-t border-line p-4 md:p-5">
+            <button type="submit" className={`${button()} w-full`}>
               Показать
             </button>
-            {hasFilters(params) && (
-              <Link
-                href="/catalog"
-                className="inline-flex min-h-11 items-center rounded-sm text-sm text-muted underline hover:text-text lg:justify-center"
-              >
-                Сбросить
-              </Link>
-            )}
           </div>
         </Form>
       </div>
@@ -155,25 +208,100 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
   );
 }
 
-interface FieldProps {
-  label: string;
-  name: string;
-  defaultValue: string;
-  children: ReactNode;
-  className?: string;
+/** Группа полей: легенда вместо подписи — так скринридер называет каждый чип внутри группы. */
+function Group({ legend, children }: { legend: string; children: ReactNode }) {
+  return (
+    <fieldset className="min-w-0">
+      <legend className={`mb-2 ${FIELD_LABEL}`}>{legend}</legend>
+      {children}
+    </fieldset>
+  );
 }
 
-function Field({ label, name, defaultValue, children, className = "" }: FieldProps) {
+/**
+ * Чип с чекбоксом внутри. Сам чекбокс sr-only: он остаётся настоящим полем формы, получает фокус
+ * и работает с клавиатуры, а видимое состояние рисует подпись.
+ */
+function CheckChip({
+  name,
+  value,
+  checked,
+  children,
+}: {
+  name: string;
+  value: string;
+  checked: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <label className={`cursor-pointer ${FOCUS_WITHIN} ${checked ? CHIP_ACTIVE : CHIP}`}>
+      <input type="checkbox" name={name} value={value} defaultChecked={checked} className="sr-only outline-none" />
+      {children}
+    </label>
+  );
+}
+
+function RadioSegment({
+  name,
+  value,
+  checked,
+  children,
+}: {
+  name: string;
+  value: string;
+  checked: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <label className={`${FOCUS_WITHIN} ${checked ? SEGMENT_ITEM_ACTIVE : SEGMENT_ITEM}`}>
+      <input type="radio" name={name} value={value} defaultChecked={checked} className="sr-only outline-none" />
+      {children}
+    </label>
+  );
+}
+
+function YearSelect({
+  name,
+  label,
+  value,
+  years,
+}: {
+  name: string;
+  label: string;
+  value: number | undefined;
+  years: readonly number[];
+}) {
   const id = `catalog-${name}`;
   return (
-    <div className={`flex min-w-0 flex-col gap-1 ${className}`}>
-      <label htmlFor={id} className="text-xs text-muted">
+    <>
+      <label htmlFor={id} className="sr-only">
         {label}
       </label>
-      {/* 16px на телефоне: iOS Safari увеличивает страницу при фокусе на поле с шрифтом мельче. */}
-      <select id={id} name={name} defaultValue={defaultValue} className={FIELD}>
-        {children}
+      <select id={id} name={name} defaultValue={value ? String(value) : ""} className={FIELD}>
+        <option value="">Любой</option>
+        {years.map((year) => (
+          <option key={year} value={year}>
+            {year}
+          </option>
+        ))}
       </select>
-    </div>
+    </>
+  );
+}
+
+/** Иконки рисуются, а не берутся из юникода: глиф зависит от шрифта и на телефоне бывает эмодзи. */
+function FiltersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="none" stroke="currentColor">
+      <path d="M4 6h16M7 12h10M10 18h4" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="none" stroke="currentColor">
+      <path d="M6 6l12 12M18 6L6 18" strokeWidth="2" strokeLinecap="round" />
+    </svg>
   );
 }

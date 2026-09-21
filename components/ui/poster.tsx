@@ -1,4 +1,5 @@
 import Image from "next/image";
+import type { ReactNode } from "react";
 
 interface PosterProps {
   src: string | null;
@@ -9,13 +10,23 @@ interface PosterProps {
   loading?: "preload" | "eager" | "lazy";
   /** Фон под заглушкой: он обязан отличаться от того, на чём лежит карточка, иначе тайтл без постера пропадает. */
   background?: "surface" | "bg";
+  /** Слой поверх постера: значок оценки. Контейнер здесь позиционированный, поэтому место есть. */
+  children?: ReactNode;
   className?: string;
 }
 
 const BACKGROUNDS = { surface: "bg-surface", bg: "bg-bg" } as const;
 
 /** Постер 2:3. Пропорция задана контейнером, поэтому вёрстка не прыгает ни с картинкой, ни без неё. */
-export function Poster({ src, title, sizes, loading = "lazy", background = "surface", className = "" }: PosterProps) {
+export function Poster({
+  src,
+  title,
+  sizes,
+  loading = "lazy",
+  background = "surface",
+  children,
+  className = "",
+}: PosterProps) {
   return (
     <div
       className={`relative aspect-2/3 overflow-hidden rounded-md border border-line ${BACKGROUNDS[background]} ${className}`}
@@ -37,6 +48,7 @@ export function Poster({ src, title, sizes, loading = "lazy", background = "surf
           {title}
         </p>
       )}
+      {children}
     </div>
   );
 }

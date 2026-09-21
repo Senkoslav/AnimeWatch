@@ -4,7 +4,9 @@ import { notFound } from "next/navigation";
 
 import { EpisodeList } from "@/components/title/episode-list";
 import { ExpandableText } from "@/components/title/expandable-text";
+import { button, CHIP } from "@/components/ui/controls";
 import { Poster } from "@/components/ui/poster";
+import { ScoreBadge } from "@/components/ui/score-badge";
 import { catalogHref } from "@/lib/catalog/params";
 import { formatCount } from "@/lib/format";
 import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
@@ -50,17 +52,16 @@ export default async function TitlePageView({ params }: PageProps<"/anime/[slug]
       {/* На телефоне постер уходит в шапку рядом с названием, на десктопе — липкая колонка слева. */}
       <div className="grid grid-cols-2 items-start gap-x-4 gap-y-8 md:grid-cols-[240px_minmax(0,1fr)] md:gap-x-10">
         <header className="col-start-2 row-start-1 min-w-0 space-y-3">
-          <h1 className="text-lg leading-tight font-semibold text-balance break-words md:text-2xl">{title.nameRu}</h1>
-          {title.name !== title.nameRu && <p className="text-sm text-muted">{title.name}</p>}
-          <p className="text-sm">{facts(title)}</p>
+          <h1 className="font-display text-xl leading-tight font-bold tracking-tight text-balance break-words md:text-2xl">
+            {title.nameRu}
+          </h1>
+          {title.name !== title.nameRu && <p className="text-sm text-dim">{title.name}</p>}
+          <p className="text-sm text-text-2">{facts(title)}</p>
           {title.genres.length > 0 && (
             <ul aria-label="Жанры" className="flex flex-wrap gap-2">
               {title.genres.map((genre) => (
                 <li key={genre}>
-                  <Link
-                    href={catalogHref({ genre })}
-                    className="inline-flex min-h-11 max-w-full items-center rounded-sm border border-line px-3 text-sm break-words hover:bg-surface-2"
-                  >
+                  <Link href={catalogHref({ genres: [genre] })} className={`${CHIP} max-w-full break-words`}>
                     {genre}
                   </Link>
                 </li>
@@ -70,12 +71,11 @@ export default async function TitlePageView({ params }: PageProps<"/anime/[slug]
         </header>
 
         <aside className="col-start-1 row-start-1 space-y-4 md:sticky md:top-sticky md:row-span-2">
-          <Poster src={title.posterUrl} title={title.nameRu} sizes="(min-width: 768px) 240px, 50vw" loading="preload" />
+          <Poster src={title.posterUrl} title={title.nameRu} sizes="(min-width: 768px) 240px, 50vw" loading="preload">
+            {title.score !== null && <ScoreBadge score={title.score} />}
+          </Poster>
           {firstEpisode && (
-            <Link
-              href={episodeHref(title.slug, firstEpisode.number)}
-              className="flex min-h-11 items-center justify-center rounded-sm bg-text px-5 font-medium text-bg hover:bg-muted"
-            >
+            <Link href={episodeHref(title.slug, firstEpisode.number)} className={`${button()} w-full`}>
               Смотреть
             </Link>
           )}

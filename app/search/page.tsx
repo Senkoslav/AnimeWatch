@@ -4,6 +4,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { TitleCard } from "@/components/catalog/title-card";
+import { button, FIELD, PAGE_TITLE, TEXT_LINK } from "@/components/ui/controls";
 import { requestedHref, trackingEntries, withTracking } from "@/lib/canonical";
 import { formatCount } from "@/lib/format";
 import { SEARCH_LIMIT, searchTitles } from "@/lib/queries/search";
@@ -30,7 +31,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 md:py-10">
-      <h1 className="text-xl font-semibold">Поиск</h1>
+      <h1 className={PAGE_TITLE}>Поиск</h1>
 
       <Form action="/search" className="mt-6 flex max-w-xl flex-wrap items-center gap-3">
         {trackingEntries(params).map(([key, value]) => (
@@ -46,13 +47,9 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           defaultValue={query}
           maxLength={MAX_QUERY_LENGTH}
           placeholder="Например, Фрирен"
-          // 16px на телефоне: iOS Safari увеличивает страницу при фокусе на поле с шрифтом мельче.
-          className="h-11 min-w-0 flex-1 rounded-sm border border-line bg-surface px-3 text-base text-text placeholder:text-muted sm:text-sm"
+          className={`${FIELD} flex-1`}
         />
-        <button
-          type="submit"
-          className="inline-flex min-h-11 items-center rounded-sm bg-text px-5 font-medium text-bg hover:bg-muted"
-        >
+        <button type="submit" className={button()}>
           Найти
         </button>
       </Form>
@@ -60,7 +57,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
       {!query ? (
         <p className="mt-12 text-muted">
           Введите название: подойдут и русское, и оригинальное. Или посмотрите{" "}
-          <Link href="/catalog" className="text-text underline">
+          <Link href="/catalog" className={TEXT_LINK}>
             каталог
           </Link>
           .
@@ -82,10 +79,10 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
         </section>
       ) : (
         <section className="mt-12 space-y-3">
-          <h2 className="text-lg">Ничего не нашлось</h2>
+          <h2 className="text-lg font-semibold">Ничего не нашлось</h2>
           <p className="text-muted">
             Проверьте название или посмотрите{" "}
-            <Link href="/catalog" className="text-text underline">
+            <Link href="/catalog" className={TEXT_LINK}>
               каталог
             </Link>
             .

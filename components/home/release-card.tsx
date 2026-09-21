@@ -28,14 +28,23 @@ export function ReleaseCard({ release, now, eager = false }: ReleaseCardProps) {
     <Link
       href={episodeHref(title.slug, number)}
       aria-label={[title.nameRu, episode, `вышел ${released}`, fresh ? "новая" : null].filter(Boolean).join(", ")}
-      className="block rounded-md"
+      className="group block rounded-md"
     >
-      <Poster src={title.posterUrl} title={title.nameRu} sizes={POSTER_SIZES} loading={eager ? "eager" : "lazy"} />
-      <p className="mt-2 line-clamp-2 text-sm font-medium">{title.nameRu}</p>
-      <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
-        <span className="text-text">{episode}</span>
-        <time dateTime={publishedAt.toISOString()}>{released}</time>
-        {fresh && <FreshMark />}
+      {/* Метка «новая» уехала на постер: в подписи она переносилась на свою строку, и карточки в
+          ряду вставали разной высоты — линейки под ними переставали собираться. */}
+      <Poster src={title.posterUrl} title={title.nameRu} sizes={POSTER_SIZES} loading={eager ? "eager" : "lazy"}>
+        {fresh && <FreshMark onPoster />}
+      </Poster>
+
+      {/* Две строки всегда, как и в карточке каталога: иначе соседние подписи встают на разной высоте. */}
+      <p className="mt-2.5 line-clamp-2 min-h-[2.6rem] text-sm leading-snug font-medium group-hover:underline">
+        {title.nameRu}
+      </p>
+      <p className="mt-2 flex items-baseline justify-between gap-2 border-t border-line pt-2 text-xs text-dim">
+        <span className="shrink-0 font-medium text-text-2">{episode}</span>
+        <time dateTime={publishedAt.toISOString()} className="min-w-0 truncate">
+          {released}
+        </time>
       </p>
     </Link>
   );

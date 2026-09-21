@@ -23,6 +23,8 @@ export interface TitlePage {
   kind: TitleKind;
   status: TitleStatus;
   year: number | null;
+  /** Оценка Shikimori. null — тайтл ещё никто не оценил, и значка на постере не будет. */
+  score: number | null;
   genres: string[];
   totalEpisodes: number | null;
   episodes: TitleEpisode[];
@@ -49,6 +51,8 @@ export const getTitlePage = cache(async (slug: string): Promise<TitlePage | null
       kind: true,
       status: true,
       year: true,
+      // Оценка Shikimori: значок на постере. null — тайтл ещё никто не оценил (docs/03).
+      score: true,
       genres: true,
       totalEpisodes: true,
       episodes: {

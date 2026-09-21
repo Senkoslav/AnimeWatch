@@ -2,6 +2,8 @@
 
 import { useActionState } from "react";
 
+import { button } from "@/components/ui/controls";
+
 import { submitDmca } from "@/app/dmca/actions";
 import { initialDmcaState } from "@/lib/dmca/state";
 import { FIELD_LIMITS, HONEYPOT_FIELD } from "@/lib/dmca/schema";
@@ -32,8 +34,9 @@ const FIELDS: Field[] = [
   },
 ];
 
-const INPUT_CLASS =
-  "w-full rounded-sm border border-line bg-surface px-3 py-2 text-base text-text placeholder:text-muted sm:text-sm";
+// Поле формы: та же поверхность, что у отбора каталога, но с высотой по содержимому —
+// «Суть обращения» это textarea на шесть строк.
+const INPUT_CLASS = "w-full min-w-0 rounded-sm border border-line bg-bg/60 px-3.5 py-2.5 text-[1rem] text-text";
 
 /**
  * Форма обращения. Клиентский компонент только ради ошибок полей без перезагрузки:
@@ -44,7 +47,7 @@ export function DmcaForm() {
 
   if (state.status === "sent") {
     return (
-      <div role="status" className="rounded-lg space-y-3 border border-line bg-surface p-4">
+      <div role="status" className="space-y-3 rounded-lg border border-line bg-surface p-4">
         <h2 className="text-lg font-semibold">Обращение принято</h2>
         <p className="max-w-[70ch] text-muted">
           Мы рассмотрим его и ответим на указанный адрес. Если материал нарушает права, тайтл скрывается целиком до
@@ -121,7 +124,7 @@ export function DmcaForm() {
             defaultChecked={values.consent === "on"}
             aria-invalid={fieldErrors.consent ? true : undefined}
             aria-describedby={fieldErrors.consent ? "consent-error" : undefined}
-            className="mt-0.5 size-5 accent-ink"
+            className="accent-ink mt-0.5 size-5"
           />
           <span>Подтверждаю, что сведения достоверны и я вправе подать это обращение.</span>
         </label>
@@ -138,11 +141,7 @@ export function DmcaForm() {
         <input id={HONEYPOT_FIELD} name={HONEYPOT_FIELD} type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex min-h-11 items-center rounded-sm bg-text px-5 font-medium text-bg hover:bg-muted disabled:opacity-60"
-      >
+      <button type="submit" disabled={pending} className={`${button()} disabled:opacity-60`}>
         {pending ? "Отправляем" : "Отправить обращение"}
       </button>
     </form>

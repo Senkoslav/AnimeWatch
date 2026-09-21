@@ -38,7 +38,8 @@ test("жанр ведёт в каталог с этим фильтром, «См
 
   await page.getByRole("list", { name: "Жанры" }).getByRole("link", { name: "Драма" }).click();
   await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0");
-  await expect(page.getByLabel("Жанр")).toHaveValue("Драма");
+  // Отбор виден и при закрытом листе: метка над выдачей говорит, почему тайтлов стало меньше.
+  await expect(page.getByRole("list", { name: "Действующий отбор" })).toContainText("Драма");
 });
 
 test("из каталога карточка открывает страницу тайтла", async ({ page }) => {

@@ -1,8 +1,9 @@
 import Link from "next/link";
 
 import { Poster } from "@/components/ui/poster";
-import { formatScore } from "@/lib/format";
-import { KIND_LABELS } from "@/lib/labels";
+import { ScoreBadge } from "@/components/ui/score-badge";
+import { TitleStatus } from "@/lib/generated/prisma/enums";
+import { KIND_LABELS, STATUS_LABELS } from "@/lib/labels";
 import type { CatalogItem } from "@/lib/queries/catalog";
 import { titleHref } from "@/lib/routes";
 
@@ -21,39 +22,45 @@ interface TitleCardProps {
 
 /** Карточка каталога: ведёт на страницу тайтла. */
 export function TitleCard({ title, eager = false, sizes = POSTER_SIZES, background = "surface" }: TitleCardProps) {
-  const details = [title.year, KIND_LABELS[title.kind]].filter(Boolean).join(", ");
+  const facts = [title.year, KIND_LABELS[title.kind]].filter(Boolean).join(", ");
+  // HIDDEN сюда не доходит: такой тайтл отсекается ещё в запросе (publicTitleWhere).
+  const status = title.status === TitleStatus.HIDDEN ? null : title.status;
+  const ongoing = status === TitleStatus.ONGOING;
 
   return (
-    <Link href={titleHref(title.slug)} className="group relative block rounded-md">
+    <Link href={titleHref(title.slug)} className="group block rounded-md">
       <Poster
         src={title.posterUrl}
         title={title.nameRu}
         sizes={sizes}
         background={background}
         loading={eager ? "eager" : "lazy"}
-      />
+      >
+        {title.score !== null && <ScoreBadge score={title.score} />}
+      </Poster>
 
       {/* Две строки всегда, даже под коротким названием: иначе подписи соседних карточек встают на
           разной высоте и линейки ряда перестают собираться — а на них держится весь мир. */}
-      <p className="mt-2 line-clamp-2 min-h-[2.5rem] text-sm leading-snug font-medium group-hover:underline">
+      <p className="mt-2.5 line-clamp-2 min-h-[2.6rem] text-sm leading-snug font-medium group-hover:underline">
         {title.nameRu}
       </p>
 
       {/*
-       * Линованная подпись: слева выходные данные, справа оценка в своей ячейке. Ячейка стоит
-       * всегда — у тайтла без оценки она пустая по форме, а не отсутствует. Молча пропасть может
-       * только то, чего не бывает; «оценки пока нет» — это состояние, и его рисуют.
+       * Линованная подпись: слева выходные данные, справа состояние. Ячейка стоит всегда — у тайтла
+       * без года она пустая по форме, а не отсутствует. Янтарь только у «выходит»: это и есть то,
+       * что происходит сейчас; у завершённого и анонса состояние приглушённое.
        */}
-      <p className="mt-1 flex items-baseline justify-between gap-2 border-t border-line pt-1 text-xs text-muted">
-        <span className="min-w-0 truncate">{details}</span>
-        {title.score === null ? (
-          <span className="cell-ghost shrink-0 tabular-nums" aria-hidden="true">
+      <p className="mt-2 flex items-baseline justify-between gap-2 border-t border-line pt-2 text-xs">
+        {facts ? (
+          <span className="min-w-0 truncate text-dim">{facts}</span>
+        ) : (
+          <span className="cell-ghost shrink-0" aria-hidden="true">
             —
           </span>
-        ) : (
-          <span className="shrink-0 font-medium text-ink-bright tabular-nums">
-            <span className="sr-only">Оценка Shikimori </span>
-            {formatScore(title.score)}
+        )}
+        {status && (
+          <span className={`shrink-0 ${ongoing ? "font-medium text-signal" : "text-dim"}`}>
+            {STATUS_LABELS[status].toLocaleLowerCase("ru")}
           </span>
         )}
       </p>

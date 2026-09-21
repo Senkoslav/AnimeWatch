@@ -11,43 +11,69 @@ const DRAMA_TV_BY_NAME = [
 ];
 
 function results(page: Page) {
-  return page.getByRole("region", { name: /Найдено/ }).getByRole("listitem");
+  return page.getByRole("list", { name: "Найденные тайтлы" }).getByRole("listitem");
 }
 
-/** Ширина, с которой панель фильтров раскрыта всегда (lg в tailwind). */
+/**
+ * Чип отбора: кликаем подпись, а не сам чекбокс. Чекбокс sr-only и перекрыт своей же подписью —
+ * ровно как у живого зрителя, который жмёт на слово, а не на скрытое поле.
+ */
+function chip(page: Page, name: string, value: string) {
+  return page.locator(`label:has(input[name="${name}"][value="${value}"])`);
+}
+
+/** Метки действующего отбора над выдачей: они же кнопки «снять». */
+function appliedFilters(page: Page) {
+  return page.getByRole("list", { name: "Действующий отбор" }).getByRole("listitem");
+}
+
+/** Ширина, с которой панель отбора стоит колонкой и раскрыта всегда (lg в tailwind). */
 const DESKTOP = 1024;
 
 /**
- * На телефоне панель свёрнута. Ветвимся по ширине окна, а не по видимости подписи: isVisible
- * не ждёт, и на медленном прогоне вернул бы false до отрисовки.
+ * На телефоне отбор — нижний лист, и он закрыт. Ветвимся по ширине окна, а не по видимости:
+ * isVisible не ждёт и на медленном прогоне вернул бы false до отрисовки.
  */
 async function openFilters(page: Page) {
   const viewport = page.viewportSize();
   if (viewport && viewport.width < DESKTOP) {
-    // Кликаем подпись, а не сам чекбокс: он sr-only, и Playwright не дотянется до клипнутого элемента.
-    const toggle = page.locator('label[for="catalog-filters-open"]');
-    // Спрашиваем состояние чекбокса, а не видимость полей: при заданном отборе панель уже раскрыта,
-    // и безусловный клик её бы закрыл. Видимость зависит от применённого CSS и на медленном прогоне врёт.
-    if (!(await page.locator("#catalog-filters-open").isChecked())) await toggle.click();
+    if (!(await page.locator("#catalog-filters-open").isChecked())) {
+      // Кликаем открывашку, а не чекбокс: он sr-only. Тем же htmlFor помечены затемнение и
+      // крестик, поэтому отбираем по тексту.
+      await page.locator('label[for="catalog-filters-open"]', { hasText: "Фильтры" }).click();
+    }
   }
-  await expect(page.getByLabel("Жанр")).toBeVisible();
+  // Жанров в базе бывает больше, чем помещается открытыми: остальные лежат под «ещё N».
+  const more = page.locator("#catalog-filters-panel details > summary");
+  if ((await more.count()) > 0) await more.first().click();
+  await expect(page.getByRole("group", { name: "Жанр" })).toBeVisible();
+}
+
+/** Закрыть нижний лист: пока он открыт, он и его затемнение перекрывают всё под собой. */
+async function closeFilters(page: Page) {
+  if (await page.locator("#catalog-filters-open").isChecked()) {
+    await page.locator('label[for="catalog-filters-open"]').filter({ hasText: "Закрыть отбор" }).last().click();
+  }
 }
 
 async function expectFilteredView(page: Page) {
-  await expect(page.getByLabel("Жанр")).toHaveValue("Драма");
-  await expect(page.getByLabel("Тип")).toHaveValue("tv");
-  await expect(page.getByLabel("Сортировка")).toHaveValue("name");
-  await expect(page.getByLabel("Год")).toHaveValue("");
-  await expect(results(page)).toHaveText(DRAMA_TV_BY_NAME.map((name) => new RegExp(`^${escapeRegExp(name)}`)));
+  await expect(page.getByRole("checkbox", { name: "Драма" })).toBeChecked();
+  await expect(page.getByRole("checkbox", { name: "ТВ-сериал" })).toBeChecked();
+  await expect(page.getByRole("radio", { name: "Любой" })).toBeChecked();
+  await expect(page.getByLabel("Год от")).toHaveValue("");
+  // Без якоря в начале: перед названием в карточке стоит подпись оценки для скринридера.
+  await expect(results(page)).toHaveText(DRAMA_TV_BY_NAME.map((name) => new RegExp(escapeRegExp(name))));
 }
 
 test("ссылка с фильтрами открывается в новой вкладке в том же виде", async ({ page, context }) => {
   await page.goto(FILTERED);
+  await openFilters(page);
   await expectFilteredView(page);
 
   const tab = await context.newPage();
   await tab.goto(page.url());
   await expect(tab).toHaveURL(page.url());
+  await openFilters(tab);
   await expectFilteredView(tab);
 });
 
@@ -58,33 +84,105 @@ test("форма меняет адрес на чистый, «Сбросить»
   expect(total).toBeGreaterThan(DRAMA_TV_BY_NAME.length);
 
   await openFilters(page);
-  await page.getByLabel("Жанр").selectOption("Драма");
-  await page.getByLabel("Тип").selectOption("tv");
-  await page.getByLabel("Сортировка").selectOption("name");
+  await chip(page, "genre", "Драма").click();
+  await chip(page, "kind", "tv").click();
   await page.getByRole("button", { name: "Показать" }).click();
 
-  // Пустые поля формы (year=, status=) в адрес не попадают: им делятся.
-  await expect(page).toHaveURL(FILTERED);
-  await expectFilteredView(page);
+  // Пустые поля формы (status=, year_from=) в адрес не попадают: им делятся.
+  await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&kind=tv");
+  await expect(results(page)).toHaveCount(DRAMA_TV_BY_NAME.length);
 
+  await closeFilters(page);
   await page.getByRole("link", { name: "Сбросить" }).click();
   await expect(page).toHaveURL("/catalog");
-  await expect(page.getByLabel("Жанр")).toHaveValue("");
   await expect(results(page)).toHaveCount(total);
+});
+
+test("два жанра сразу — это «или»: выдача шире, а не пустее", async ({ page }) => {
+  await page.goto("/catalog");
+  await openFilters(page);
+
+  await chip(page, "genre", "Драма").click();
+  await page.getByRole("button", { name: "Показать" }).click();
+  // Ждём адрес, а не просто клик: без этого счёт снялся бы ещё со старой выдачи.
+  await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0");
+  const onlyDrama = await results(page).count();
+
+  await openFilters(page);
+  await chip(page, "genre", "Комедия").click();
+  await page.getByRole("button", { name: "Показать" }).click();
+
+  // Порядок повторяемых параметров канонический: жанры по алфавиту.
+  await expect(page).toHaveURL(
+    "/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&genre=%D0%9A%D0%BE%D0%BC%D0%B5%D0%B4%D0%B8%D1%8F",
+  );
+  expect(await results(page).count()).toBeGreaterThan(onlyDrama);
+});
+
+test("год диапазоном сужает выдачу и читается одной меткой", async ({ page }) => {
+  await page.goto("/catalog?year_from=2023&year_to=2024");
+  await expect(appliedFilters(page)).toHaveCount(1);
+  await expect(appliedFilters(page).first()).toContainText("2023—2024");
+
+  // Границы наоборот — это опечатка в ссылке, а не пустая выдача.
+  await page.goto("/catalog?year_from=2024&year_to=2023");
+  await expect(page).toHaveURL("/catalog?year_from=2023&year_to=2024");
+});
+
+test("метка отбора снимает ровно себя и возвращает на первую страницу", async ({ page }) => {
+  await page.goto("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&kind=tv");
+  await expect(appliedFilters(page)).toHaveCount(2);
+
+  await appliedFilters(page).filter({ hasText: "ТВ-сериал" }).getByRole("link").click();
+  await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0");
+  await expect(appliedFilters(page)).toHaveCount(1);
+});
+
+test("пресет открывается прямой ссылкой и отмечен, только когда открыт ровно он", async ({ page }) => {
+  await page.goto("/catalog");
+  const preset = page.getByRole("navigation", { name: "Подборки" }).getByRole("link", { name: "Онгоинги" });
+  await expect(preset).not.toHaveAttribute("aria-current", "page");
+
+  await preset.click();
+  await expect(page).toHaveURL("/catalog?status=ongoing");
+  await expect(
+    page.getByRole("navigation", { name: "Подборки" }).getByRole("link", { name: "Онгоинги" }),
+  ).toHaveAttribute("aria-current", "page");
+
+  // Пресет плюс жанр — это уже не пресет: подсвеченный чип соврал бы про то, что показано.
+  await page.goto("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&status=ongoing");
+  await expect(
+    page.getByRole("navigation", { name: "Подборки" }).getByRole("link", { name: "Онгоинги" }),
+  ).not.toHaveAttribute("aria-current", "page");
+});
+
+test("сортировка — ссылки, работает без отправки формы", async ({ page }) => {
+  await page.goto("/catalog");
+  await page.locator("summary", { hasText: "Сортировка" }).click();
+  await page.getByRole("link", { name: "По названию" }).click();
+
+  await expect(page).toHaveURL("/catalog?sort=name");
+  // Выбранная сортировка переживает отправку формы отбора скрытым полем.
+  await openFilters(page);
+  await chip(page, "genre", "Драма").click();
+  await page.getByRole("button", { name: "Показать" }).click();
+  await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&sort=name");
 });
 
 test("черновик и скрытый по жалобе тайтл не видны ни в выдаче, ни через свои фильтры", async ({ page }) => {
   await page.goto("/catalog");
   await expect(page.getByText("Семья шпиона")).toHaveCount(0);
   await expect(page.getByText("Ребёнок идола")).toHaveCount(0);
+
+  await openFilters(page);
   // «Сэйнэн» в seed есть только у скрытого тайтла.
-  await expect(page.getByLabel("Жанр").locator("option", { hasText: "Сэйнэн" })).toHaveCount(0);
+  await expect(page.getByRole("checkbox", { name: "Сэйнэн" })).toHaveCount(0);
 });
 
 test("мусор, неизвестный жанр и страница за последней ведут на чистый адрес, метки кампаний сохраняются", async ({
   page,
 }) => {
-  const garbage = await page.goto("/catalog?year=abc&page=-1&status=hidden&genre=%00");
+  const garbage = await page.goto("/catalog?year_from=abc&page=-1&status=hidden&genre=%00");
   expect(garbage?.status()).toBe(200);
   await expect(page).toHaveURL("/catalog");
 
@@ -110,7 +208,7 @@ test("пункт «Каталог» в шапке отмечен текущим"
   // На телефоне навигация живёт в свёрнутом меню, на широком экране стоит прямо в шапке.
   // Ширина — то же значение, что и у lg в разметке шапки.
   const viewport = page.viewportSize();
-  if (viewport && viewport.width < 1024) {
+  if (viewport && viewport.width < DESKTOP) {
     // Элементом, а не ролью: Chrome выставляет <summary> не как button, и роль ненадёжна.
     await page.locator("header summary").click();
   }
@@ -125,7 +223,7 @@ test("поиск в каталоге складывается с фильтро�
   await openFilters(page);
 
   // Два слова: encodeURIComponent дал бы «%20» вместо «+», и страница ушла бы в вечный редирект.
-  await page.getByLabel("Поиск по названию").fill("монолог фармацевта");
+  await page.getByLabel("Название").fill("монолог фармацевта");
   await page.getByRole("button", { name: "Показать" }).click();
 
   await expect(page).toHaveURL(
@@ -137,7 +235,8 @@ test("поиск в каталоге складывается с фильтро�
 
   // Поле переживает переход: иначе непонятно, почему в каталоге три тайтла вместо девяти.
   await openFilters(page);
-  await expect(page.getByLabel("Поиск по названию")).toHaveValue("монолог фармацевта");
+  await expect(page.getByLabel("Название")).toHaveValue("монолог фармацевта");
+  await closeFilters(page);
 
   await page.getByRole("link", { name: "Сбросить" }).click();
   await expect(page).toHaveURL("/catalog");
@@ -149,7 +248,7 @@ test("поиск в каталоге с фильтром сужает выдач
   await expect(results(page).first()).toContainText("Фрирен");
 
   await page.goto("/catalog?q=%D1%84%D1%80%D0%B8%D1%80%D0%B5%D0%BD&genre=%D0%9A%D0%BE%D0%BC%D0%B5%D0%B4%D0%B8%D1%8F");
-  await expect(page.getByText("Ничего не нашлось")).toBeVisible();
+  await expect(page.getByText("Здесь пока пусто")).toBeVisible();
 
   // Поиск из индекса убран: адресов с произвольным q бесконечно много. Фильтры остаются индексируемыми.
   await page.goto("/catalog?q=%D1%84%D1%80%D0%B8%D1%80%D0%B5%D0%BD");
@@ -170,7 +269,7 @@ test("бейдж оценки на карточке", async ({ page }) => {
   const first = results(page).first();
   await expect(first).toContainText("Провожающая в последний путь Фрирен");
   await expect(first).toContainText("9,3");
-  // Цифра рядом с постером без пояснения — это шум для скринридера.
+  // Цифра на постере без пояснения — это шум для скринридера.
   await expect(first.getByText("Оценка Shikimori", { exact: false })).toBeAttached();
 });
 
@@ -196,38 +295,49 @@ test("сортировки по рейтингу и по популярност�
   expect(byScore.naruto).toBeGreaterThan(byScore.frieren);
 });
 
-test("на широком экране панель фильтров стоит справа от выдачи", async ({ page }) => {
+test("пагинация номерами: работает с клавиатуры, за последней страницей — канонический адрес", async ({ page }) => {
+  await page.goto("/catalog?sort=name");
+  const pages = page.getByRole("navigation", { name: "Страницы каталога" });
+
+  // В seed тайтлов меньше страницы, и полосы номеров тогда нет вовсе — это не ошибка.
+  if ((await pages.count()) === 0) {
+    await expect(results(page).first()).toBeVisible();
+    return;
+  }
+
+  await pages.getByRole("link", { name: "Страница 2" }).press("Enter");
+  await expect(page).toHaveURL("/catalog?sort=name&page=2");
+  await expect(pages.getByText("2", { exact: true }).first()).toHaveAttribute("aria-current", "page");
+});
+
+test("на широком экране панель отбора стоит справа от выдачи", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/catalog");
 
   const filters = await page.getByRole("button", { name: "Показать" }).boundingBox();
-  const grid = await page.getByRole("region", { name: /Найдено/ }).boundingBox();
-  if (!filters || !grid) throw new Error("панель фильтров или выдача не отрисованы");
+  const grid = await page.getByRole("list", { name: "Найденные тайтлы" }).boundingBox();
+  if (!filters || !grid) throw new Error("панель отбора или выдача не отрисованы");
 
   expect(filters.x).toBeGreaterThanOrEqual(grid.x + grid.width);
 
-  // Панель липкая: после прокрутки она обязана остаться в окне, иначе фильтры недостижимы в длинной выдаче.
-  await page.mouse.wheel(0, 600);
-  const scrolled = await page.getByRole("button", { name: "Показать" }).boundingBox();
-  if (!scrolled) throw new Error("кнопка «Показать» пропала после прокрутки");
-  expect(scrolled.y).toBeGreaterThan(0);
-  expect(scrolled.y).toBeLessThan(900);
+  // Панель липкая и сама по себе не выше экрана: после прокрутки страницы до конца кнопка
+  // «Показать» обязана остаться в окне, иначе в длинной выдаче отбор недостижим.
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect(page.getByRole("button", { name: "Показать" })).toBeInViewport();
 });
 
-test("на 360px фильтры свёрнуты и первый ряд постеров виден сразу", async ({ page }) => {
+test("на 360px отбор закрыт, первый ряд постеров виден сразу, лист открывается и закрывается", async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 });
   await page.goto("/catalog");
 
-  await expect(page.getByLabel("Жанр")).toBeHidden();
-  // Сортировка тоже держит панель раскрытой: свёрнутая, она прячет единственный признак иного порядка.
-  await page.goto("/catalog?sort=name");
-  await expect(page.getByLabel("Сортировка")).toBeVisible();
-  await page.goto("/catalog");
+  await expect(page.getByRole("group", { name: "Жанр" })).toBeHidden();
   const first = await results(page).first().boundingBox();
   if (!first) throw new Error("выдача пуста");
   expect(first.y).toBeLessThan(800);
 
   await openFilters(page);
+  await closeFilters(page);
+  await expect(page.getByRole("group", { name: "Жанр" })).toBeHidden();
 });
 
 test("на 360px нет горизонтального скролла", async ({ page }) => {
@@ -239,9 +349,10 @@ test("на 360px нет горизонтального скролла", async ({
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
-test("axe: нет нарушений critical и serious в выдаче и в пустом состоянии", async ({ page }) => {
+test("axe: нет нарушений critical и serious в выдаче, в пустом состоянии и в раскрытом отборе", async ({ page }) => {
   for (const url of [FILTERED, "/catalog?genre=%D0%9A%D0%BE%D0%BC%D0%B5%D0%B4%D0%B8%D1%8F&kind=movie"]) {
     await page.goto(url);
+    await openFilters(page);
     const { violations } = await new AxeBuilder({ page }).analyze();
     const blocking = violations
       .filter(({ impact }) => impact === "critical" || impact === "serious")

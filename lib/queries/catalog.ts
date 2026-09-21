@@ -1,7 +1,7 @@
 import type { CatalogParams, CatalogSort } from "@/lib/catalog/params";
 import { prisma } from "@/lib/db";
 import type { Prisma } from "@/lib/generated/prisma/client";
-import type { TitleKind } from "@/lib/generated/prisma/enums";
+import type { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 import { publicTitleWhere } from "@/lib/public-where";
 
 // Обратный импорт (search тянет отсюда CatalogItem) — только типовой, он стирается при сборке,
@@ -19,6 +19,8 @@ export interface CatalogItem {
   year: number | null;
   /** Оценка Shikimori. null — тайтл ещё никто не оценил, и бейджа на карточке не будет. */
   score: number | null;
+  /** HIDDEN сюда не доходит: скрытый тайтл отсекается в publicTitleWhere ещё в запросе. */
+  status: TitleStatus;
 }
 
 export interface CatalogPage {
@@ -46,7 +48,7 @@ const ORDER_BY: Record<CatalogSort, Prisma.TitleOrderByWithRelationInput[]> = {
 };
 
 export async function getCatalog(params: CatalogParams): Promise<CatalogPage> {
-  const { q, genre, year, status, kind, sort, page } = params;
+  const { q, genres, yearFrom, yearTo, status, kinds, sort, page } = params;
 
   // Поиск сужает набор, а не заменяет выдачу: жанр, год, сортировка и страницы работают поверх него
   // ровно как раньше. Тем же запросом, что и /search: два разных дали бы разное на одно слово.
@@ -60,7 +62,16 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogPage> {
     // AND, а не слияние объектов: фильтр статуса не должен перезаписать «не HIDDEN» из publicTitleWhere.
     AND: [
       publicTitleWhere(),
-      { genres: genre ? { has: genre } : undefined, year, status, kind },
+      {
+        // Несколько жанров — «или» (hasSome): у тайтла редко стоят сразу два выбранных, и «и»
+        // превращало бы второй жанр в кнопку «очистить выдачу». То же у типов.
+        genres: genres.length > 0 ? { hasSome: genres } : undefined,
+        // Год диапазоном. Границы независимы: задана одна — вторая не ограничивает.
+        // Тайтл без года под заданный диапазон не попадает, и это верно: год неизвестен.
+        year: yearFrom || yearTo ? { gte: yearFrom, lte: yearTo } : undefined,
+        status,
+        kind: kinds.length > 0 ? { in: kinds } : undefined,
+      },
       ...(matched ? [{ id: { in: matched.ids } }] : []),
     ],
   };
@@ -73,7 +84,16 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogPage> {
       orderBy: ORDER_BY[sort],
       skip: (page - 1) * CATALOG_PAGE_SIZE,
       take: CATALOG_PAGE_SIZE,
-      select: { id: true, slug: true, nameRu: true, posterUrl: true, kind: true, year: true, score: true },
+      select: {
+        id: true,
+        slug: true,
+        nameRu: true,
+        posterUrl: true,
+        kind: true,
+        year: true,
+        score: true,
+        status: true,
+      },
     }),
   ]);
 
