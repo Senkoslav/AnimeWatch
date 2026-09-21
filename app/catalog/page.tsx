@@ -3,7 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { CatalogFilters } from "@/components/catalog/catalog-filters";
-import { CATALOG_PANEL } from "@/components/catalog/panel";
+import { CATALOG_PANEL, CATALOG_PANEL_BODY } from "@/components/catalog/panel";
+import { Band } from "@/components/ui/band";
 import { Pagination } from "@/components/catalog/pagination";
 import { TitleCard } from "@/components/catalog/title-card";
 import { withTracking } from "@/lib/canonical";
@@ -51,7 +52,7 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 md:py-10">
-      <h1 className="text-xl font-semibold">Каталог</h1>
+      <h1 className="font-display text-2xl font-bold tracking-tight">Каталог</h1>
 
       {/* Фильтры первыми в DOM — сначала отбор, потом результат, это и порядок чтения скринридером.
           Вправо их ставит явная раскладка грида, а не порядок разметки. */}
@@ -65,40 +66,51 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
             aria-labelledby="catalog-results"
             className={`mt-6 lg:col-start-1 lg:row-start-1 lg:mt-0 lg:self-start ${CATALOG_PANEL}`}
           >
-            <h2 id="catalog-results" className="text-sm text-muted">
-              {catalog.truncated
-                ? // Счётчик при обрезке считает внутри отобранных совпадений: писать его как число по
-                  // каталогу значило бы соврать, поэтому говорим, что показано, и что с этим делать.
-                  `Показаны первые ${formatCount(CATALOG_MATCH_LIMIT, ["совпадение", "совпадения", "совпадений"])}, из них подходит ${catalog.total}: уточните запрос`
-                : `Найдено ${formatCount(catalog.total, ["тайтл", "тайтла", "тайтлов"])}`}
-            </h2>
-            <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
-              {catalog.items.map((title, index) => (
-                <li key={title.id}>
-                  <TitleCard
-                    title={title}
-                    sizes={POSTER_SIZES}
-                    background="bg"
-                    eager={params.page === 1 && index < MOBILE_COLUMNS}
-                  />
-                </li>
-              ))}
-            </ul>
-            <Pagination params={params} pageCount={catalog.pageCount} />
+            {/* Счётчик живёт в полосе раздела: это выходные данные подборки, а не подпись под ней. */}
+            <Band id="catalog-results" aside={`${catalog.total}`}>
+              {catalog.truncated ? "Совпадения" : "Найдено"}
+            </Band>
+
+            <div className={CATALOG_PANEL_BODY}>
+              {catalog.truncated && (
+                // При обрезке счётчик считает внутри отобранных совпадений: писать его числом по
+                // каталогу значило бы соврать, поэтому говорим, что показано, и что с этим делать.
+                <p className="mb-4 text-sm text-muted">
+                  Показаны первые {formatCount(CATALOG_MATCH_LIMIT, ["совпадение", "совпадения", "совпадений"])}, из них
+                  подходит {catalog.total}: уточните запрос.
+                </p>
+              )}
+              <ul className="grid grid-cols-2 gap-x-4 gap-y-5 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
+                {catalog.items.map((title, index) => (
+                  <li key={title.id}>
+                    <TitleCard
+                      title={title}
+                      sizes={POSTER_SIZES}
+                      background="bg"
+                      eager={params.page === 1 && index < MOBILE_COLUMNS}
+                    />
+                  </li>
+                ))}
+              </ul>
+              <Pagination params={params} pageCount={catalog.pageCount} />
+            </div>
           </section>
         ) : (
           // Пустое состояние тоже в панели: иначе правая колонка повиснет рядом с пустотой.
-          <section className={`mt-6 space-y-3 lg:col-start-1 lg:row-start-1 lg:mt-0 lg:self-start ${CATALOG_PANEL}`}>
-            <h2 className="text-lg">Ничего не нашлось</h2>
-            {hasFilters(params) && (
-              <p className="text-muted">
-                Попробуйте убрать один из фильтров или{" "}
-                <Link href="/catalog" className="text-text underline">
-                  сбросьте все
-                </Link>
-                .
-              </p>
-            )}
+          <section className={`mt-6 lg:col-start-1 lg:row-start-1 lg:mt-0 lg:self-start ${CATALOG_PANEL}`}>
+            <Band aside="0">Найдено</Band>
+            <div className={`${CATALOG_PANEL_BODY} space-y-3`}>
+              <p className="text-lg">Ничего не нашлось</p>
+              {hasFilters(params) && (
+                <p className="text-muted">
+                  Попробуйте убрать один из фильтров или{" "}
+                  <Link href="/catalog" className="text-text underline">
+                    сбросьте все
+                  </Link>
+                  .
+                </p>
+              )}
+            </div>
           </section>
         )}
       </div>

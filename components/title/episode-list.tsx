@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { Band } from "@/components/ui/band";
 import { FreshMark } from "@/components/ui/fresh-mark";
 import { episodeWindow } from "@/lib/episodes";
 import { formatCount, formatDuration, formatEpisodeNumber, isFresh } from "@/lib/format";
@@ -14,7 +15,12 @@ interface EpisodeListProps {
   currentNumber?: number;
 }
 
-/** Список серий — основной блок страницы на телефоне. Полоса прогресса появится вместе с его сохранением. */
+/**
+ * Список серий — трек-лист вкладыша и основной блок страницы на телефоне.
+ *
+ * Все три колонки заданы одной сеткой (.row-ruled): при прокрутке номера и хронометражи
+ * собираются в сплошные вертикальные линейки, а не пляшут по ширине от строки к строке.
+ */
 export function EpisodeList({ title, now, currentNumber }: EpisodeListProps) {
   const { episodes: all, totalEpisodes, kind, slug } = title;
   const isMovie = kind === TitleKind.MOVIE;
@@ -26,22 +32,22 @@ export function EpisodeList({ title, now, currentNumber }: EpisodeListProps) {
       : formatCount(total, ["серия", "серии", "серий"]);
 
   return (
-    <section aria-labelledby="episodes-title">
-      <h2 id="episodes-title" className="flex items-baseline gap-3 text-lg font-semibold">
+    <section aria-labelledby="episodes-title" className="overflow-hidden rounded-md border border-line bg-surface">
+      {/* Объём подборки — выходные данные, они живут в полосе, а не подписью под ней. */}
+      <Band id="episodes-title" aside={isMovie ? undefined : count}>
         {isMovie ? "Фильм" : "Серии"}
-        {!isMovie && total > 0 && <span className="text-sm font-normal text-muted">{count}</span>}
-      </h2>
+      </Band>
 
       {capped && (
-        <p className="mt-2 text-sm text-muted">
-          Показаны серии {first}–{last} из {total}
+        <p className="border-b border-line px-4 py-2 text-xs text-muted">
+          Показаны {first}–{last} из {total}
         </p>
       )}
 
       {episodes.length === 0 ? (
-        <p className="mt-3 text-muted">Первая серия ещё в работе.</p>
+        <p className="px-4 py-6 text-muted">Первая серия ещё в работе.</p>
       ) : (
-        <ol className="mt-3 border-y border-line">
+        <ol>
           {episodes.map((episode) => {
             const number = formatEpisodeNumber(episode.number);
             const label = isMovie ? "Фильм" : episode.name;
@@ -53,7 +59,7 @@ export function EpisodeList({ title, now, currentNumber }: EpisodeListProps) {
               <li key={episode.id} className="border-b border-line last:border-b-0">
                 <Link
                   href={episodeHref(slug, episode.number)}
-                  // Строка собрана из нескольких span: без aria-label скринридер склеил бы номер и название.
+                  // Строка собрана из нескольких ячеек: без aria-label скринридер склеил бы номер и название.
                   aria-label={[
                     isMovie ? "Фильм" : `Эпизод ${number}`,
                     episode.name,
@@ -64,19 +70,25 @@ export function EpisodeList({ title, now, currentNumber }: EpisodeListProps) {
                     .filter(Boolean)
                     .join(", ")}
                   aria-current={current ? "page" : undefined}
-                  className="flex min-h-14 items-center gap-4 px-2 hover:bg-surface-2 aria-[current=page]:bg-surface-2"
+                  // Активная строка залита краской: по закону мира краска означает «здесь живое».
+                  className={`row-ruled min-h-12 px-4 py-2 ${current ? "bg-ink text-text" : "hover:bg-surface-2"}`}
                 >
-                  {/* Янтарный номер — серия, которая идёт прямо сейчас (docs/04). */}
-                  {!isMovie && (
-                    <span
-                      className={`min-w-10 shrink-0 font-display text-lg font-bold tabular-nums ${current ? "text-signal" : ""}`}
-                    >
-                      {number}
-                    </span>
+                  {!isMovie && <span className="font-display text-base font-bold tabular-nums">{number}</span>}
+                  {/* Ячейка стоит всегда, даже когда у серии нет своего названия: пустое место в
+                      трек-листе — это часть сетки, а не отсутствие строки. Без названия его занимает
+                      отточие — та самая линия от названия до времени, что и в печатном трек-листе. */}
+                  {label ? (
+                    <span className="min-w-0 truncate text-sm">{label}</span>
+                  ) : (
+                    <span className="leader min-w-0" aria-hidden="true" />
                   )}
-                  <span className="min-w-0 flex-1 truncate">{label}</span>
-                  {fresh && <FreshMark />}
-                  {duration && <span className="shrink-0 text-sm text-muted tabular-nums">{duration}</span>}
+                  <span className="flex items-center gap-3">
+                    {fresh && !current && <FreshMark />}
+                    {/* На залитой краской строке приглушённый цвет даёт 2.15 — там всё наследует бумагу. */}
+                    <span className={`text-sm tabular-nums ${current ? "" : "text-muted"}`}>
+                      {duration ?? <span aria-hidden="true">—:—</span>}
+                    </span>
+                  </span>
                 </Link>
               </li>
             );

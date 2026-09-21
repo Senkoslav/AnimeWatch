@@ -2,6 +2,8 @@ import Form from "next/form";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { CATALOG_PANEL, CATALOG_PANEL_BODY } from "@/components/catalog/panel";
+import { Band } from "@/components/ui/band";
 import {
   CATALOG_SORTS,
   catalogHref,
@@ -13,10 +15,9 @@ import {
   STATUS_OPTIONS,
   type CatalogParams,
 } from "@/lib/catalog/params";
-import { CATALOG_PANEL } from "@/components/catalog/panel";
 import { KIND_LABELS, SORT_LABELS, STATUS_LABELS } from "@/lib/labels";
-import { MAX_QUERY_LENGTH } from "@/lib/search/query";
 import type { CatalogFilters as FilterOptions } from "@/lib/queries/catalog";
+import { MAX_QUERY_LENGTH } from "@/lib/search/query";
 
 interface CatalogFiltersProps {
   params: CatalogParams;
@@ -25,6 +26,10 @@ interface CatalogFiltersProps {
 
 const TOGGLE_ID = "catalog-filters-open";
 const FIELDS_ID = "catalog-filters-fields";
+
+/** Поле и подпись одной высоты по всему сайту: колонки в панели должны собираться в линейку. */
+const FIELD =
+  "h-10 w-full min-w-0 rounded-sm border border-line bg-bg px-2 text-base text-text placeholder:text-muted sm:text-sm";
 
 /**
  * GET-форма через next/form: без своего JS, состояние только в URL. Страница не
@@ -54,14 +59,23 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
         defaultChecked={hasFilters(params) || params.sort !== DEFAULT_SORT}
         className="peer sr-only lg:hidden"
       />
+
+      {/* На телефоне полоса раздела работает кнопкой, на десктопе — просто полосой. */}
       <label
         htmlFor={TOGGLE_ID}
-        className="flex min-h-11 cursor-pointer items-center justify-between text-sm font-medium peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-text after:text-muted after:content-['▾'] peer-checked:after:rotate-180 lg:hidden"
+        className="flex cursor-pointer items-center justify-between gap-4 bg-ink px-4 py-2 text-text peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-ink-bright lg:hidden peer-checked:[&_svg]:rotate-180"
       >
-        Фильтры
+        <span className="font-display text-sm font-bold tracking-tight">Отбор</span>
+        {/* Нарисованный шеврон, а не глиф: иконки в проекте рисуются, а не берутся из юникода. */}
+        <svg viewBox="0 0 16 16" aria-hidden="true" className="size-4 shrink-0" fill="none" stroke="currentColor">
+          <path d="M4 6l4 4 4-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
       </label>
+      <div className="hidden lg:block">
+        <Band>Отбор</Band>
+      </div>
 
-      <div id={FIELDS_ID} className="hidden peer-checked:block max-lg:peer-checked:mt-4 lg:block">
+      <div id={FIELDS_ID} className={`hidden peer-checked:block lg:block ${CATALOG_PANEL_BODY}`}>
         <Form action="/catalog" className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-1">
           {/* Первым и здесь, и в catalogHref: пришедший адрес собирается как есть, и перестановка
               параметров увела бы страницу в вечный редирект на саму себя. */}
@@ -76,8 +90,7 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
               defaultValue={params.q ?? ""}
               maxLength={MAX_QUERY_LENGTH}
               placeholder="Название или часть"
-              // 16px на телефоне: iOS Safari увеличивает страницу при фокусе на поле с шрифтом мельче.
-              className="h-11 w-full min-w-0 rounded-sm border border-line bg-bg px-3 text-base text-text placeholder:text-muted sm:text-sm"
+              className={FIELD}
             />
           </div>
           <Field label="Жанр" name="genre" defaultValue={params.genre ?? ""}>
@@ -120,7 +133,7 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
             ))}
           </Field>
 
-          <div className="col-span-2 flex items-center gap-4 sm:col-span-3 lg:col-span-1 lg:mt-1 lg:flex-col lg:items-stretch lg:gap-3">
+          <div className="col-span-2 flex items-center gap-4 sm:col-span-3 lg:col-span-1 lg:mt-2 lg:flex-col lg:items-stretch lg:gap-2">
             <button
               type="submit"
               className="inline-flex min-h-11 flex-1 items-center justify-center rounded-sm bg-text px-5 font-medium text-bg hover:bg-muted lg:flex-none"
@@ -130,7 +143,7 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
             {hasFilters(params) && (
               <Link
                 href="/catalog"
-                className="inline-flex min-h-11 items-center rounded-sm text-sm text-muted underline lg:justify-center"
+                className="inline-flex min-h-11 items-center rounded-sm text-sm text-muted underline hover:text-text lg:justify-center"
               >
                 Сбросить
               </Link>
@@ -157,13 +170,8 @@ function Field({ label, name, defaultValue, children, className = "" }: FieldPro
       <label htmlFor={id} className="text-xs text-muted">
         {label}
       </label>
-      <select
-        id={id}
-        name={name}
-        defaultValue={defaultValue}
-        // 16px на телефоне: iOS Safari увеличивает страницу при фокусе на поле с шрифтом мельче.
-        className="h-11 w-full min-w-0 rounded-sm border border-line bg-bg px-3 text-base text-text sm:text-sm"
-      >
+      {/* 16px на телефоне: iOS Safari увеличивает страницу при фокусе на поле с шрифтом мельче. */}
+      <select id={id} name={name} defaultValue={defaultValue} className={FIELD}>
         {children}
       </select>
     </div>
