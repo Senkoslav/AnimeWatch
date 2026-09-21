@@ -35,7 +35,7 @@ export function SiteHeader() {
 
         <Link
           href="/"
-          className="-mx-2 inline-flex min-h-11 shrink-0 items-center rounded-sm px-2 font-display text-lg font-bold"
+          className="-mx-2 inline-flex min-h-11 shrink-0 items-center rounded-sm px-2 font-display text-lg font-bold tracking-tight"
         >
           AnimeWatch
         </Link>
@@ -59,7 +59,7 @@ export function SiteHeader() {
         {/* На телефоне «Войти» уходит в меню: в строку 360px оно не встаёт рядом с логотипом и лупой. */}
         <Link
           href="/login"
-          className="-mr-2 hidden min-h-11 shrink-0 items-center rounded-sm px-2 text-sm font-medium hover:text-muted md:inline-flex"
+          className="hidden h-10 shrink-0 items-center rounded-sm border border-line px-4 text-sm font-medium hover:bg-surface-2 md:inline-flex"
         >
           Войти
         </Link>
@@ -90,7 +90,7 @@ function Search({ className = "" }: { className?: string }) {
       <label htmlFor="site-search" className="sr-only">
         Поиск аниме
       </label>
-      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted">
+      <span className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2 text-muted">
         <SearchIcon />
       </span>
       <input
@@ -100,7 +100,7 @@ function Search({ className = "" }: { className?: string }) {
         maxLength={MAX_QUERY_LENGTH}
         placeholder="Поиск аниме"
         // 16px на телефоне: iOS Safari увеличивает страницу при фокусе на поле с шрифтом мельче.
-        className="h-11 w-full rounded-sm border border-line bg-surface pr-3 pl-10 text-base text-text placeholder:text-muted sm:text-sm"
+        className="h-10 w-full rounded-sm border border-line bg-surface pr-3 pl-9 text-base text-text placeholder:text-muted sm:text-sm"
       />
     </Form>
   );

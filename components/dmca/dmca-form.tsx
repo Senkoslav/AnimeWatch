@@ -121,7 +121,7 @@ export function DmcaForm() {
             defaultChecked={values.consent === "on"}
             aria-invalid={fieldErrors.consent ? true : undefined}
             aria-describedby={fieldErrors.consent ? "consent-error" : undefined}
-            className="mt-0.5 size-5 accent-signal"
+            className="mt-0.5 size-5 accent-ink"
           />
           <span>Подтверждаю, что сведения достоверны и я вправе подать это обращение.</span>
         </label>
