@@ -23,7 +23,8 @@ async function searchFromHeader(page: Page, query: string) {
     return;
   }
 
-  await page.getByRole("link", { name: "Поиск" }).click();
+  // Лупа в шапке, а не пункт нижней панели: на телефоне ссылок «Поиск» две, и тест про шапку.
+  await page.getByRole("banner").getByRole("link", { name: "Поиск" }).click();
   await expect(page).toHaveURL("/search");
   await page.getByLabel("Название аниме").fill(query);
   await page.getByRole("button", { name: "Найти" }).click();

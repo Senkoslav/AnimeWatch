@@ -301,3 +301,15 @@
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * Затемнение под модалкой входа размывает страницу утилитой (backdrop:backdrop-blur). При запрошенной
+ * непрозрачности размытие гаснет и здесь — тот же сброс, что у классов стекла. Вне слоёв намеренно:
+ * утилиты лежат в слое, и правило в слое их бы не перебило.
+ */
+@media (prefers-reduced-transparency: reduce) {
+  dialog::backdrop {
+    backdrop-filter: none;
+    background-color: var(--color-bg);
+  }
+}

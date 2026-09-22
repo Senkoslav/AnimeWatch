@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
-import type { ReactNode } from "react";
 
+import { BottomNav } from "@/components/site/bottom-nav";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
 
@@ -51,10 +51,15 @@ export const metadata: Metadata = {
   description: "Аниме онлайн: каталог, поиск и просмотр с русской озвучкой",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+/**
+ * `auth` — параллельный слот модалки входа (app/@auth). Пустой везде, кроме клиентского перехода
+ * на /login: тогда в нём окно входа поверх текущей страницы, а `children` остаётся прежним.
+ */
+export default function RootLayout({ children, auth }: LayoutProps<"/">) {
   return (
     <html lang="ru" className={`${golos.variable} ${unbounded.variable}`}>
-      <body className="flex min-h-dvh flex-col">
+      {/* Снизу на телефоне место под нижнюю панель: без него она закрыла бы конец подвала. */}
+      <body className="flex min-h-dvh flex-col pb-[calc(5.5rem+env(safe-area-inset-bottom))] lg:pb-0">
         <div hidden dangerouslySetInnerHTML={{ __html: DIRECTION_CONTRACT }} />
         <a
           href="#content"
@@ -67,6 +72,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           {children}
         </main>
         <SiteFooter />
+        <BottomNav />
+        {auth}
       </body>
     </html>
   );

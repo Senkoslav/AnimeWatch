@@ -25,13 +25,11 @@ export function SiteHeader() {
   return (
     <header className="glass-chrome sticky top-0 z-20 border-b border-line">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-4 lg:h-16">
+        {/* «Войти» на телефоне — в нижней панели (components/site/bottom-nav.tsx), здесь его нет. */}
         <MobileMenu label="Меню">
           <nav aria-label="Разделы" className="flex flex-col">
             <NavLink href="/catalog">Каталог</NavLink>
           </nav>
-          <Link href="/login" className={`${button("secondary")} mt-2 w-full`}>
-            Войти
-          </Link>
         </MobileMenu>
 
         {/* Точка — единственный знак различия логотипа. Янтарная, потому что это марка, а не место. */}
