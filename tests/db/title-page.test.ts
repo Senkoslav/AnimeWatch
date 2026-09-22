@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { TitleStatus } from "@/lib/generated/prisma/enums";
+import { prisma } from "@/lib/db";
+import { SourceType, TitleStatus } from "@/lib/generated/prisma/enums";
 import { getTitlePage } from "@/lib/queries/title";
 
 import { createEpisode, createTitle } from "../factories/catalog";
@@ -18,6 +19,28 @@ describe("getTitlePage", () => {
       [1, "Первая"],
       [2, "Вторая"],
     ]);
+  });
+
+  it("серия подключена, только если у неё есть фрейм Kodik: прямой файл не играет и не считается", async () => {
+    const title = await createTitle({ slug: "mixed" });
+    const kodik = await createEpisode(title, { number: 1 });
+    const mp4 = await createEpisode(title, { number: 2 });
+    await createEpisode(title, { number: 3 });
+    await prisma.source.create({ data: { episodeId: kodik.id, type: SourceType.KODIK, url: "https://kodik.info/seria/1" } });
+    await prisma.source.create({ data: { episodeId: mp4.id, type: SourceType.MP4, url: "https://example.com/2.mp4" } });
+
+    const page = await getTitlePage("mixed");
+    expect(page?.episodes.map((episode) => [episode.number, episode.hasSource])).toEqual([
+      [1, true],
+      [2, false],
+      [3, false],
+    ]);
+  });
+
+  it("отдаёт факты для таблицы под постером сырыми значениями Shikimori", async () => {
+    await createTitle({ slug: "facts", season: "spring_2022", ageRating: "pg_13", airDay: 4 });
+
+    expect(await getTitlePage("facts")).toMatchObject({ season: "spring_2022", ageRating: "pg_13", airDay: 4 });
   });
 
   it("несуществующий slug и мусор вместо slug — null, без ошибки базы", async () => {

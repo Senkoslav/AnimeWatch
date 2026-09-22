@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { formatCount, formatDuration, formatEpisodeNumber, formatRelativeDate, formatScore, isFresh } from "./format";
+import {
+  formatAgeRating,
+  formatAirDay,
+  formatCount,
+  formatDuration,
+  formatEpisodeNumber,
+  formatRelativeDate,
+  formatScore,
+  formatSeason,
+  isFresh,
+} from "./format";
 
 const now = new Date("2026-09-16T12:00:00Z");
 const ago = (ms: number) => new Date(now.getTime() - ms);
@@ -94,5 +104,44 @@ describe("formatDuration", () => {
     [0, "0:00"],
   ])("%i с — %s", (seconds, expected) => {
     expect(formatDuration(seconds)).toBe(expected);
+  });
+});
+
+describe("formatSeason", () => {
+  it("сезон с годом и без", () => {
+    expect(formatSeason("spring_2022")).toBe("Весна 2022");
+    expect(formatSeason("fall")).toBe("Осень");
+  });
+
+  it("незнакомое значение — не показываем, а не выводим сырую строку", () => {
+    expect(formatSeason(null)).toBeNull();
+    expect(formatSeason("ongoing_2024")).toBeNull();
+    expect(formatSeason("winter_24")).toBe("Зима");
+  });
+});
+
+describe("formatAgeRating", () => {
+  it("переводит рейтинг Shikimori", () => {
+    expect(formatAgeRating("pg_13")).toBe("PG-13, с 13 лет");
+    expect(formatAgeRating("r_plus")).toBe("R+, с 17 лет");
+  });
+
+  it("«none» и мусор — null", () => {
+    expect(formatAgeRating("none")).toBeNull();
+    expect(formatAgeRating(null)).toBeNull();
+  });
+});
+
+describe("formatAirDay", () => {
+  it("1 — понедельник, 7 — воскресенье", () => {
+    expect(formatAirDay(1)).toBe("по понедельникам");
+    expect(formatAirDay(4)).toBe("по четвергам");
+    expect(formatAirDay(7)).toBe("по воскресеньям");
+  });
+
+  it("вне недели — null", () => {
+    expect(formatAirDay(0)).toBeNull();
+    expect(formatAirDay(8)).toBeNull();
+    expect(formatAirDay(null)).toBeNull();
   });
 });

@@ -12,10 +12,13 @@ interface PosterProps {
   background?: "surface" | "bg";
   /** Слой поверх постера: значок оценки. Контейнер здесь позиционированный, поэтому место есть. */
   children?: ReactNode;
+  /** md — постер в карточке, lg — большой постер страницы тайтла (docs/04, «Токены»: радиусы). */
+  radius?: "md" | "lg";
   className?: string;
 }
 
 const BACKGROUNDS = { surface: "bg-surface", bg: "bg-bg" } as const;
+const RADII = { md: "rounded-md", lg: "rounded-lg" } as const;
 
 /** Постер 2:3. Пропорция задана контейнером, поэтому вёрстка не прыгает ни с картинкой, ни без неё. */
 export function Poster({
@@ -25,11 +28,12 @@ export function Poster({
   loading = "lazy",
   background = "surface",
   children,
+  radius = "md",
   className = "",
 }: PosterProps) {
   return (
     <div
-      className={`relative aspect-2/3 overflow-hidden rounded-md border border-line ${BACKGROUNDS[background]} ${className}`}
+      className={`relative aspect-2/3 overflow-hidden border border-line ${RADII[radius]} ${BACKGROUNDS[background]} ${className}`}
     >
       {src ? (
         // alt пустой: название всегда стоит текстом рядом, иначе скринридер прочтёт его дважды.

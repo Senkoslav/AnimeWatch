@@ -12,7 +12,7 @@ test("страница рендерится на сервере: в сыром H
   for (const text of [
     "Провожающая в последний путь Фрирен",
     "Sousou no Frieren",
-    // Описание целиком, включая то, что визуально скрыто под «Ещё».
+    // Описание целиком, включая то, что визуально скрыто под «Читать дальше».
     "Отряд героя победил Короля демонов и вернулся домой. Эльфийка-маг Фрирен проживёт ещё тысячу лет и только теперь начинает понимать, как мало времени провела со спутниками. Она отправляется в новое путешествие, чтобы узнать людей, которых успела потерять, и берёт в ученицы юную волшебницу Ферн.",
     "Конец путешествия",
     "Не обязательно магия",
@@ -58,11 +58,11 @@ test("список серий: номер, название и длительн�
   );
 });
 
-test("«Ещё» раскрывает длинное описание с клавиатуры", async ({ page, isMobile }) => {
+test("«Читать дальше» раскрывает длинное описание с клавиатуры", async ({ page, isMobile }) => {
   test.skip(isMobile, "клавиатура проверяется на десктопе");
   // Описание Фрирен в seed длиннее порога.
   await page.goto(FRIEREN);
-  const toggle = page.getByRole("button", { name: "Ещё" });
+  const toggle = page.getByRole("button", { name: "Читать дальше" });
   await expect(toggle).toHaveAttribute("aria-expanded", "false");
   const description = page.locator(`#${await toggle.getAttribute("aria-controls")}`.replaceAll(":", "\\:"));
   const clampedHeight = (await description.boundingBox())?.height ?? 0;
@@ -88,4 +88,14 @@ test("на 360px нет горизонтального скролла, axe бе�
       .map(({ id, help, nodes }) => `${id}: ${help} (${nodes.length})`);
     expect(blocking, url).toEqual([]);
   }
+});
+
+test("«В список» без аккаунта ведёт во вход, а не молчит", async ({ page }) => {
+  await page.goto(FRIEREN);
+  await page.getByRole("link", { name: "В список" }).click();
+
+  await expect(page.getByRole("dialog", { name: "Вход в AnimeWatch" })).toBeVisible();
+  // Страница тайтла осталась под модалкой: адрес сменился на /login, заголовок тайтла на месте.
+  await expect(page).toHaveURL("/login");
+  await expect(page.getByRole("heading", { level: 1, name: "Провожающая в последний путь Фрирен" })).toBeAttached();
 });

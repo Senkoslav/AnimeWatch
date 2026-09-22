@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { EpisodeList } from "@/components/title/episode-list";
 import { ExpandableText } from "@/components/title/expandable-text";
-import { button, CHIP } from "@/components/ui/controls";
+import { AddToList } from "@/components/ui/add-to-list";
+import { button, CHIP, TAG, TAG_SIGNAL } from "@/components/ui/controls";
 import { Poster } from "@/components/ui/poster";
-import { ScoreBadge } from "@/components/ui/score-badge";
+import { PosterBackdrop } from "@/components/ui/poster-backdrop";
 import { catalogHref } from "@/lib/catalog/params";
-import { formatCount } from "@/lib/format";
+import { formatAgeRating, formatAirDay, formatCount, formatScore, formatSeason } from "@/lib/format";
 import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 import { KIND_LABELS, STATUS_LABELS } from "@/lib/labels";
 import { getTitlePage, type TitlePage } from "@/lib/queries/title";
@@ -24,9 +26,12 @@ export function generateStaticParams(): { slug: string }[] {
   return [];
 }
 
-/** Описание длиннее этого почти всегда занимает больше трёх строк: показываем «Ещё». */
+/** Описание длиннее этого почти всегда занимает больше трёх строк: показываем «Читать дальше». */
 const COLLAPSIBLE_DESCRIPTION = 220;
 const META_DESCRIPTION = 160;
+
+/** Постер один и тот же на телефоне и на десктопе: подсказка ширины под обе колонки. */
+const POSTER_SIZES = "(min-width: 1024px) 296px, (min-width: 768px) 272px, 136px";
 
 export async function generateMetadata({ params }: PageProps<"/anime/[slug]">): Promise<Metadata> {
   const title = await getTitlePage((await params).slug);
@@ -39,69 +44,237 @@ export async function generateMetadata({ params }: PageProps<"/anime/[slug]">): 
   };
 }
 
+/**
+ * Страница тайтла по Title.dc.html. Отзывов с макета здесь нет: у них своя задача, и без аккаунтов
+ * на их месте были бы выдуманные люди.
+ *
+ * Раскладка одна на обе ширины. На десктопе — две колонки: слева постер, действия и факты, справа
+ * заголовок, оценка, описание и серии. На телефоне обёртки колонок становятся `contents`, и те же
+ * блоки встают в один поток в своём порядке: постер рядом с заголовком, дальше действия, оценка,
+ * описание, серии, факты. Разметка не дублируется — скринридер слышит каждый блок один раз.
+ */
 export default async function TitlePageView({ params }: PageProps<"/anime/[slug]">) {
   const title = await getTitlePage((await params).slug);
   if (!title) notFound();
 
   // Момент рендера: при ISR метка «новая» стареет до 5 минут. Осознанно.
   const now = new Date();
+  const isMovie = title.kind === TitleKind.MOVIE;
+  const status = title.status === TitleStatus.HIDDEN ? null : title.status;
   const [firstEpisode] = title.episodes;
+  // «Смотреть» ведёт туда, где играет: первая серия с источником, а если не подключено ничего — первая вообще.
+  const startEpisode = title.episodes.find((episode) => episode.hasSource) ?? firstEpisode;
+  const [mainGenre] = title.genres;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 md:py-10">
-      {/* На телефоне постер уходит в шапку рядом с названием, на десктопе — липкая колонка слева. */}
-      <div className="grid grid-cols-2 items-start gap-x-4 gap-y-8 md:grid-cols-[240px_minmax(0,1fr)] md:gap-x-10">
-        <header className="col-start-2 row-start-1 min-w-0 space-y-3">
-          <h1 className="font-display text-xl leading-tight font-bold tracking-tight text-balance break-words md:text-2xl">
-            {title.nameRu}
-          </h1>
-          {title.name !== title.nameRu && <p className="text-sm text-dim">{title.name}</p>}
-          <p className="text-sm text-text-2">{facts(title)}</p>
-          {title.genres.length > 0 && (
-            <ul aria-label="Жанры" className="flex flex-wrap gap-2">
-              {title.genres.map((genre) => (
-                <li key={genre}>
-                  <Link href={catalogHref({ genres: [genre] })} className={`${CHIP} max-w-full break-words`}>
-                    {genre}
-                  </Link>
-                </li>
+    <div className="relative">
+      <PosterBackdrop src={title.posterUrl} fade className="inset-x-0 top-0 h-80" />
+
+      <div className="relative mx-auto max-w-6xl px-4 pt-4 pb-6 md:pb-10">
+        <nav aria-label="Вы здесь" className="text-sm text-muted">
+          <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <li>
+              <Link href="/" className="inline-flex min-h-11 items-center hover:text-text">
+                Главная
+              </Link>
+            </li>
+            <Crumb>
+              <Link href="/catalog" className="inline-flex min-h-11 items-center hover:text-text">
+                Каталог
+              </Link>
+            </Crumb>
+            {mainGenre && (
+              <Crumb>
+                <Link
+                  href={catalogHref({ genres: [mainGenre] })}
+                  className="inline-flex min-h-11 items-center hover:text-text"
+                >
+                  {mainGenre}
+                </Link>
+              </Crumb>
+            )}
+          </ol>
+        </nav>
+
+        <div className="mt-2 grid grid-cols-[8.5rem_minmax(0,1fr)] gap-x-4 gap-y-5 md:mt-14 md:grid-cols-[17rem_minmax(0,1fr)] md:gap-x-8 lg:grid-cols-[18.5rem_minmax(0,1fr)]">
+          {/* Левая колонка на десктопе; на телефоне её блоки встают в общий поток. */}
+          <div className="contents md:flex md:flex-col md:gap-3.5">
+            <div className="col-start-1 row-start-1">
+              <Poster
+                src={title.posterUrl}
+                title={title.nameRu}
+                sizes={POSTER_SIZES}
+                loading="preload"
+                radius="lg"
+              />
+            </div>
+
+            <div className="order-2 col-span-2 flex flex-col gap-2.5 md:order-none">
+              {startEpisode && (
+                <Link href={episodeHref(title.slug, startEpisode.number)} className={`${button()} w-full`}>
+                  <PlayIcon />
+                  {isMovie ? "Смотреть" : `Смотреть эпизод ${startEpisode.number}`}
+                </Link>
+              )}
+              <AddToList className="w-full" />
+            </div>
+
+            <dl className="order-6 col-span-2 overflow-hidden rounded-lg border border-line bg-surface md:order-none">
+              {facts(title).map(([name, value]) => (
+                <div
+                  key={name}
+                  className="flex min-h-11 items-center justify-between gap-3 border-b border-line px-3.5 py-2 last:border-b-0"
+                >
+                  <dt className="text-sm text-dim">{name}</dt>
+                  {/* Пустое место рисуется прочерком, а не пропадает строкой (docs/04, «Компоненты»). */}
+                  <dd className={`text-right text-sm font-medium ${value ? "" : "cell-ghost"}`}>
+                    {value ?? (
+                      <>
+                        <span aria-hidden="true">—</span>
+                        <span className="sr-only">нет данных</span>
+                      </>
+                    )}
+                  </dd>
+                </div>
               ))}
-            </ul>
-          )}
-        </header>
+            </dl>
+          </div>
 
-        <aside className="col-start-1 row-start-1 space-y-4 md:sticky md:top-sticky md:row-span-2">
-          <Poster src={title.posterUrl} title={title.nameRu} sizes="(min-width: 768px) 240px, 50vw" loading="preload">
-            {title.score !== null && <ScoreBadge score={title.score} />}
-          </Poster>
-          {firstEpisode && (
-            <Link href={episodeHref(title.slug, firstEpisode.number)} className={`${button()} w-full`}>
-              Смотреть
-            </Link>
-          )}
-        </aside>
+          {/* Правая колонка на десктопе. */}
+          <div className="contents md:flex md:min-w-0 md:flex-col md:gap-6 md:pt-2">
+            <div className="contents lg:flex lg:items-start lg:gap-8">
+              <header className="col-start-2 row-start-1 flex min-w-0 flex-col gap-2.5 self-center md:self-auto lg:flex-1">
+                <h1 className="font-display text-xl leading-tight font-bold tracking-tight text-balance break-words hyphens-auto md:text-3xl">
+                  {title.nameRu}
+                </h1>
+                {title.name !== title.nameRu && <p className="text-sm text-muted md:text-md">{title.name}</p>}
+                <ul aria-label="Коротко" className="mt-1 flex flex-wrap gap-2">
+                  {title.year && <li className={TAG}>{title.year}</li>}
+                  <li className={TAG}>{KIND_LABELS[title.kind]}</li>
+                  {!isMovie && title.totalEpisodes && (
+                    <li className={TAG}>{formatCount(title.totalEpisodes, ["серия", "серии", "серий"])}</li>
+                  )}
+                  {status && (
+                    // Янтарь только у «выходит»: это и есть то, что происходит сейчас.
+                    <li className={status === TitleStatus.ONGOING ? TAG_SIGNAL : TAG}>
+                      {status === TitleStatus.ONGOING && (
+                        <span aria-hidden="true" className="size-1.5 rounded-full bg-signal" />
+                      )}
+                      {STATUS_LABELS[status].toLocaleLowerCase("ru")}
+                    </li>
+                  )}
+                </ul>
+              </header>
 
-        <div className="col-span-2 min-w-0 space-y-10 md:col-span-1 md:col-start-2">
-          {title.description && (
-            <ExpandableText text={title.description} collapsible={title.description.length > COLLAPSIBLE_DESCRIPTION} />
-          )}
-          <EpisodeList title={title} now={now} />
+              {title.score !== null && (
+                <div className="order-3 col-span-2 rounded-lg border border-line bg-surface p-4 md:order-none lg:w-53 lg:shrink-0">
+                  <p className="text-xs text-dim">Оценка Shikimori</p>
+                  {/* Оценка янтарная по закону мира; полоса — «заполненная часть», тот же сигнал. */}
+                  <p
+                    className="mt-1.5 font-display text-2xl leading-none font-bold tracking-tight text-signal"
+                    data-numeric=""
+                  >
+                    {formatScore(title.score)}
+                  </p>
+                  <div aria-hidden="true" className="mt-3 h-1.5 overflow-hidden rounded-full bg-fill-2">
+                    <div className="h-full bg-signal" style={{ width: `${Math.min(100, title.score * 10)}%` }} />
+                  </div>
+                  <p className="mt-2.5 text-xs text-dim">
+                    Своих оценок у сайта пока нет — появятся вместе с аккаунтами.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="order-4 col-span-2 flex flex-col gap-4 md:order-none">
+              {title.genres.length > 0 && (
+                <ul aria-label="Жанры" className="flex flex-wrap gap-2">
+                  {title.genres.map((genre) => (
+                    <li key={genre}>
+                      <Link href={catalogHref({ genres: [genre] })} className={`${CHIP} max-w-full break-words`}>
+                        {genre}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {title.description && (
+                <ExpandableText
+                  text={title.description}
+                  collapsible={title.description.length > COLLAPSIBLE_DESCRIPTION}
+                />
+              )}
+            </div>
+
+            <div className="order-5 col-span-2 md:order-none">
+              <EpisodeList title={title} now={now} thumbs footer={episodesFooter(title)} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-/** «2023, ТВ-сериал, 28 серий, выходит» — через запятую, по смыслу от общего к частному. */
-function facts(title: TitlePage): string {
-  const parts: (string | null)[] = [
-    title.year ? String(title.year) : null,
-    KIND_LABELS[title.kind],
-    title.kind !== TitleKind.MOVIE && title.totalEpisodes
-      ? formatCount(title.totalEpisodes, ["серия", "серии", "серий"])
-      : null,
-    // HIDDEN сюда не доходит: такой тайтл не найден ещё в запросе.
-    title.status === TitleStatus.HIDDEN ? null : STATUS_LABELS[title.status].toLocaleLowerCase("ru"),
+/** Звено крошек со своей косой чертой: разделитель — оформление, скринридеру его читать незачем. */
+function Crumb({ children }: { children: ReactNode }) {
+  return (
+    <li className="flex items-center gap-2">
+      <span aria-hidden="true" className="text-dim">
+        /
+      </span>
+      {children}
+    </li>
+  );
+}
+
+/** Таблица фактов под постером. Год и тип стоят метками у заголовка, здесь — то, чего там нет. */
+function facts(title: TitlePage): [string, string | null][] {
+  const status = title.status === TitleStatus.HIDDEN ? null : title.status;
+  const rows: [string, string | null][] = [
+    ["Сезон", formatSeason(title.season)],
+    ["Возраст", formatAgeRating(title.ageRating)],
   ];
-  return parts.filter(Boolean).join(", ");
+  if (title.kind !== TitleKind.MOVIE) {
+    rows.push([
+      "Серий",
+      title.totalEpisodes && title.totalEpisodes > title.episodes.length
+        ? `${title.episodes.length} из ${title.totalEpisodes}`
+        : String(title.episodes.length),
+    ]);
+  }
+  // День выхода имеет смысл только у того, что ещё выходит.
+  if (status === TitleStatus.ONGOING) rows.push(["Выходит", formatAirDay(title.airDay)]);
+  return rows;
+}
+
+/** Подвал списка серий: что показано, когда выйдет остальное, и вход с первой серии. */
+function episodesFooter(title: TitlePage) {
+  const [first] = title.episodes;
+  if (!first || title.kind === TitleKind.MOVIE) return undefined;
+
+  const total = title.episodes.length;
+  const airDay = title.status === TitleStatus.ONGOING ? formatAirDay(title.airDay) : null;
+  const rest = title.totalEpisodes && title.totalEpisodes > total ? title.totalEpisodes - total : 0;
+
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <p className="text-xs text-dim">
+        {rest > 0
+          ? `Вышло ${total} из ${title.totalEpisodes}.${airDay ? ` Остальные выйдут по расписанию, ${airDay}.` : ""}`
+          : formatCount(total, ["серия", "серии", "серий"])}
+      </p>
+      <Link href={episodeHref(title.slug, first.number)} className={button("secondary", "sm")}>
+        Начать с первой
+      </Link>
+    </div>
+  );
+}
+
+function PlayIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="currentColor">
+      <path d="M7 4.5l13 7.5-13 7.5z" />
+    </svg>
+  );
 }

@@ -1,7 +1,7 @@
 import { cache } from "react";
 
 import { prisma } from "@/lib/db";
-import type { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
+import { SourceType, type TitleKind, type TitleStatus } from "@/lib/generated/prisma/enums";
 import { publicEpisodeWhere, publicTitleWhere } from "@/lib/public-where";
 import { slugSchema } from "@/lib/slug";
 
@@ -10,7 +10,14 @@ export interface TitleEpisode {
   number: number;
   name: string | null;
   duration: number | null;
+  /** Кадр из серии для строки списка; у импорта с Shikimori его обычно нет. */
+  thumbUrl: string | null;
   publishedAt: Date;
+  /**
+   * Есть ли у серии источник, который реально играет: фрейм Kodik. Прямые файлы в этой версии не
+   * воспроизводятся (components/watch/player-slot.tsx), и считать их «подключёнными» значило бы соврать.
+   */
+  hasSource: boolean;
 }
 
 export interface TitlePage {
@@ -25,6 +32,11 @@ export interface TitlePage {
   year: number | null;
   /** Оценка Shikimori. null — тайтл ещё никто не оценил, и значка на постере не будет. */
   score: number | null;
+  /** Сырые значения Shikimori: «spring_2022», «pg_13». Подписи — lib/format.ts. */
+  season: string | null;
+  ageRating: string | null;
+  /** День выхода, 1 — понедельник. Для подписи «остальные выйдут по четвергам». */
+  airDay: number | null;
   genres: string[];
   totalEpisodes: number | null;
   episodes: TitleEpisode[];
@@ -53,12 +65,24 @@ export const getTitlePage = cache(async (slug: string): Promise<TitlePage | null
       year: true,
       // Оценка Shikimori: значок на постере. null — тайтл ещё никто не оценил (docs/03).
       score: true,
+      season: true,
+      ageRating: true,
+      airDay: true,
       genres: true,
       totalEpisodes: true,
       episodes: {
         where: publicEpisodeWhere(),
         orderBy: { number: "asc" },
-        select: { id: true, number: true, name: true, duration: true, publishedAt: true },
+        select: {
+          id: true,
+          number: true,
+          name: true,
+          duration: true,
+          thumbUrl: true,
+          publishedAt: true,
+          // Счётчик в том же запросе, а не запрос на серию: у «Ван-Пис» их больше тысячи.
+          _count: { select: { sources: { where: { type: SourceType.KODIK } } } },
+        },
       },
     },
   });
@@ -66,8 +90,8 @@ export const getTitlePage = cache(async (slug: string): Promise<TitlePage | null
 
   return {
     ...title,
-    episodes: title.episodes.flatMap(({ publishedAt, ...episode }) =>
-      publishedAt === null ? [] : [{ ...episode, publishedAt }],
+    episodes: title.episodes.flatMap(({ publishedAt, _count, ...episode }) =>
+      publishedAt === null ? [] : [{ ...episode, publishedAt, hasSource: _count.sources > 0 }],
     ),
   };
 });

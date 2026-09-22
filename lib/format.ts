@@ -71,3 +71,38 @@ export function formatScore(score: number): string {
 export function formatEpisodeNumber(number: number): string {
   return String(number).padStart(2, "0");
 }
+
+const SEASONS: Record<string, string> = { winter: "Зима", spring: "Весна", summer: "Лето", fall: "Осень" };
+
+/**
+ * Сезон Shikimori: «spring_2022» → «Весна 2022», «fall» → «Осень». Незнакомое значение — null, а не
+ * сырая строка: «ongoing_2024» в таблице фактов читалось бы как поломка.
+ */
+export function formatSeason(season: string | null): string | null {
+  if (!season) return null;
+  const [name = "", year] = season.split("_");
+  const label = SEASONS[name];
+  if (!label) return null;
+  return year && /^\d{4}$/.test(year) ? `${label} ${year}` : label;
+}
+
+const AGE_RATINGS: Record<string, string> = {
+  g: "G, для всех",
+  pg: "PG, для детей",
+  pg_13: "PG-13, с 13 лет",
+  r: "R-17, с 17 лет",
+  r_plus: "R+, с 17 лет",
+  rx: "Rx, 18+",
+};
+
+/** Возрастной рейтинг Shikimori по-человечески: «pg_13» → «PG-13, с 13 лет». «none» и мусор — null. */
+export function formatAgeRating(rating: string | null): string | null {
+  return rating ? (AGE_RATINGS[rating] ?? null) : null;
+}
+
+/** День выхода по airDay (1 — понедельник): «по четвергам». Вне 1–7 — null. */
+const AIR_DAYS = ["по понедельникам", "по вторникам", "по средам", "по четвергам", "по пятницам", "по субботам", "по воскресеньям"];
+
+export function formatAirDay(airDay: number | null): string | null {
+  return airDay && airDay >= 1 && airDay <= 7 ? (AIR_DAYS[airDay - 1] ?? null) : null;
+}

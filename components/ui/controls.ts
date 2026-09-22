@@ -69,6 +69,16 @@ export const CHIP = `${CHIP_BASE} border-line bg-fill text-text-2 hover:bg-fill-
 export const CHIP_ACTIVE = `${CHIP_BASE} border-signal-line bg-signal-soft text-signal`;
 
 /**
+ * Метка: выходные данные рядом с заголовком (год, тип, число серий). Выглядит как чип, но это не
+ * ссылка и не поле, поэтому без ховера и без тач-цели — нажимать на неё нечего.
+ */
+const TAG_BASE = "inline-flex min-h-8 items-center gap-2 rounded-sm border px-3 text-sm";
+export const TAG = `${TAG_BASE} border-line bg-fill text-text-2`;
+
+/** Метка того, что происходит сейчас: «выходит», «вышло 3 часа назад». Точка повторяет смысл формой. */
+export const TAG_SIGNAL = `${TAG_BASE} border-signal-line bg-signal-soft font-semibold text-signal`;
+
+/**
  * Сегментированный переключатель: одно значение из нескольких, собран из радиокнопок.
  *
  * Сетка, а не строка: в колонке отбора шириной 19rem четыре варианта в ряд не помещаются, и
