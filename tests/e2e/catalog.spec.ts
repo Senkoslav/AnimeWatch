@@ -223,7 +223,7 @@ test("поиск в каталоге складывается с фильтро�
 
   // Два слова: encodeURIComponent дал бы «%20» вместо «+», и страница ушла бы в вечный редирект.
   // Название применяется паузой в наборе, без Enter и без кнопки.
-  await page.getByLabel("Название").fill("монолог фармацевта");
+  await page.getByLabel("Название", { exact: true }).fill("монолог фармацевта");
 
   await expect(page).toHaveURL(
     "/catalog?q=%D0%BC%D0%BE%D0%BD%D0%BE%D0%BB%D0%BE%D0%B3+%D1%84%D0%B0%D1%80%D0%BC%D0%B0%D1%86%D0%B5%D0%B2%D1%82%D0%B0",
@@ -234,7 +234,7 @@ test("поиск в каталоге складывается с фильтро�
 
   // Поле переживает переход: иначе непонятно, почему в каталоге три тайтла вместо девяти.
   await openFilters(page);
-  await expect(page.getByLabel("Название")).toHaveValue("монолог фармацевта");
+  await expect(page.getByLabel("Название", { exact: true })).toHaveValue("монолог фармацевта");
 
   // «Сбросить» — в шапке панели; лист уже открыт строкой выше.
   await page.getByRole("link", { name: "Сбросить" }).click();

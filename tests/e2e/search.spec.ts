@@ -11,23 +11,21 @@ function results(page: Page) {
 const HEADER_FIELD = 768;
 
 /**
- * Дорога до выдачи из шапки. На широком экране поиск начинается прямо в ней, на телефоне поле
- * туда не помещается и там лупа, ведущая на страницу. Ветвимся по ширине окна, а не по видимости:
- * isVisible не ретраится и на медленном прогоне соврал бы.
+ * Дорога до выдачи из шапки: поле на широком экране и лупа на телефоне открывают окно поиска,
+ * Enter в нём ведёт на страницу выдачи. Ветвимся по ширине окна, а не по видимости: isVisible не
+ * ретраится и на медленном прогоне соврал бы.
  */
 async function searchFromHeader(page: Page, query: string) {
   const viewport = page.viewportSize();
-  if (viewport && viewport.width >= HEADER_FIELD) {
-    await page.getByLabel("Поиск аниме").fill(query);
-    await page.getByLabel("Поиск аниме").press("Enter");
-    return;
-  }
-
-  // Лупа в шапке, а не пункт нижней панели: на телефоне ссылок «Поиск» две, и тест про шапку.
-  await page.getByRole("banner").getByRole("link", { name: "Поиск" }).click();
-  await expect(page).toHaveURL("/search");
-  await page.getByLabel("Название аниме").fill(query);
-  await page.getByRole("button", { name: "Найти" }).click();
+  const trigger =
+    viewport && viewport.width >= HEADER_FIELD
+      ? page.getByRole("banner").getByRole("link", { name: /Поиск аниме/ })
+      : // Лупа в шапке, а не пункт нижней панели: на телефоне ссылок «Поиск» две, и тест про шапку.
+        page.getByRole("banner").getByRole("link", { name: "Поиск", exact: true });
+  await trigger.click();
+  const field = page.getByRole("dialog").getByLabel("Название аниме");
+  await field.fill(query);
+  await field.press("Enter");
 }
 
 test("приёмка роадмапа: «наруот» находит «Наруто»", async ({ page }) => {

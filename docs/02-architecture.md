@@ -146,6 +146,7 @@ GOOGLE_CLIENT_SECRET     # только сервер: обмен кода на �
 TELEGRAM_BOT_TOKEN       # уведомление об обращении правообладателя
 DMCA_TG_CHAT             # чат, куда уходит уведомление
 DMCA_IP_SALT             # соль для хеша IP заявителя; обязательна в проде — без неё сборка прода падает
+REDIS_URL                # Redis (интеграция Vercel): счётчики лимитов; нет — лимиты пропускают запросы
 NEXT_PUBLIC_SITE_URL     # адрес сайта для canonical и sitemap; не задан — VERCEL_PROJECT_PRODUCTION_URL
 ```
 

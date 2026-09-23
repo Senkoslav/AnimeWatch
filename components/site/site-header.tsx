@@ -1,12 +1,10 @@
 import { Search as SearchIcon } from "lucide-react";
-import Form from "next/form";
 import Link from "next/link";
 
 import { AccountMenu } from "@/components/auth/account-menu";
 import { LogoMark } from "@/components/site/logo-mark";
 import { AuthTrigger } from "@/components/auth/auth-trigger";
 import { button, FIELD_COMPACT } from "@/components/ui/controls";
-import { MAX_QUERY_LENGTH } from "@/lib/search/query";
 
 import { MobileMenu } from "./mobile-menu";
 import { NavLink } from "./nav-link";
@@ -62,11 +60,13 @@ export function SiteHeader() {
         </nav>
 
         {/* Поле, а не иконка: поиск — вторая причина, по которой сюда приходят, и прятать его незачем. */}
-        <Search className="ml-auto hidden w-full max-w-xs md:block" />
+        <Search className="ml-auto hidden w-full max-w-xs md:flex" />
 
-        {/* На телефоне поле не помещается рядом с логотипом, поэтому там лупа на страницу поиска. */}
+        {/* На телефоне поле не помещается рядом с логотипом, поэтому там лупа: окно поиска, без JS — страница. */}
         <Link
           href="/search"
+          prefetch={false}
+          data-search-open=""
           aria-label="Поиск"
           className="-mr-2 ml-auto inline-flex size-11 shrink-0 items-center justify-center rounded-sm text-muted hover:text-text md:hidden"
         >
@@ -89,30 +89,32 @@ export function SiteHeader() {
 }
 
 /**
- * GET-форма без своего JS: работает и до того, как появится модалка поиска.
+ * Поиск в шапке — ссылка, похожая на поле (Title.dc.html: «Поиск аниме» и «Ctrl K»). Щелчок
+ * перехватывает окно поиска (components/search/search-dialog.tsx); без JS это переход на /search,
+ * где своя форма. Настоящего поля здесь нет: с окном оно ловило бы фокус дважды.
  *
- * prefetch={false}: форма видна на каждой странице, а next/form по умолчанию подгружает адрес
- * действия, как только форма появилась в кадре. `/search` динамический, и это был бы запрос к базе
- * на каждый просмотр любой страницы сайта.
+ * prefetch={false}: ссылка видна на каждой странице, а /search динамический — это был бы запрос к
+ * базе на каждый просмотр любой страницы сайта.
  */
 function Search({ className = "" }: { className?: string }) {
   return (
-    <Form action="/search" prefetch={false} className={`relative ${className}`}>
-      <label htmlFor="site-search" className="sr-only">
-        Поиск аниме
-      </label>
-      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-dim">
-        <SearchIcon aria-hidden="true" className="size-5" />
-      </span>
-      <input
-        id="site-search"
-        name="q"
-        type="search"
-        maxLength={MAX_QUERY_LENGTH}
-        // Только название: поиск идёт по названиям и синонимам (docs/03), жанр или год он не найдёт.
-        placeholder="Поиск по названию"
-        className={`${FIELD_COMPACT} pr-3 pl-10`}
-      />
-    </Form>
+    <Link
+      href="/search"
+      prefetch={false}
+      data-search-open=""
+      aria-keyshortcuts="Control+K Meta+K"
+      className={`${FIELD_COMPACT} flex items-center gap-2.5 pr-2 pl-3 text-dim hover:border-fill-2 hover:text-muted ${className}`}
+    >
+      <SearchIcon aria-hidden="true" className="size-5 shrink-0" />
+      <span className="flex-1 truncate">Поиск аниме</span>
+      {/* Подсказка сочетания: на Mac окно поиска заменит её на «⌘K». */}
+      <kbd
+        data-search-kbd=""
+        aria-hidden="true"
+        className="shrink-0 rounded-[6px] border border-line bg-fill px-1.5 py-0.5 font-sans text-xs text-dim"
+      >
+        Ctrl K
+      </kbd>
+    </Link>
   );
 }

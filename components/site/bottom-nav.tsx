@@ -14,12 +14,14 @@ interface Item {
   Icon: LucideIcon;
   /** Главная совпадает только сама с собой: иначе «/» был бы текущим на любой странице. */
   exact?: boolean;
+  /** Открывает окно поиска вместо перехода (components/search/search-dialog.tsx); без JS — переход. */
+  searchDialog?: boolean;
 }
 
 const ITEMS: Item[] = [
   { href: "/", label: "Главная", Icon: House, exact: true },
   { href: "/catalog", label: "Каталог", Icon: LayoutGrid },
-  { href: "/search", label: "Поиск", Icon: Search },
+  { href: "/search", label: "Поиск", Icon: Search, searchDialog: true },
 ];
 
 const ITEM = "group flex flex-1 flex-col items-center justify-center gap-1 rounded-md text-dim";
@@ -42,12 +44,14 @@ export function BottomNav() {
       className="glass-chrome fixed inset-x-3 bottom-[calc(0.75rem+env(safe-area-inset-bottom))] z-20 rounded-lg border border-line lg:hidden"
     >
       <ul className="flex h-16 items-stretch px-1">
-        {ITEMS.map(({ href, label, Icon, exact }) => {
+        {ITEMS.map(({ href, label, Icon, exact, searchDialog }) => {
           const current = exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`);
           return (
             <li key={href} className="flex flex-1">
               <Link
                 href={href}
+                data-search-open={searchDialog ? "" : undefined}
+                prefetch={searchDialog ? false : undefined}
                 aria-current={current ? "page" : undefined}
                 className={`${ITEM} aria-[current=page]:text-text`}
               >

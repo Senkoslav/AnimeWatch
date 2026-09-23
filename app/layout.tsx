@@ -6,6 +6,7 @@ import { Golos_Text, Unbounded } from "next/font/google";
 import { AuthDialog } from "@/components/auth/auth-dialog";
 import { BottomNav } from "@/components/site/bottom-nav";
 import { SiteFooter } from "@/components/site/site-footer";
+import { SearchDialog } from "@/components/search/search-dialog";
 import { SiteHeader } from "@/components/site/site-header";
 import { OPEN_GRAPH_BASE } from "@/lib/site/metadata";
 import { siteUrl } from "@/lib/site/url";
@@ -79,6 +80,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteFooter />
         <BottomNav />
         <AuthDialog />
+        <SearchDialog />
         {/*
           Vercel Web Analytics (посещения) и Speed Insights (Core Web Vitals у настоящих зрителей:
           LCP, CLS, INP — цели MVP из docs/01). Без cookie и персональных данных. Только на Vercel:

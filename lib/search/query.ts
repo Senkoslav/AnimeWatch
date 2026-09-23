@@ -8,6 +8,9 @@ import { z } from "zod";
 /** Длиннее люди не ищут, а триграммный счёт по такой строке только дорожает. */
 export const MAX_QUERY_LENGTH = 64;
 
+/** Короче двух букв живой поиск молчит: триграммный счёт по одной букве возвращает шум, а не тайтлы. */
+export const MIN_QUICK_QUERY = 2;
+
 /** Схлопывает пробелы, убирает управляющие символы, обрезает по длине. Пустой запрос — пустая строка. */
 export function normalizeQuery(raw: string | undefined): string {
   return (raw ?? "")
