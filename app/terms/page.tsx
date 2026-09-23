@@ -7,6 +7,7 @@ import { siteContactEmail } from "@/lib/site/contact";
 export const metadata: Metadata = {
   title: "Пользовательское соглашение",
   description: "Условия использования сайта AnimeWatch.",
+  alternates: { canonical: "/terms" },
 };
 
 // Текст меняется редко: сутки в кеше, точечный сброс не нужен.

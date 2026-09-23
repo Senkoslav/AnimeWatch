@@ -200,10 +200,12 @@ Video.js, раздел «Команда», новости.
 
 ## Фаза E. Заявка
 
-- [ ] `S` Минимум SEO: `generateMetadata` на каждом роуте, `robots.txt`,
+- [x] `S` Минимум SEO: `generateMetadata` на каждом роуте, `robots.txt`,
       `sitemap.xml`.
       **Приёмка:** мета двух разных тайтлов различаются; canonical не ведёт на
       чужой URL.
+      Сделано 2026-09-23: `metadataBase` из `lib/site/url.ts`, canonical и Open
+      Graph с постером, `/random` и `/search` закрыты в `robots.txt`.
 - [ ] `S` Заявка в Kodik: письмо на support@kodikres.com с доменом и описанием
       (адрес с `kodikplayer.com`; `kodik.biz` больше не существует, `docs/05`).
       **Приёмка:** письмо отправлено, текст сохранён в `docs/05-kodik.md`.
@@ -211,6 +213,8 @@ Video.js, раздел «Команда», новости.
 ## Фаза F. После доступа
 
 - [ ] `M` Сопоставление нашего каталога с их базой, заполнение `Source`.
+      Вместе с ним — страницы серий с источником в `sitemap.xml` (сейчас их там
+      нет: без плеера это тонкие дубли).
       **Приёмка:** у тайтлов с озвучкой в Kodik серии играют.
 - [ ] `S` Пул соединений под serverless (`docs/03`): явный `pg.Pool` с малым
       `max` и `attachDatabasePool` из `@vercel/functions`.

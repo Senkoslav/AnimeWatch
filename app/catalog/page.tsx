@@ -33,8 +33,11 @@ import { CATALOG_MATCH_LIMIT } from "@/lib/queries/search";
  * проверены по каталогу (sanitizeCatalogParams).
  */
 export async function generateMetadata({ searchParams }: PageProps<"/catalog">): Promise<Metadata> {
-  const { q } = parseCatalogParams(await searchParams);
-  return q ? { title: "Каталог", robots: { index: false, follow: true } } : { title: "Каталог" };
+  const params = parseCatalogParams(await searchParams);
+  if (params.q) return { title: "Каталог", robots: { index: false, follow: true } };
+  // Нечистый адрес страница и так уводит на канонический (ниже), так что здесь адрес уже чистый;
+  // метки кампаний в canonical не идут — это один и тот же каталог.
+  return { title: "Каталог", alternates: { canonical: catalogHref(params) } };
 }
 
 /** Колонок сетки на телефоне: первый ряд виден без прокрутки. */

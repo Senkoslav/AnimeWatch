@@ -7,6 +7,7 @@ import { siteContactEmail } from "@/lib/site/contact";
 export const metadata: Metadata = {
   title: "Политика конфиденциальности",
   description: "Какие данные собирает AnimeWatch и что с ними происходит.",
+  alternates: { canonical: "/privacy" },
 };
 
 export const revalidate = 86_400;

@@ -12,6 +12,7 @@ import { TitleKind } from "@/lib/generated/prisma/enums";
 import type { TitleEpisode } from "@/lib/queries/title";
 import { getWatchPage } from "@/lib/queries/watch";
 import { episodeHref, titleHref } from "@/lib/routes";
+import { OPEN_GRAPH_BASE } from "@/lib/site/metadata";
 
 // docs/02, «Кеширование»: страница просмотра динамическая — скрытие тайтла по жалобе должно действовать сразу.
 export const dynamic = "force-dynamic";
@@ -32,9 +33,20 @@ export async function generateMetadata({ params }: PageProps<"/anime/[slug]/[epi
   const page = await load(params);
   if (!page) return {};
   const { title, episode } = page;
+  const heading = title.kind === TitleKind.MOVIE ? title.nameRu : `${title.nameRu} — эпизод ${episode.number}`;
+  const description = `Смотреть ${title.nameRu} онлайн на AnimeWatch`;
   return {
-    title: title.kind === TitleKind.MOVIE ? title.nameRu : `${title.nameRu} — эпизод ${episode.number}`,
-    description: `Смотреть ${title.nameRu} онлайн на AnimeWatch`,
+    title: heading,
+    description,
+    // Относительный путь от metadataBase: чужой хост сюда не попадёт по построению.
+    alternates: { canonical: episodeHref(title.slug, episode.number) },
+    openGraph: {
+      ...OPEN_GRAPH_BASE,
+      type: "video.episode",
+      title: heading,
+      description,
+      images: title.posterUrl ? [title.posterUrl] : undefined,
+    },
   };
 }
 

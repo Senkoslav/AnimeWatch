@@ -9,6 +9,7 @@ import { getSchedule } from "@/lib/queries/home";
 export const metadata: Metadata = {
   title: "Расписание",
   description: "Когда выходят новые серии онгоингов: дни недели и время по Москве.",
+  alternates: { canonical: "/schedule" },
 };
 
 // Данные меняет только импорт, а «сегодня» сдвигается раз в сутки: пять минут кеша достаточно.

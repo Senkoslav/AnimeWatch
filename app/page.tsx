@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { NewEpisodes } from "@/components/home/new-episodes";
@@ -8,6 +9,9 @@ import { Schedule } from "@/components/home/schedule";
 import { button } from "@/components/ui/controls";
 import { isToday, moscowWeekday } from "@/lib/format";
 import { getHomeFeed, getOngoing, getPopular, getSchedule } from "@/lib/queries/home";
+
+// Заголовок и описание — корневые из лэйаута; своё у главной только canonical.
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 // docs/02, «Кеширование»: главная — ISR раз в минуту.
 export const revalidate = 60;

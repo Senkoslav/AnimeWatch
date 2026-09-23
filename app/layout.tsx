@@ -5,6 +5,8 @@ import { AuthDialog } from "@/components/auth/auth-dialog";
 import { BottomNav } from "@/components/site/bottom-nav";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
+import { OPEN_GRAPH_BASE } from "@/lib/site/metadata";
+import { siteUrl } from "@/lib/site/url";
 
 import "./globals.css";
 
@@ -48,8 +50,11 @@ the verdict, DESIGN.md, and every shipping raster carrying its provenance
 -->`;
 
 export const metadata: Metadata = {
+  // Относительные canonical и картинки Open Graph собираются от адреса сайта (lib/site/url.ts).
+  metadataBase: siteUrl(),
   title: { default: "AnimeWatch", template: "%s — AnimeWatch" },
   description: "Аниме онлайн: каталог, поиск и просмотр с русской озвучкой",
+  openGraph: { ...OPEN_GRAPH_BASE, type: "website" },
 };
 
 /** Окно входа стоит здесь закрытым, одно на весь сайт: его открывают кнопки «Войти» и «В список». */

@@ -16,7 +16,8 @@ import { formatAgeRating, formatAirDay, formatCount, formatScore, formatSeason }
 import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 import { KIND_LABELS, STATUS_LABELS } from "@/lib/labels";
 import { getTitlePage, type TitlePage } from "@/lib/queries/title";
-import { episodeHref } from "@/lib/routes";
+import { episodeHref, titleHref } from "@/lib/routes";
+import { OPEN_GRAPH_BASE } from "@/lib/site/metadata";
 
 // docs/02, «Кеширование»: ISR раз в 5 минут. Кешируется и 404: опубликованный черновик или снятая жалоба до 5 минут
 // отдают «нет страницы», скрытый тайтл до 5 минут виден. Тегов у страницы нет, мгновенно её сбросит только
@@ -39,10 +40,21 @@ export async function generateMetadata({ params }: PageProps<"/anime/[slug]">): 
   const title = await getTitlePage((await params).slug);
   if (!title) return {};
 
-  const description = title.description ?? `${title.nameRu} — смотреть онлайн на AnimeWatch`;
+  const full = title.description ?? `${title.nameRu} — смотреть онлайн на AnimeWatch`;
+  const description = full.length > META_DESCRIPTION ? `${full.slice(0, META_DESCRIPTION - 1)}…` : full;
   return {
     title: title.nameRu,
-    description: description.length > META_DESCRIPTION ? `${description.slice(0, META_DESCRIPTION - 1)}…` : description,
+    description,
+    // Относительный путь от metadataBase: чужой хост сюда не попадёт по построению.
+    alternates: { canonical: titleHref(title.slug) },
+    openGraph: {
+      ...OPEN_GRAPH_BASE,
+      type: title.kind === TitleKind.MOVIE ? "video.movie" : "video.tv_show",
+      title: title.nameRu,
+      description,
+      // Постер с Shikimori уже абсолютный; ссылка в мессенджере приходит с картинкой.
+      images: title.posterUrl ? [title.posterUrl] : undefined,
+    },
   };
 }
 

@@ -43,7 +43,16 @@ serverless-функции открывают соединения агресси
 /schedule                 расписание на неделю: день и время выхода по Москве
 /random                   редирект на случайный публичный тайтл
 /dmca, /terms, /privacy   обязательные страницы
+/robots.txt, /sitemap.xml app/robots.ts, app/sitemap.ts
 ```
+
+Адрес сайта для `metadataBase`, canonical и карты сайта — `siteUrl()` из
+`lib/site/url.ts`: `NEXT_PUBLIC_SITE_URL`, иначе системный
+`VERCEL_PROJECT_PRODUCTION_URL`, иначе `localhost`. Canonical пишутся
+относительными путями через построители адресов (`titleHref`, `catalogHref`),
+поэтому чужой хост туда не попадает по построению. Превью Vercel тоже указывают
+canonical на прод. В карте сайта — главная, разделы и публичные тайтлы; страниц
+серий в ней нет, пока без плеера они почти одинаковые (вернутся в фазе F).
 
 Вход — только окно, отдельной страницы нет (решение владельца 2026-09-23).
 `<dialog>` один на сайт и стоит закрытым в корневом лэйауте
@@ -114,7 +123,7 @@ GOOGLE_CLIENT_ID         # вход через Google; без него окно 
 TELEGRAM_BOT_TOKEN       # уведомление об обращении правообладателя
 DMCA_TG_CHAT             # чат, куда уходит уведомление
 DMCA_IP_SALT             # соль для хеша IP заявителя
-NEXT_PUBLIC_SITE_URL
+NEXT_PUBLIC_SITE_URL     # адрес сайта для canonical и sitemap; не задан — VERCEL_PROJECT_PRODUCTION_URL
 ```
 
 ## Версии

@@ -7,6 +7,7 @@ import { siteContactEmail } from "@/lib/site/contact";
 export const metadata: Metadata = {
   title: "Обращение правообладателя",
   description: "Форма обращения по правам на материалы сайта AnimeWatch.",
+  alternates: { canonical: "/dmca" },
 };
 
 // Страница с формой не кешируется: в ответе состояние отправки (docs/02, «Кеширование»).
