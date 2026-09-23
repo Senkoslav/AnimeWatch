@@ -34,7 +34,7 @@ export function Promo({ release, latest, allToday, now }: PromoProps) {
   const episodeLabel = isMovie ? "Фильм" : `Эпизод ${formatEpisodeNumber(number)}`;
 
   return (
-    <section aria-labelledby="promo-title" className="mx-auto max-w-6xl px-4 pt-4 md:pt-6">
+    <section aria-labelledby="promo-title" className="mx-auto max-w-page px-4 lg:px-8 pt-4 md:pt-6">
       <div className="relative overflow-hidden rounded-xl border border-line">
         <PosterBackdrop src={title.posterUrl} className="inset-0" />
 

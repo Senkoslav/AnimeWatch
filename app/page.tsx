@@ -51,7 +51,7 @@ export default async function HomePage() {
         <Promo release={hero} latest={panel} allToday={today.length > 0} now={now} />
       ) : (
         // Пустое состояние зовёт в каталог, а не извиняется (docs/04, «Текст в интерфейсе»).
-        <section className="mx-auto max-w-6xl px-4 py-16">
+        <section className="mx-auto max-w-page px-4 lg:px-8 py-16">
           <p className="text-lg font-semibold">Скоро здесь появятся новые серии</p>
           <p className="mt-2 max-w-[60ch] text-muted">Каталог уже открыт — там есть что выбрать на вечер.</p>
           <Link href="/catalog" className={`${button("secondary")} mt-5`}>
@@ -65,7 +65,7 @@ export default async function HomePage() {
       {ongoing.titles.length > 0 && <OngoingRow titles={ongoing.titles} total={ongoing.total} />}
 
       {(popular.length > 0 || schedule.size > 0) && (
-        <div className="mx-auto grid max-w-6xl gap-9 px-4 pt-9 lg:grid-cols-2 lg:gap-6">
+        <div className="mx-auto grid max-w-page gap-9 px-4 lg:px-8 pt-9 lg:grid-cols-2 lg:gap-6">
           {popular.length > 0 && <PopularList titles={popular} />}
           {schedule.size > 0 && <Schedule byDay={schedule} today={moscowWeekday(now)} />}
         </div>

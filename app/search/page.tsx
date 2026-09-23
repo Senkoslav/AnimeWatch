@@ -30,7 +30,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   const { titles, truncated } = query ? await searchTitles(query) : { titles: [], truncated: false };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 md:py-10">
+    <div className="mx-auto max-w-page px-4 lg:px-8 py-6 md:py-10">
       <h1 className={PAGE_TITLE}>Поиск</h1>
 
       <Form action="/search" className="mt-6 flex max-w-xl flex-wrap items-center gap-3">

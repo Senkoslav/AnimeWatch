@@ -40,8 +40,8 @@ export async function generateMetadata({ searchParams }: PageProps<"/catalog">):
 /** Колонок сетки на телефоне: первый ряд виден без прокрутки. */
 const MOBILE_COLUMNS = 2;
 
-/** Сетка уже, чем на поиске: справа стоит панель отбора в 19rem. */
-const POSTER_SIZES = "(min-width: 1280px) 190px, (min-width: 1024px) 22vw, (min-width: 640px) 33vw, 50vw";
+/** Пять колонок рядом с отбором в 300px на широком экране, четыре на ноутбуке. */
+const POSTER_SIZES = "(min-width: 1280px) 200px, (min-width: 1024px) 20vw, (min-width: 640px) 33vw, 50vw";
 
 // Рендер динамический: фильтры в searchParams (docs/02, «Кеширование»).
 export default async function CatalogPage({ searchParams }: PageProps<"/catalog">) {
@@ -62,40 +62,38 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
   const range = shownRange(params.page, CATALOG_PAGE_SIZE, catalog.total);
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 md:py-10">
-      <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
+    <div className="mx-auto max-w-page px-4 lg:px-8 py-6 md:py-10">
+      {/* Строка заголовка, как на Catalog.dc.html: название, счёт и пресеты справа в той же строке. */}
+      <div className="flex flex-wrap items-end gap-x-4 gap-y-3">
         <h1 className={PAGE_TITLE}>Каталог</h1>
-        <p className="text-sm text-dim">{formatCount(catalog.total, ["тайтл", "тайтла", "тайтлов"])}</p>
+        <p className="mb-1 text-sm text-dim">{formatCount(catalog.total, ["тайтл", "тайтла", "тайтлов"])}</p>
+        {/* Пресеты — готовые наборы параметров ссылками, а не новый механизм отбора. */}
+        <nav aria-label="Подборки" className="flex w-full flex-wrap gap-2 md:ml-auto md:w-auto">
+          {CATALOG_PRESETS.map((preset) => {
+            const current = isPresetActive(params, preset);
+            return (
+              <Link
+                key={preset.name}
+                href={presetHref(preset)}
+                aria-current={current ? "page" : undefined}
+                className={current ? CHIP_ACTIVE : CHIP}
+              >
+                {preset.name}
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
-      {/* Пресеты — готовые наборы параметров ссылками, а не новый механизм отбора. */}
-      <nav aria-label="Подборки" className="mt-4 flex flex-wrap gap-2">
-        {CATALOG_PRESETS.map((preset) => {
-          const current = isPresetActive(params, preset);
-          return (
-            <Link
-              key={preset.name}
-              href={presetHref(preset)}
-              aria-current={current ? "page" : undefined}
-              className={current ? CHIP_ACTIVE : CHIP}
-            >
-              {preset.name}
-            </Link>
-          );
-        })}
-      </nav>
-
-      {/* Фильтры первыми в DOM — сначала отбор, потом результат, это и порядок чтения скринридером.
-          Вправо их ставит явная раскладка грида, а не порядок разметки. */}
-      <div className="mt-5 lg:grid lg:grid-cols-[minmax(0,1fr)_19rem] lg:gap-6">
-        <div className="lg:col-start-2 lg:row-start-1 lg:h-full">
+      {/* Отбор первым в DOM и слева на экране, как на макете: сначала отбор, потом результат —
+          это и порядок чтения скринридером. Ячейка отбора тянется на всю высоту ряда: внутри неё
+          панель и липнет (components/catalog/catalog-filters.tsx). */}
+      <div className="mt-5 lg:grid lg:grid-cols-[18.75rem_minmax(0,1fr)] lg:gap-6">
+        <div className="lg:h-full">
           <CatalogFilters params={params} options={options} />
         </div>
 
-        <section
-          aria-labelledby="catalog-results"
-          className="mt-6 min-w-0 lg:col-start-1 lg:row-start-1 lg:mt-0 lg:self-start"
-        >
+        <section aria-labelledby="catalog-results" className="mt-6 min-w-0 lg:mt-0 lg:self-start">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
             <p id="catalog-results" className="text-sm text-muted">
               {catalog.total === 0 ? (
@@ -110,12 +108,8 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
                 </>
               )}
             </p>
-            <SortMenu params={params} />
-          </div>
-
-          {/* Метки действующего отбора: снять один фильтр должно быть так же просто, как поставить. */}
-          {active.length > 0 && (
-            <div className="mt-3 flex flex-wrap items-center gap-2">
+            {/* Метки действующего отбора: снять один фильтр должно быть так же просто, как поставить. */}
+            {active.length > 0 && (
               <ul aria-label="Действующий отбор" className="flex flex-wrap gap-2">
                 {active.map((filter) => (
                   <li key={filter.key}>
@@ -127,17 +121,9 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
                   </li>
                 ))}
               </ul>
-              {/* Сброс всего — здесь, а не в панели: на телефоне панель закрыта, и из неё
-                  «Сбросить» было бы недостижимо, пока лист не открыт. Вне списка меток: это не
-                  ещё один отбор, который можно снять. */}
-              <Link
-                href="/catalog"
-                className="inline-flex min-h-11 items-center px-2 text-sm text-dim underline hover:text-text sm:min-h-9"
-              >
-                Сбросить
-              </Link>
-            </div>
-          )}
+            )}
+            <SortMenu params={params} />
+          </div>
 
           {catalog.truncated && (
             // При обрезке счётчик считает внутри отобранных совпадений: писать его числом по
@@ -152,7 +138,7 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
             <>
               <ul
                 aria-label="Найденные тайтлы"
-                className="mt-5 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 xl:grid-cols-4"
+                className="mt-5 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
               >
                 {catalog.items.map((title, index) => (
                   <li key={title.id}>
@@ -161,6 +147,7 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
                 ))}
               </ul>
               <Pagination params={params} pageCount={catalog.pageCount} />
+              <p className="mt-4 text-xs text-dim">Числа на постерах — оценка Shikimori.</p>
             </>
           ) : (
             <div className="mt-6 rounded-lg border border-dashed border-line p-6">

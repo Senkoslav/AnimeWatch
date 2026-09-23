@@ -4,7 +4,7 @@ import Link from "next/link";
 export function SiteFooter() {
   return (
     <footer className="mt-16 border-t border-line">
-      <div className="mx-auto max-w-6xl space-y-4 px-4 py-8 text-sm text-dim">
+      <div className="mx-auto max-w-page space-y-4 px-4 lg:px-8 py-8 text-sm text-dim">
         <p className="max-w-[70ch]">
           AnimeWatch — каталог аниме. Видеофайлы мы не храним и не раздаём: воспроизведение идёт во фрейме сторонних
           поставщиков. Права на произведения принадлежат их правообладателям, по обращению правообладателя мы скрываем

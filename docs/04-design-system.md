@@ -93,6 +93,7 @@
   --inset-shadow-*: initial;
   --text-shadow-*: initial;
 
+  --container-page: 86rem;  /* ширина страницы с артбордов: 1376 при 1440, поля 16/32 */
   --spacing-sticky: 4.5rem; /* высота липкой шапки плюс отступ */
   --spacing-rail: 3.5rem;   /* поле номера в линованных списках */
 

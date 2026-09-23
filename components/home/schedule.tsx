@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 import { ScheduleRow } from "@/components/schedule/schedule-row";
-import { CHIP, FOCUS_WITHIN } from "@/components/ui/controls";
+import { CHIP_CHECKABLE, FOCUS_WITHIN } from "@/components/ui/controls";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { WEEKDAY_SHORT } from "@/lib/format";
 import type { OngoingTitle } from "@/lib/queries/home";
@@ -46,7 +46,7 @@ export function Schedule({ byDay, today }: ScheduleProps) {
           {days.map((day) => (
             <label
               key={day}
-              className={`${CHIP} ${FOCUS_WITHIN} shrink-0 cursor-pointer has-[:checked]:border-signal-line has-[:checked]:bg-signal-soft has-[:checked]:text-signal`}
+              className={`${CHIP_CHECKABLE} ${FOCUS_WITHIN} shrink-0 cursor-pointer`}
             >
               <input
                 type="radio"

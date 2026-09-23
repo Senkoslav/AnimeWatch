@@ -64,7 +64,7 @@ export default async function WatchPage({ params }: PageProps<"/anime/[slug]/[ep
     .join(", ");
 
   return (
-    <div className="mx-auto max-w-6xl sm:px-4 sm:py-6">
+    <div className="mx-auto max-w-page sm:px-4 lg:px-8 sm:py-6">
       <div className="grid grid-cols-1 gap-x-7 gap-y-8 lg:grid-cols-[minmax(0,1fr)_21rem]">
         <div className="flex min-w-0 flex-col gap-5">
           <PlayerSlot

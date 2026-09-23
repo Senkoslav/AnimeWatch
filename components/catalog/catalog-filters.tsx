@@ -1,18 +1,17 @@
 import { SlidersHorizontal, X } from "lucide-react";
 import Form from "next/form";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { CATALOG_PANEL_HEAD } from "@/components/catalog/panel";
 import {
   button,
-  CHIP,
-  CHIP_ACTIVE,
+  CHIP_CHECKABLE,
   FIELD,
   FIELD_LABEL,
   FOCUS_WITHIN,
   SEGMENT,
   SEGMENT_ITEM,
-  SEGMENT_ITEM_ACTIVE,
 } from "@/components/ui/controls";
 import { SectionHeading } from "@/components/ui/section-heading";
 import {
@@ -20,6 +19,7 @@ import {
   catalogHref,
   type CatalogParams,
   DEFAULT_SORT,
+  hasFilters,
   KIND_OPTIONS,
   STATUS_OPTIONS,
 } from "@/lib/catalog/params";
@@ -42,7 +42,7 @@ const GENRES_SHOWN = 12;
  * Отбор каталога. GET-форма через next/form: без своего JS, состояние только в URL. Страница не
  * отправляется — после смены отбора всегда первая. Выбранные значения берутся из URL.
  *
- * На десктопе это липкая колонка справа от выдачи, на телефоне — нижний лист поверх страницы.
+ * На десктопе это липкая колонка слева от выдачи (Catalog.dc.html), на телефоне — нижний лист.
  * И там, и там один и тот же DOM и одна и та же форма: два комплекта полей с одинаковыми именами
  * отправлялись бы оба.
  *
@@ -68,7 +68,9 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
   return (
     // key: при переходе по ссылке «Сбросить», по метке отбора или «Назад» в истории панель
     // пересоздаётся, иначе неуправляемые поля и чекбокс остались бы с прежними значениями.
-    <div key={catalogHref({ ...params, page: 1 })}>
+    // lg:h-full — не оформление: `sticky` держится только внутри родителя, и без полной высоты
+    // обёртки панели прилипать некуда — на длинной выдаче она уезжала вверх вместе со страницей.
+    <div key={catalogHref({ ...params, page: 1 })} className="lg:h-full">
       {/* sr-only, а не hidden: элемент должен остаться фокусируемым с клавиатуры. */}
       <input type="checkbox" id={TOGGLE_ID} aria-controls={PANEL_ID} className="peer sr-only lg:hidden" />
 
@@ -99,15 +101,16 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
         className="sheet-surface fixed inset-x-0 bottom-0 z-40 hidden max-h-[85dvh] flex-col overflow-hidden peer-checked:flex lg:sticky lg:inset-x-auto lg:top-sticky lg:bottom-auto lg:z-auto lg:flex lg:max-h-[calc(100dvh_-_var(--spacing-sticky)_-_1rem)]"
       >
         <div className={CATALOG_PANEL_HEAD}>
-          <SectionHeading>Отбор</SectionHeading>
-          {/*
-            Крестик только на телефоне: на десктопе панель не закрывается. «Сбросить» здесь нет —
-            оно стоит рядом с метками действующего отбора над выдачей, где видно при любой ширине
-            и при закрытом листе.
-          */}
+          <SectionHeading className="mr-auto">Отбор</SectionHeading>
+          {hasFilters(params) && (
+            <Link href="/catalog" className="inline-flex min-h-11 items-center text-sm text-dim hover:text-text">
+              Сбросить
+            </Link>
+          )}
+          {/* Крестик только на телефоне: на десктопе панель не закрывается. */}
           <label
             htmlFor={TOGGLE_ID}
-            className="ml-auto inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-sm border border-line bg-fill text-text-2 hover:text-text lg:hidden"
+            className="inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-sm border border-line bg-fill text-text-2 hover:text-text lg:hidden"
           >
             <span className="sr-only">Закрыть отбор</span>
             <X aria-hidden="true" className="size-4" />
@@ -235,7 +238,7 @@ function CheckChip({
   children: ReactNode;
 }) {
   return (
-    <label className={`cursor-pointer ${FOCUS_WITHIN} ${checked ? CHIP_ACTIVE : CHIP}`}>
+    <label className={`cursor-pointer ${FOCUS_WITHIN} ${CHIP_CHECKABLE}`}>
       <input type="checkbox" name={name} value={value} defaultChecked={checked} className="sr-only outline-none" />
       {children}
     </label>
@@ -254,7 +257,7 @@ function RadioSegment({
   children: ReactNode;
 }) {
   return (
-    <label className={`${FOCUS_WITHIN} ${checked ? SEGMENT_ITEM_ACTIVE : SEGMENT_ITEM}`}>
+    <label className={`${FOCUS_WITHIN} ${SEGMENT_ITEM}`}>
       <input type="radio" name={name} value={value} defaultChecked={checked} className="sr-only outline-none" />
       {children}
     </label>

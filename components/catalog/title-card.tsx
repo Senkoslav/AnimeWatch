@@ -2,7 +2,8 @@ import Link from "next/link";
 
 import { Poster } from "@/components/ui/poster";
 import { ScoreBadge } from "@/components/ui/score-badge";
-import { TitleStatus } from "@/lib/generated/prisma/enums";
+import { formatCount } from "@/lib/format";
+import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 import { KIND_LABELS, STATUS_LABELS } from "@/lib/labels";
 import type { CatalogItem } from "@/lib/queries/catalog";
 import { titleHref } from "@/lib/routes";
@@ -26,6 +27,13 @@ export function TitleCard({ title, eager = false, sizes = POSTER_SIZES, backgrou
   // HIDDEN сюда не доходит: такой тайтл отсекается ещё в запросе (publicTitleWhere).
   const status = title.status === TitleStatus.HIDDEN ? null : title.status;
   const ongoing = status === TitleStatus.ONGOING;
+  // «7 из 28», пока выходит; «24 серии», когда вышло всё. У фильма и у тайтла без серий — ничего.
+  const episodes =
+    title.kind === TitleKind.MOVIE || title.published === 0
+      ? null
+      : title.totalEpisodes && title.totalEpisodes > title.published
+        ? `${title.published} из ${title.totalEpisodes}`
+        : formatCount(title.published, ["серия", "серии", "серий"]);
 
   return (
     <Link href={titleHref(title.slug)} className="group block rounded-md">
@@ -37,6 +45,12 @@ export function TitleCard({ title, eager = false, sizes = POSTER_SIZES, backgrou
         loading={eager ? "eager" : "lazy"}
       >
         {title.score !== null && <ScoreBadge score={title.score} />}
+        {episodes && (
+          // Счёт серий на стекле с тёмной основой (Catalog.dc.html): постер под ним заранее неизвестен.
+          <span className="glass-panel pointer-events-none absolute bottom-2 left-2 rounded-sm border border-line bg-bg/65 px-2 py-0.5 text-xs text-text-2">
+            {episodes}
+          </span>
+        )}
       </Poster>
 
       {/* Две строки всегда, даже под коротким названием: иначе подписи соседних карточек встают на

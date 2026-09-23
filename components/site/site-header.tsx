@@ -26,7 +26,7 @@ import { NavLink } from "./nav-link";
 export function SiteHeader() {
   return (
     <header className="glass-chrome sticky top-0 z-20 border-b border-line">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:gap-4 lg:h-16">
+      <div className="mx-auto flex h-14 max-w-page items-center gap-2 px-4 lg:px-8 sm:gap-4 lg:h-16">
         {/* «Войти» на телефоне — в нижней панели (components/site/bottom-nav.tsx), здесь его нет. */}
         <MobileMenu label="Меню">
           <nav aria-label="Разделы" className="flex flex-col">

@@ -1,27 +1,15 @@
 import type { CatalogParams, CatalogSort } from "@/lib/catalog/params";
 import { prisma } from "@/lib/db";
 import type { Prisma } from "@/lib/generated/prisma/client";
-import type { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 import { publicTitleWhere } from "@/lib/public-where";
 
-// Обратный импорт (search тянет отсюда CatalogItem) — только типовой, он стирается при сборке,
-// так что рантайм-цикла между модулями нет.
+// Карточка — из своего модуля: поиск берёт её оттуда же, и цикла каталог ↔ поиск в рантайме нет.
+import { CATALOG_ITEM_SELECT, type CatalogItem, toCatalogItem } from "./catalog-item";
 import { CATALOG_MATCH_LIMIT, rankTitleIds } from "./search";
 
 export const CATALOG_PAGE_SIZE = 24;
 
-export interface CatalogItem {
-  id: string;
-  slug: string;
-  nameRu: string;
-  posterUrl: string | null;
-  kind: TitleKind;
-  year: number | null;
-  /** Оценка Shikimori. null — тайтл ещё никто не оценил, и бейджа на карточке не будет. */
-  score: number | null;
-  /** HIDDEN сюда не доходит: скрытый тайтл отсекается в publicTitleWhere ещё в запросе. */
-  status: TitleStatus;
-}
+export type { CatalogItem } from "./catalog-item";
 
 export interface CatalogPage {
   items: CatalogItem[];
@@ -84,20 +72,16 @@ export async function getCatalog(params: CatalogParams): Promise<CatalogPage> {
       orderBy: ORDER_BY[sort],
       skip: (page - 1) * CATALOG_PAGE_SIZE,
       take: CATALOG_PAGE_SIZE,
-      select: {
-        id: true,
-        slug: true,
-        nameRu: true,
-        posterUrl: true,
-        kind: true,
-        year: true,
-        score: true,
-        status: true,
-      },
+      select: CATALOG_ITEM_SELECT,
     }),
   ]);
 
-  return { items, total, pageCount: Math.max(1, Math.ceil(total / CATALOG_PAGE_SIZE)), truncated };
+  return {
+    items: items.map(toCatalogItem),
+    total,
+    pageCount: Math.max(1, Math.ceil(total / CATALOG_PAGE_SIZE)),
+    truncated,
+  };
 }
 
 /** Значения для фильтров — только из публичных тайтлов: жанр скрытого тайтла не выдаёт его существование. */

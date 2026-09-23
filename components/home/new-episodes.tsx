@@ -25,7 +25,7 @@ interface NewEpisodesProps {
 /** «Новые серии» (Main.dc.html): последняя серия каждого тайтла, свежие сверху. */
 export function NewEpisodes({ releases, withinWeek, now }: NewEpisodesProps) {
   return (
-    <section aria-labelledby="new-episodes-title" className="mx-auto max-w-6xl px-4 pt-9">
+    <section aria-labelledby="new-episodes-title" className="mx-auto max-w-page px-4 lg:px-8 pt-9">
       {/* Засечка янтарная: новые серии — ровно то, что происходит сейчас. */}
       <SectionHeading
         id="new-episodes-title"

@@ -69,6 +69,12 @@ export const CHIP = `${CHIP_BASE} border-line bg-fill text-text-2 hover:bg-fill-
 export const CHIP_ACTIVE = `${CHIP_BASE} border-signal-line bg-signal-soft text-signal`;
 
 /**
+ * Чип с чекбоксом внутри (жанр, тип в отборе). Как у сегмента: выбранный красится от `:checked`
+ * поля, чтобы клик был виден сразу, до отправки формы.
+ */
+export const CHIP_CHECKABLE = `${CHIP} has-[:checked]:border-signal-line has-[:checked]:bg-signal-soft has-[:checked]:text-signal`;
+
+/**
  * Метка: выходные данные рядом с заголовком (год, тип, число серий). Выглядит как чип, но это не
  * ссылка и не поле, поэтому без ховера и без тач-цели — нажимать на неё нечего.
  */
@@ -87,8 +93,11 @@ export const TAG_SIGNAL = `${TAG_BASE} border-signal-line bg-signal-soft font-se
 export const SEGMENT = "grid grid-cols-2 gap-1 rounded-md border border-line bg-bg/55 p-1";
 const SEGMENT_ITEM_BASE =
   "inline-flex min-h-11 cursor-pointer items-center justify-center rounded-sm px-2 text-center text-sm sm:min-h-9";
-export const SEGMENT_ITEM = `${SEGMENT_ITEM_BASE} text-muted hover:text-text`;
-export const SEGMENT_ITEM_ACTIVE = `${SEGMENT_ITEM_BASE} border border-signal-line bg-signal-soft font-semibold text-signal`;
+/**
+ * Пункт сегмента с радиокнопкой внутри. Выбранный красится от `:checked` самого поля, а не от
+ * значения в адресе: иначе клик меняет выбор, а глазами ничего не происходит до «Показать».
+ */
+export const SEGMENT_ITEM = `${SEGMENT_ITEM_BASE} border border-transparent text-muted hover:text-text has-[:checked]:border-signal-line has-[:checked]:bg-signal-soft has-[:checked]:font-semibold has-[:checked]:text-signal`;
 
 /**
  * Заголовок страницы. На телефоне на ступень мельче: Unbounded — широкая дисплейная гарнитура, и

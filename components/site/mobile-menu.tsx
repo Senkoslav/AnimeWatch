@@ -36,7 +36,7 @@ export function MobileMenu({ label, children }: { label: string; children: React
       {/* Абсолютно — под всей шапкой: внутри строки-флексбокса панель иначе встала бы в ряд.
           Привязка к самой шапке: sticky уже делает её позиционированным предком. */}
       <div className="glass-chrome absolute top-full left-0 w-full border-b border-line">
-        <div className="mx-auto max-w-6xl px-4 py-3">{children}</div>
+        <div className="mx-auto max-w-page px-4 lg:px-8 py-3">{children}</div>
       </div>
     </details>
   );

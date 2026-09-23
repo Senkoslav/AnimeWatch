@@ -92,7 +92,8 @@ test("форма меняет адрес на чистый, «Сбросить»
   await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&kind=tv");
   await expect(results(page)).toHaveCount(DRAMA_TV_BY_NAME.length);
 
-  await closeFilters(page);
+  // «Сбросить» в шапке панели (Catalog.dc.html): на телефоне это внутри листа.
+  await openFilters(page);
   await page.getByRole("link", { name: "Сбросить" }).click();
   await expect(page).toHaveURL("/catalog");
   await expect(results(page)).toHaveCount(total);
@@ -236,8 +237,8 @@ test("поиск в каталоге складывается с фильтро�
   // Поле переживает переход: иначе непонятно, почему в каталоге три тайтла вместо девяти.
   await openFilters(page);
   await expect(page.getByLabel("Название")).toHaveValue("монолог фармацевта");
-  await closeFilters(page);
 
+  // «Сбросить» — в шапке панели; лист уже открыт строкой выше.
   await page.getByRole("link", { name: "Сбросить" }).click();
   await expect(page).toHaveURL("/catalog");
 });
@@ -310,20 +311,47 @@ test("пагинация номерами: работает с клавиату�
   await expect(pages.getByText("2", { exact: true }).first()).toHaveAttribute("aria-current", "page");
 });
 
-test("на широком экране панель отбора стоит справа от выдачи", async ({ page }) => {
+test("на широком экране отбор стоит слева от выдачи, как на макете", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/catalog");
 
-  const filters = await page.getByRole("button", { name: "Показать" }).boundingBox();
+  const panel = await page.locator("#catalog-filters-panel").boundingBox();
   const grid = await page.getByRole("list", { name: "Найденные тайтлы" }).boundingBox();
-  if (!filters || !grid) throw new Error("панель отбора или выдача не отрисованы");
+  if (!panel || !grid) throw new Error("панель отбора или выдача не отрисованы");
+  expect(panel.x + panel.width).toBeLessThanOrEqual(grid.x);
+});
 
-  expect(filters.x).toBeGreaterThanOrEqual(grid.x + grid.width);
+test("панель отбора липнет на длинной странице и остаётся в окне", async ({ page }) => {
+  // Низкое окно делает страницу длиннее экрана и на seed-данных: так был виден баг, когда панель
+  // уезжала вверх вместе со страницей — sticky упирался в обёртку высотой ровно в саму панель.
+  await page.setViewportSize({ width: 1440, height: 500 });
+  await page.goto("/catalog");
+  // До последней карточки, а не до подвала: ниже выдачи колонка кончается, и липкий блок законно
+  // уходит вверх вместе с ней. Баг был в том, что панель уезжала посреди выдачи.
+  await page.getByRole("list", { name: "Найденные тайтлы" }).getByRole("listitem").last().scrollIntoViewIfNeeded();
 
-  // Панель липкая и сама по себе не выше экрана: после прокрутки страницы до конца кнопка
-  // «Показать» обязана остаться в окне, иначе в длинной выдаче отбор недостижим.
-  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  const panel = await page.locator("#catalog-filters-panel").boundingBox();
+  if (!panel) throw new Error("панель отбора не отрисована");
+  expect(panel.y).toBeGreaterThanOrEqual(0);
+  expect(panel.y).toBeLessThan(120);
   await expect(page.getByRole("button", { name: "Показать" })).toBeInViewport();
+});
+
+test("выбранный статус и жанр подсвечиваются сразу, до «Показать»", async ({ page }) => {
+  // Раньше подсветку считал сервер из адреса: клик менял радиокнопку, а глазами ничего не происходило.
+  await page.goto("/catalog");
+  await openFilters(page);
+
+  const ongoing = page.locator('label:has(input[name="status"][value="ongoing"])');
+  await ongoing.click();
+  await expect(page.getByRole("radio", { name: "Выходит" })).toBeChecked();
+  await expect(ongoing).toHaveCSS("color", "rgb(255, 176, 46)");
+  await expect(page.locator('label:has(input[name="status"][value=""])')).not.toHaveCSS("color", "rgb(255, 176, 46)");
+
+  const drama = chip(page, "genre", "Драма");
+  await drama.click();
+  await expect(drama).toHaveCSS("color", "rgb(255, 176, 46)");
+  await expect(page).toHaveURL("/catalog");
 });
 
 test("на 360px отбор закрыт, первый ряд постеров виден сразу, лист открывается и закрывается", async ({ page }) => {

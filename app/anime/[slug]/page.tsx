@@ -71,7 +71,7 @@ export default async function TitlePageView({ params }: PageProps<"/anime/[slug]
     <div className="relative">
       <PosterBackdrop src={title.posterUrl} fade className="inset-x-0 top-0 h-80" />
 
-      <div className="relative mx-auto max-w-6xl px-4 pt-4 pb-6 md:pb-10">
+      <div className="relative mx-auto max-w-page px-4 lg:px-8 pt-4 pb-6 md:pb-10">
         <nav aria-label="Вы здесь" className="text-sm text-muted">
           <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <li>

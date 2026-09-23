@@ -14,7 +14,7 @@ export const revalidate = 86_400;
 
 export default function PrivacyPage() {
   return (
-    <article className="mx-auto max-w-6xl px-4 py-6 md:py-10">
+    <article className="mx-auto max-w-page px-4 lg:px-8 py-6 md:py-10">
       <h1 className={PAGE_TITLE}>Политика конфиденциальности</h1>
       <p className="mt-2 text-sm text-dim">Редакция от 18 сентября 2026 года</p>
 

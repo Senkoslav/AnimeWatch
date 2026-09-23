@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/db";
 import { publicTitleWhere } from "@/lib/public-where";
 
-import type { CatalogItem } from "./catalog";
+import { CATALOG_ITEM_SELECT, type CatalogItem, toCatalogItem } from "./catalog-item";
 
 export const SEARCH_LIMIT = 24;
 
@@ -100,11 +100,11 @@ export async function searchTitles(query: string): Promise<SearchResult> {
 
   const found = await prisma.title.findMany({
     where: { AND: [publicTitleWhere(), { id: { in: ids } }] },
-    select: { id: true, slug: true, nameRu: true, posterUrl: true, kind: true, year: true, score: true, status: true },
+    select: CATALOG_ITEM_SELECT,
   });
 
   // Порядок задаёт счёт из SQL, findMany его не сохраняет.
-  const byId = new Map(found.map((title) => [title.id, title]));
+  const byId = new Map(found.map((title) => [title.id, toCatalogItem(title)]));
   return {
     titles: ids.flatMap((id) => {
       const title = byId.get(id);

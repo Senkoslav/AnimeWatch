@@ -24,7 +24,7 @@ interface OngoingRowProps {
  */
 export function OngoingRow({ titles, total }: OngoingRowProps) {
   return (
-    <section aria-labelledby="ongoing-title" className="mx-auto max-w-6xl px-4 pt-9">
+    <section aria-labelledby="ongoing-title" className="mx-auto max-w-page px-4 lg:px-8 pt-9">
       <SectionHeading
         id="ongoing-title"
         tone="signal"
