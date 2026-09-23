@@ -14,6 +14,14 @@ db_host() {
   printf '%s' "$1" | sed -E 's#^[a-z]+://([^@/]*@)?([^/:?]+).*#\2#'
 }
 
+# Обязательный секрет прода. Без соли lib/dmca/throttle.ts отказывается хешировать IP заявителя, и
+# форма /dmca падает на отправке — страница, которую сайт обязан держать живой. Так было до
+# 2026-09-24: сборка зеленела, а ломалась только форма. Теперь без соли не собирается сам прод.
+if [ "$VERCEL_ENV" = "production" ] && [ -z "$DMCA_IP_SALT" ]; then
+  echo "DMCA_IP_SALT не задан в Production: форма /dmca не сможет принять обращение. Задайте его в Vercel → Environment Variables." >&2
+  exit 1
+fi
+
 if [ "$VERCEL_ENV" = "production" ]; then
   echo "Продакшен: применяю миграции"
   pnpm exec prisma migrate deploy
