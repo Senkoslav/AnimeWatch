@@ -35,6 +35,7 @@
     "prisma",
     "scripts",
     "tests",
+    "types",
     "*.config.ts"
   ],
   "exclude": ["node_modules"]

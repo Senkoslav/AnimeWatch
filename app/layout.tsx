@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
 
+import { AuthDialog } from "@/components/auth/auth-dialog";
 import { BottomNav } from "@/components/site/bottom-nav";
 import { SiteFooter } from "@/components/site/site-footer";
 import { SiteHeader } from "@/components/site/site-header";
@@ -51,11 +52,8 @@ export const metadata: Metadata = {
   description: "Аниме онлайн: каталог, поиск и просмотр с русской озвучкой",
 };
 
-/**
- * `auth` — параллельный слот модалки входа (app/@auth). Пустой везде, кроме клиентского перехода
- * на /login: тогда в нём окно входа поверх текущей страницы, а `children` остаётся прежним.
- */
-export default function RootLayout({ children, auth }: LayoutProps<"/">) {
+/** Окно входа стоит здесь закрытым, одно на весь сайт: его открывают кнопки «Войти» и «В список». */
+export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="ru" className={`${golos.variable} ${unbounded.variable}`}>
       {/* Снизу на телефоне место под нижнюю панель: без него она закрыла бы конец подвала. */}
@@ -73,7 +71,7 @@ export default function RootLayout({ children, auth }: LayoutProps<"/">) {
         </main>
         <SiteFooter />
         <BottomNav />
-        {auth}
+        <AuthDialog />
       </body>
     </html>
   );

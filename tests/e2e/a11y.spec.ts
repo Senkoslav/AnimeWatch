@@ -18,7 +18,6 @@ const PAGES: [name: string, url: string][] = [
   ["страница тайтла", "/anime/frieren"],
   ["просмотр", "/anime/frieren/1"],
   ["поиск", "/search?q=%D1%84%D1%80%D0%B8%D1%80%D0%B5%D0%BD"],
-  ["вход", "/login"],
   ["обращение правообладателя", "/dmca"],
   ["соглашение", "/terms"],
   ["конфиденциальность", "/privacy"],

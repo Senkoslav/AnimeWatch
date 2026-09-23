@@ -1,53 +1,28 @@
-"use client";
+import { X } from "lucide-react";
 
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, type ReactNode } from "react";
+import { CloseOnNavigate } from "@/components/auth/close-on-navigate";
+import { AUTH_DIALOG_ID } from "@/components/auth/ids";
+import { LoginCard } from "@/components/auth/login-card";
 
-interface AuthDialogProps {
-  /** id заголовка внутри: по нему диалог называет себя (aria-labelledby). */
-  labelledBy: string;
-  children: ReactNode;
-}
+const TITLE_ID = "auth-dialog-title";
 
 /**
- * Модалка входа поверх текущей страницы (Auth.dc.html) и нижний лист на телефоне (Auth-mobile.dc.html).
+ * Окно входа (Auth.dc.html, Auth-mobile.dc.html) — единственное место входа на сайте: отдельной
+ * страницы нет по решению владельца 2026-09-23.
  *
- * Нативный <dialog> со showModal(): фокус-ловушку, Esc, inert для страницы под ним и возврат фокуса
- * на «Войти» после закрытия даёт браузер, а не наш код. Клиентский лист нужен ровно для двух вещей:
- * вызвать showModal() и по закрытию вернуться назад по истории — адрес /login открыла навигация,
- * значит и закрывает её навигация, а не прятанье окна.
+ * Серверный компонент и один на весь сайт: стоит в корневом лэйауте закрытым, а открывают его кнопки
+ * `AuthTrigger` нативной командой `show-modal`. Так окно работает и без нашего JS: браузер сам
+ * открывает <dialog> модально, ловит фокус, закрывает по Esc и возвращает фокус на кнопку.
+ * `closedby="any"` закрывает окно нажатием мимо него.
  *
- * Содержимое приходит детьми с сервера: карточка входа читает ключ Google и в бандл не попадает.
+ * На десктопе — стекло третьего уровня по центру, на телефоне — нижний лист с ручкой.
  */
-export function AuthDialog({ labelledBy, children }: AuthDialogProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const dialog = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    const element = dialog.current;
-    if (element && !element.open) element.showModal();
-  }, []);
-
-  /*
-   * Переход по ссылке изнутри окна (соглашение, политика) не сбрасывает слот: при клиентской
-   * навигации слот без совпадения держит последнее состояние, и окно осталось бы висеть над новой
-   * страницей. Документация закрывает это catch-all страницей в слоте, но она попадает в typedRoutes
-   * как «/[...catchAll]» и делает допустимым любой адрес — проверка ссылок молча отключается.
-   * Поэтому окно само уходит, как только адрес перестал быть /login.
-   */
-  if (pathname !== "/login") return null;
-
+export function AuthDialog() {
   return (
     <dialog
-      ref={dialog}
-      aria-labelledby={labelledBy}
-      // Esc, крестик и нажатие мимо окна сходятся сюда: одно закрытие — один шаг назад по истории.
-      onClose={() => router.back()}
-      // Нажатие по затемнению приходит в сам <dialog>: у окна нет своих полей, всё содержимое внутри.
-      onClick={(event) => {
-        if (event.target === event.currentTarget) event.currentTarget.close();
-      }}
+      id={AUTH_DIALOG_ID}
+      aria-labelledby={TITLE_ID}
+      closedby="any"
       className={[
         "glass-modal m-auto max-h-[calc(100dvh-2rem)] w-[min(30rem,calc(100%-2rem))] max-w-none overflow-y-auto rounded-xl border border-fill-2 p-0 text-text",
         // Телефон: нижний лист во всю ширину, прижат к низу, ручка сверху.
@@ -55,32 +30,28 @@ export function AuthDialog({ labelledBy, children }: AuthDialogProps) {
         // Затемнение под окном размывает страницу, которая под ним реально есть (docs/04, «Стекло»).
         "backdrop:bg-bg/70 backdrop:backdrop-blur-[10px]",
         // Единственное авторское движение: 180 мс, затухающее ускорение, из уже видимого состояния.
-        "transition-[opacity,translate] duration-[180ms] ease-out starting:translate-y-3 starting:opacity-0",
+        "transition-[opacity,translate] duration-[180ms] ease-out starting:open:translate-y-3 starting:open:opacity-0",
       ].join(" ")}
     >
+      <CloseOnNavigate dialogId={AUTH_DIALOG_ID} />
       <div aria-hidden="true" className="flex justify-center pt-2.5 sm:hidden">
         <span className="h-1 w-10 rounded-full bg-fill-2" />
       </div>
-      {children}
+      <LoginCard
+        titleId={TITLE_ID}
+        close={
+          // Закрытие той же нативной командой: без JS работает так же, как Esc.
+          <button
+            type="button"
+            commandfor={AUTH_DIALOG_ID}
+            command="close"
+            className="-mt-1.5 -mr-1.5 inline-flex size-11 shrink-0 items-center justify-center rounded-sm border border-line bg-fill text-text-2 hover:bg-fill-2 hover:text-text"
+          >
+            <span className="sr-only">Закрыть</span>
+            <X aria-hidden="true" className="size-4" />
+          </button>
+        }
+      />
     </dialog>
-  );
-}
-
-/**
- * Крестик. Отдельной клиентской кнопкой, потому что стоит внутри серверной карточки: закрывает
- * ближайший <dialog>, а дальше всё решает onClose выше — тот же путь, что у Esc.
- */
-export function AuthDialogClose() {
-  return (
-    <button
-      type="button"
-      onClick={(event) => event.currentTarget.closest("dialog")?.close()}
-      className="-mt-1.5 -mr-1.5 inline-flex size-11 shrink-0 items-center justify-center rounded-sm border border-line bg-fill text-text-2 hover:bg-fill-2 hover:text-text"
-    >
-      <span className="sr-only">Закрыть</span>
-      <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="none" stroke="currentColor">
-        <path d="M6 6l12 12M18 6L6 18" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    </button>
   );
 }

@@ -31,7 +31,7 @@ test("промо ведёт к просмотру последней серии,
 });
 
 test("«В список» в промо ведёт во вход", async ({ page }) => {
-  await page.getByRole("region").first().getByRole("link", { name: "В список" }).click();
+  await page.getByRole("region").first().getByRole("button", { name: "В список" }).click();
   await expect(page.getByRole("dialog", { name: "Вход в AnimeWatch" })).toBeVisible();
 });
 

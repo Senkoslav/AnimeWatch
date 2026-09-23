@@ -92,10 +92,10 @@ test("на 360px нет горизонтального скролла, axe бе�
 
 test("«В список» без аккаунта ведёт во вход, а не молчит", async ({ page }) => {
   await page.goto(FRIEREN);
-  await page.getByRole("link", { name: "В список" }).click();
+  await page.getByRole("button", { name: "В список" }).click();
 
   await expect(page.getByRole("dialog", { name: "Вход в AnimeWatch" })).toBeVisible();
-  // Страница тайтла осталась под модалкой: адрес сменился на /login, заголовок тайтла на месте.
-  await expect(page).toHaveURL("/login");
+  // Страница тайтла осталась под окном: адрес прежний, заголовок тайтла на месте.
+  await expect(page).toHaveURL("/anime/frieren");
   await expect(page.getByRole("heading", { level: 1, name: "Провожающая в последний путь Фрирен" })).toBeAttached();
 });

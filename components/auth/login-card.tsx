@@ -1,3 +1,4 @@
+import { Info } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -19,26 +20,22 @@ const BENEFITS = [
 interface LoginCardProps {
   /** id заголовка: по нему диалог называет себя для скринридера (aria-labelledby). */
   titleId: string;
-  /** На странице /login это h1; в модалке над чужой страницей — h2, свой h1 у страницы уже есть. */
-  as?: "h1" | "h2";
-  /** Крестик закрытия — есть только у модалки. */
+  /** Крестик закрытия. */
   close?: ReactNode;
-  /** Ссылка «Открыть отдельной страницей» — только в модалке: на самой странице она вела бы на себя. */
-  standaloneLink?: boolean;
 }
 
 /**
- * Карточка входа — одна на модалку и на страницу /login (Auth.dc.html, Auth-mobile.dc.html).
- * Серверная: ключ Google читается здесь и в клиентский бандл не попадает.
+ * Содержимое окна входа (Auth.dc.html, Auth-mobile.dc.html). Серверная: ключ Google читается
+ * здесь и в клиентский бандл не попадает.
  */
-export function LoginCard({ titleId, as: Title = "h2", close, standaloneLink = false }: LoginCardProps) {
+export function LoginCard({ titleId, close }: LoginCardProps) {
   return (
     <div className="flex flex-col gap-5 p-5 sm:p-7">
       <div className="flex items-start gap-4">
         <div className="min-w-0 flex-1">
-          <Title id={titleId} className="font-display text-xl leading-tight font-bold tracking-tight sm:text-2xl">
+          <h2 id={titleId} className="font-display text-xl leading-tight font-bold tracking-tight sm:text-2xl">
             Вход в AnimeWatch
-          </Title>
+          </h2>
           <p className="mt-2.5 text-base text-muted">
             Каталог, поиск и просмотр работают без аккаунта. Вход нужен, чтобы сайт помнил вас — и ни для чего больше.
           </p>
@@ -72,7 +69,7 @@ export function LoginCard({ titleId, as: Title = "h2", close, standaloneLink = f
               id={`${titleId}-pending`}
               className="flex items-start gap-2.5 rounded-md border border-signal-line bg-signal-soft px-3.5 py-3 text-sm text-signal-muted"
             >
-              <InfoIcon />
+              <Info aria-hidden="true" className="mt-px size-4.5 shrink-0 text-signal" />
               Вход ещё подключается. Каталог и поиск работают и без аккаунта.
             </p>
           </>
@@ -107,14 +104,6 @@ export function LoginCard({ titleId, as: Title = "h2", close, standaloneLink = f
           </Link>
           .
         </p>
-        {standaloneLink && (
-          <p className="mt-3 border-t border-line pt-1">
-            {/* <a>, а не Link: клиентский переход на /login снова перехватился бы модалкой. */}
-            <a href="/login" className="inline-flex min-h-11 items-center text-sm text-muted underline hover:text-text">
-              Открыть отдельной страницей
-            </a>
-          </p>
-        )}
       </div>
     </div>
   );
@@ -127,29 +116,11 @@ export function LoginCard({ titleId, as: Title = "h2", close, standaloneLink = f
 const GOOGLE_BUTTON =
   "inline-flex min-h-13 w-full items-center justify-center gap-3 rounded-md bg-text px-5 text-md font-semibold text-bg hover:bg-text-2";
 
-/** Буква в круге, а не логотип Google: чужой знак в разметке без их гайдлайнов рисовать не будем. */
+/**
+ * Знак Google — официальный цветной «G» из их правил для кнопки входа. Лежит файлом в public:
+ * у знака свои цвета, и в разметку их тащить незачем.
+ */
 function GoogleMark() {
-  return (
-    <span
-      aria-hidden="true"
-      className="inline-flex size-6 items-center justify-center rounded-full border border-current font-display text-xs font-bold"
-    >
-      G
-    </span>
-  );
-}
-
-function InfoIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      aria-hidden="true"
-      className="mt-px size-4.5 shrink-0 text-signal"
-      fill="none"
-      stroke="currentColor"
-    >
-      <circle cx="12" cy="12" r="9" strokeWidth="2" />
-      <path d="M12 8v5M12 16h.01" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
+  // eslint-disable-next-line @next/next/no-img-element -- 20px векторного знака: оптимизатору нечего делать
+  return <img src="/icons/google.svg" alt="" width={20} height={20} className="size-5 shrink-0" />;
 }
