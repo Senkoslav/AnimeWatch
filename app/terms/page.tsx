@@ -19,7 +19,7 @@ export default function TermsPage() {
   return (
     <article className="mx-auto max-w-page px-4 lg:px-8 py-6 md:py-10">
       <h1 className={PAGE_TITLE}>Пользовательское соглашение</h1>
-      <p className="mt-2 text-sm text-dim">Редакция от 18 сентября 2026 года</p>
+      <p className="mt-2 text-sm text-dim">Редакция от 23 сентября 2026 года</p>
 
       <div className="mt-8 max-w-[70ch] space-y-8">
         <section className="space-y-3">
@@ -43,9 +43,9 @@ export default function TermsPage() {
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Регистрация</h2>
           <p>
-            Смотреть можно без регистрации, и никаких данных для этого мы не спрашиваем. Вход нужен только для
-            списков и оценок и будет через аккаунт Google — отдельной регистрации нет. Когда он заработает, этот раздел
-            изменится вместе с политикой конфиденциальности.
+            Смотреть можно без регистрации, и никаких данных для этого мы не спрашиваем. Вход нужен для списков и
+            оценок и идёт через аккаунт Google: отдельной регистрации нет, первый вход создаёт аккаунт. Что при этом
+            хранится, описано в политике конфиденциальности.
           </p>
         </section>
 

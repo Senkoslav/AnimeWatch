@@ -5,6 +5,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { AccountMenu } from "@/components/auth/account-menu";
 import { AuthTrigger } from "@/components/auth/auth-trigger";
 
 interface Item {
@@ -29,8 +30,8 @@ const ICON_BOX = "inline-flex h-7 w-12 items-center justify-center rounded-sm";
  * прокручиваемой страницей, и под ней реально проезжает содержимое (docs/04, «Стекло»).
  *
  * Текущий пункт — светлой пилюлей, а не янтарём, как и в шапке: раздел — это место, а не то, что
- * происходит сейчас. Профиля ещё нет, поэтому последний пункт честно называется «Войти» и открывает
- * окно входа. Клиентский лист только ради usePathname.
+ * происходит сейчас. Последний пункт — «Войти», а у вошедшего «Профиль» с меню аккаунта (страницы
+ * профиля ещё нет). Клиентский лист только ради usePathname.
  */
 export function BottomNav() {
   const pathname = usePathname();
@@ -59,12 +60,14 @@ export function BottomNav() {
           );
         })}
         <li className="flex flex-1">
-          <AuthTrigger className={ITEM}>
-            <span className={ICON_BOX}>
-              <UserRound aria-hidden="true" className="size-5" />
-            </span>
-            <span className="text-xs font-medium">Войти</span>
-          </AuthTrigger>
+          <AccountMenu variant="bar" itemClassName={ITEM}>
+            <AuthTrigger className={ITEM}>
+              <span className={ICON_BOX}>
+                <UserRound aria-hidden="true" className="size-5" />
+              </span>
+              <span className="text-xs font-medium">Войти</span>
+            </AuthTrigger>
+          </AccountMenu>
         </li>
       </ul>
     </nav>

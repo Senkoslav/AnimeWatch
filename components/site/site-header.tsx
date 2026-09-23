@@ -2,6 +2,7 @@ import { Search as SearchIcon } from "lucide-react";
 import Form from "next/form";
 import Link from "next/link";
 
+import { AccountMenu } from "@/components/auth/account-menu";
 import { AuthTrigger } from "@/components/auth/auth-trigger";
 import { button, FIELD_COMPACT } from "@/components/ui/controls";
 import { MAX_QUERY_LENGTH } from "@/lib/search/query";
@@ -72,7 +73,11 @@ export function SiteHeader() {
             Прячет ссылку обёртка, а не класс на ней же: display-утилиты конфликтовали бы с inline-flex
             из кнопки, и кто победит — зависело бы от порядка правил в собранном CSS, а не от разметки. */}
         <div className="hidden shrink-0 md:block">
-          <AuthTrigger className={button("secondary", "sm")}>Войти</AuthTrigger>
+          {/* Вошедшему — аватар с меню: по показной куке, в браузере, чтобы шапка не делала
+              страницы динамическими (lib/auth/display.ts). */}
+          <AccountMenu variant="header">
+            <AuthTrigger className={button("secondary", "sm")}>Войти</AuthTrigger>
+          </AccountMenu>
         </div>
       </div>
     </header>

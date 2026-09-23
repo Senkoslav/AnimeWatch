@@ -1,10 +1,24 @@
 import { X } from "lucide-react";
 
 import { CloseOnNavigate } from "@/components/auth/close-on-navigate";
+import { DialogBody } from "@/components/auth/dialog-body";
 import { AUTH_DIALOG_ID } from "@/components/auth/ids";
 import { LoginCard } from "@/components/auth/login-card";
 
 const TITLE_ID = "auth-dialog-title";
+
+/** Крестик. Закрытие той же нативной командой: без JS работает так же, как Esc. */
+const CLOSE = (
+  <button
+    type="button"
+    commandfor={AUTH_DIALOG_ID}
+    command="close"
+    className="-mt-1.5 -mr-1.5 inline-flex size-11 shrink-0 items-center justify-center rounded-sm border border-line bg-fill text-text-2 hover:bg-fill-2 hover:text-text"
+  >
+    <span className="sr-only">Закрыть</span>
+    <X aria-hidden="true" className="size-4" />
+  </button>
+);
 
 /**
  * Окно входа (Auth.dc.html, Auth-mobile.dc.html) — единственное место входа на сайте: отдельной
@@ -37,21 +51,9 @@ export function AuthDialog() {
       <div aria-hidden="true" className="flex justify-center pt-2.5 sm:hidden">
         <span className="h-1 w-10 rounded-full bg-fill-2" />
       </div>
-      <LoginCard
-        titleId={TITLE_ID}
-        close={
-          // Закрытие той же нативной командой: без JS работает так же, как Esc.
-          <button
-            type="button"
-            commandfor={AUTH_DIALOG_ID}
-            command="close"
-            className="-mt-1.5 -mr-1.5 inline-flex size-11 shrink-0 items-center justify-center rounded-sm border border-line bg-fill text-text-2 hover:bg-fill-2 hover:text-text"
-          >
-            <span className="sr-only">Закрыть</span>
-            <X aria-hidden="true" className="size-4" />
-          </button>
-        }
-      />
+      <DialogBody titleId={TITLE_ID} close={CLOSE}>
+        <LoginCard titleId={TITLE_ID} close={CLOSE} />
+      </DialogBody>
     </dialog>
   );
 }

@@ -26,5 +26,8 @@ export default defineConfig({
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !isCI,
     timeout: 120_000,
+    // Тестовые ключи Google: вход включён, но настоящий Google e2e не вызывают никогда —
+    // уход на Google проверяется по адресу редиректа, а сессия подкладывается в базу (auth.spec.ts).
+    env: { GOOGLE_CLIENT_ID: "e2e-client.apps.googleusercontent.com", GOOGLE_CLIENT_SECRET: "e2e-secret" },
   },
 });

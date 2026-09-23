@@ -78,13 +78,16 @@ test("ссылка на соглашение из окна уводит на с�
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Пользовательское соглашение");
 });
 
-test("без ключей Google кнопка говорит об этом, а не молчит", async ({ page }) => {
+test("с ключами Google кнопка — обычная ссылка на вход, работающая без JS", async ({ page }) => {
   await page.goto("/catalog");
   await loginTrigger(page).click();
 
-  // Прогон идёт без GOOGLE_CLIENT_ID, значит вход обязан честно сказать, что он ещё не работает.
-  await expect(dialog(page).getByRole("button", { name: "Продолжить с Google" })).toBeDisabled();
-  await expect(dialog(page).getByText("Вход ещё подключается")).toBeVisible();
+  // Прогон идёт с тестовыми ключами (playwright.config.ts). Состояние без ключей проверяет googleConfig() в unit.
+  await expect(dialog(page).getByRole("link", { name: "Продолжить с Google" })).toHaveAttribute(
+    "href",
+    "/api/auth/google",
+  );
+  await expect(dialog(page).getByText("Вход ещё подключается")).toHaveCount(0);
   await expect(dialog(page).getByRole("link", { name: /отдельной страницей/ })).toHaveCount(0);
 });
 

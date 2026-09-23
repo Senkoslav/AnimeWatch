@@ -6,6 +6,8 @@ import { PrismaClient } from "@/lib/generated/prisma/client";
 
 /** Адрес из формы в tests/e2e/dmca.spec.ts: чистим только свои следы, чужие обращения не трогаем. */
 const TEST_CLAIMANT_EMAIL = "legal@example.com";
+/** googleId тестового зрителя из tests/e2e/auth.spec.ts. */
+const E2E_GOOGLE_ID = "e2e-google-user";
 
 /**
  * Один раз на прогон: убрать обращения, оставленные прошлыми прогонами e2e.
@@ -29,6 +31,8 @@ export default async function globalSetup(): Promise<void> {
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
   try {
     await prisma.dmcaRequest.deleteMany({ where: { claimantEmail: TEST_CLAIMANT_EMAIL } });
+    // Тестовый зритель из auth.spec.ts: его сессии от прошлых прогонов (каскадом вместе с ним).
+    await prisma.user.deleteMany({ where: { googleId: E2E_GOOGLE_ID } });
   } finally {
     await prisma.$disconnect();
   }

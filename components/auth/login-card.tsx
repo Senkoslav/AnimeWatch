@@ -3,9 +3,10 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { button, TEXT_LINK } from "@/components/ui/controls";
+import { googleConfig } from "@/lib/auth/google";
 
-/** Ключи Google живут только на сервере. Без них вход честно говорит, что пока не работает. */
-const configured = Boolean(process.env.GOOGLE_CLIENT_ID);
+/** Ключи Google живут только на сервере. Без обоих вход честно говорит, что пока не работает. */
+const configured = googleConfig() !== null;
 
 /**
  * Что даёт аккаунт. Линованный список, а не три одинаковые карточки: одинаковые блоки «заголовок
