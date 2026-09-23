@@ -10,6 +10,7 @@ import { AddToList } from "@/components/ui/add-to-list";
 import { button, CHIP, TAG, TAG_SIGNAL } from "@/components/ui/controls";
 import { Poster } from "@/components/ui/poster";
 import { PosterBackdrop } from "@/components/ui/poster-backdrop";
+import { EpisodeGrid } from "@/components/watch/episode-grid";
 import { catalogHref } from "@/lib/catalog/params";
 import { formatAgeRating, formatAirDay, formatCount, formatScore, formatSeason } from "@/lib/format";
 import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
@@ -202,7 +203,13 @@ export default async function TitlePageView({ params }: PageProps<"/anime/[slug]
             </div>
 
             <div className="order-5 col-span-2 md:order-none">
-              <EpisodeList title={title} now={now} thumbs footer={episodesFooter(title)} />
+              {/* Список — когда у серий есть названия или кадры: тогда строка что-то говорит о серии.
+                  Иначе (обычный случай после импорта с Shikimori) — плитки с номером. */}
+              {isMovie || title.episodes.some((episode) => episode.name || episode.thumbUrl) ? (
+                <EpisodeList title={title} now={now} thumbs footer={episodesFooter(title)} />
+              ) : (
+                <EpisodeGrid title={title} now={now} footer={episodesFooter(title)} />
+              )}
             </div>
           </div>
         </div>
@@ -254,11 +261,12 @@ function episodesFooter(title: TitlePage) {
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <p className="text-xs text-dim">
-        {rest > 0
-          ? `Вышло ${total} из ${title.totalEpisodes}.${airDay ? ` Остальные выйдут по расписанию, ${airDay}.` : ""}`
-          : formatCount(total, ["серия", "серии", "серий"])}
-      </p>
+      {/* Сколько серий, уже сказано в заголовке блока: здесь — только то, чего там нет. */}
+      {rest > 0 && airDay ? (
+        <p className="text-xs text-dim">Остальные {rest} выйдут по расписанию, {airDay}.</p>
+      ) : (
+        <span />
+      )}
       <Link href={episodeHref(title.slug, first.number)} className={button("secondary", "sm")}>
         Начать с первой
       </Link>

@@ -58,6 +58,23 @@ test("список серий: номер, название и длительн�
   );
 });
 
+test("серии без названий — плитками с номером, счёт серий не повторяется в подвале", async ({ page }) => {
+  // В seed у «Магической битвы» три серии без названий — как после импорта с Shikimori.
+  await page.goto("/anime/jujutsu-kaisen-2");
+  const episodes = page.getByRole("region", { name: "Серии" });
+
+  await expect(episodes.getByRole("listitem")).toHaveCount(3);
+  const tile = episodes.getByRole("link", { name: /^Эпизод 01/ });
+  await expect(tile).toHaveText("01");
+  await expect(tile).not.toHaveAttribute("aria-current", "page");
+  // На странице тайтла «Все серии» вели бы на неё же.
+  await expect(episodes.getByRole("link", { name: "Все серии" })).toHaveCount(0);
+
+  await expect(episodes.getByText(/3 из 23/)).toHaveCount(1);
+  await tile.click();
+  await expect(page).toHaveURL("/anime/jujutsu-kaisen-2/1");
+});
+
 test("«Читать дальше» раскрывает длинное описание с клавиатуры", async ({ page, isMobile }) => {
   test.skip(isMobile, "клавиатура проверяется на десктопе");
   // Описание Фрирен в seed длиннее порога.

@@ -1,9 +1,10 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 
 import { TEXT_LINK } from "@/components/ui/controls";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { episodeWindow, WATCH_EPISODE_WINDOW } from "@/lib/episodes";
-import { formatEpisodeNumber, isFresh } from "@/lib/format";
+import { EPISODE_WINDOW, episodeWindow, WATCH_EPISODE_WINDOW } from "@/lib/episodes";
+import { formatCount, formatEpisodeNumber, isFresh } from "@/lib/format";
 import type { TitlePage } from "@/lib/queries/title";
 import { episodeHref, titleHref } from "@/lib/routes";
 
@@ -19,23 +20,39 @@ const TILE_WIDTH_WIDEST = "w-19";
 interface EpisodeGridProps {
   title: Pick<TitlePage, "slug" | "totalEpisodes" | "episodes">;
   now: Date;
-  currentNumber: number;
+  /**
+   * Серия, которая играет сейчас: только на просмотре. Там колонка липкая, окно поменьше и вокруг
+   * текущей, а «Все серии» ведёт на тайтл. Без неё — страница тайтла: окно из последних серий.
+   */
+  currentNumber?: number;
+  /** Подвал: пояснение и действие справа («Начать с первой» на странице тайтла). */
+  footer?: ReactNode;
 }
 
 /**
- * Серии рядом с плеером — сеткой плиток с номером, а не списком (правка владельца 2026-09-23):
- * рядом с плеером нужен переход к соседней серии, а название серии читают на странице тайтла.
- * Название здесь — в подписи ссылки и во всплывающей подсказке.
+ * Серии сеткой плиток с номером (правка владельца 2026-09-23). Рядом с плеером — всегда: там нужен
+ * переход к соседней серии. На странице тайтла — когда у серий нет названий (импорт с Shikimori их
+ * не приносит): строка списка из номера, отточия и одинаковой длительности ничего не говорит, а
+ * сотня таких строк — это пять с половиной тысяч пикселей прокрутки. Название, если есть, — в
+ * подписи ссылки и во всплывающей подсказке.
  *
- * Колонка липкая и не выше окна. У долгих тайтлов показывается окно вокруг текущей серии
- * (lib/episodes.ts), и оно честно пишет, какой диапазон показывает.
+ * На просмотре колонка липкая и не выше окна. У долгих тайтлов показывается окно (lib/episodes.ts),
+ * и оно честно пишет, какой диапазон показывает.
  *
  * Плотная поверхность, не стекло: под колонкой ничего нет (docs/04, «Стекло»).
  */
-export function EpisodeGrid({ title, now, currentNumber }: EpisodeGridProps) {
+export function EpisodeGrid({ title, now, currentNumber, footer }: EpisodeGridProps) {
   const { episodes: all, totalEpisodes, slug } = title;
-  const { episodes, capped, first, last, total } = episodeWindow(all, currentNumber, WATCH_EPISODE_WINDOW);
-  const count = totalEpisodes && totalEpisodes > total ? `${total} из ${totalEpisodes}` : String(total);
+  const watching = currentNumber !== undefined;
+  const { episodes, capped, first, last, total } = episodeWindow(
+    all,
+    currentNumber,
+    watching ? WATCH_EPISODE_WINDOW : EPISODE_WINDOW,
+  );
+  const count =
+    totalEpisodes && totalEpisodes > total
+      ? `вышло ${total} из ${totalEpisodes}`
+      : formatCount(total, ["серия", "серии", "серий"]);
 
   const digits = formatEpisodeNumber(last).length;
   const width = TILE_WIDTH[digits] ?? TILE_WIDTH_WIDEST;
@@ -46,7 +63,7 @@ export function EpisodeGrid({ title, now, currentNumber }: EpisodeGridProps) {
   return (
     <section
       aria-labelledby="episodes-title"
-      className="flex flex-col overflow-hidden rounded-lg border border-line bg-surface lg:sticky lg:top-sticky lg:max-h-[calc(100dvh_-_var(--spacing-sticky)_-_1rem)]"
+      className={`flex flex-col overflow-hidden rounded-lg border border-line bg-surface ${watching ? "lg:sticky lg:top-sticky lg:max-h-[calc(100dvh_-_var(--spacing-sticky)_-_1rem)]" : ""}`}
     >
       <div className="border-b border-line px-4 py-3">
         <SectionHeading id="episodes-title" tone="signal" aside={count}>
@@ -54,7 +71,7 @@ export function EpisodeGrid({ title, now, currentNumber }: EpisodeGridProps) {
         </SectionHeading>
       </div>
 
-      <div className="min-h-0 overflow-y-auto p-4">
+      <div className={`min-h-0 p-4 ${watching ? "overflow-y-auto" : ""}`}>
         <ol className="flex flex-wrap gap-1.5">
           {episodes.map((episode) => {
             const number = formatEpisodeNumber(episode.number);
@@ -102,7 +119,7 @@ export function EpisodeGrid({ title, now, currentNumber }: EpisodeGridProps) {
         </ol>
       </div>
 
-      {(capped || markMissing) && (
+      {(capped || markMissing || footer) && (
         <div className="flex flex-col gap-2 border-t border-line px-4 py-3 text-xs text-dim">
           {capped && (
             <p className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
@@ -113,12 +130,16 @@ export function EpisodeGrid({ title, now, currentNumber }: EpisodeGridProps) {
                 </span>{" "}
                 из <span data-numeric="">{total}</span>
               </span>
-              <Link href={titleHref(slug)} className={`${TEXT_LINK} inline-flex min-h-11 items-center text-sm`}>
-                Все серии
-              </Link>
+              {/* На странице тайтла ссылка вела бы на саму себя. */}
+              {watching && (
+                <Link href={titleHref(slug)} className={`${TEXT_LINK} inline-flex min-h-11 items-center text-sm`}>
+                  Все серии
+                </Link>
+              )}
             </p>
           )}
           {markMissing && <p>Серии в пунктирной рамке вышли, но источник к ним ещё не подключён.</p>}
+          {footer}
         </div>
       )}
     </section>
