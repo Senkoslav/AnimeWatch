@@ -1,4 +1,5 @@
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
 
@@ -79,10 +80,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <BottomNav />
         <AuthDialog />
         {/*
-          Vercel Web Analytics: посещения без cookie и без персональных данных, счёт в панели Vercel.
-          Только на Vercel: локально и в e2e скрипт аналитики не грузится и в чужую сеть не ходит.
+          Vercel Web Analytics (посещения) и Speed Insights (Core Web Vitals у настоящих зрителей:
+          LCP, CLS, INP — цели MVP из docs/01). Без cookie и персональных данных. Только на Vercel:
+          локально и в e2e их скрипты не грузятся и в чужую сеть не ходят.
         */}
-        {process.env.VERCEL && <Analytics />}
+        {process.env.VERCEL && (
+          <>
+            <Analytics />
+            <SpeedInsights />
+          </>
+        )}
       </body>
     </html>
   );
