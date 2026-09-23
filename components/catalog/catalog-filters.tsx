@@ -93,11 +93,12 @@ export function CatalogFilters({ params, options, total }: CatalogFiltersProps) 
         <span className="sr-only">Закрыть отбор</span>
       </label>
 
-      {/* Липкая панель выше экрана прокручивается внутри себя: иначе кнопка «Показать» уезжает
-          под нижний край, и в длинной выдаче отбор становится недостижим. */}
+      {/* Липкая панель выше экрана прокручивается внутри себя, областью полей. Сама панель —
+          overflow-clip, а не hidden: hidden всё ещё прокручивается скриптом и фокусом, и шапка
+          «Отбор» уезжала бы вверх, оставляя пустоту снизу. */}
       <div
         id={PANEL_ID}
-        className="sheet-surface fixed inset-x-0 bottom-0 z-40 hidden max-h-[85dvh] flex-col overflow-hidden peer-checked:flex lg:sticky lg:inset-x-auto lg:top-sticky lg:bottom-auto lg:z-auto lg:flex lg:max-h-[calc(100dvh_-_var(--spacing-sticky)_-_1rem)]"
+        className="sheet-surface fixed inset-x-0 bottom-0 z-40 hidden max-h-[85dvh] flex-col overflow-clip peer-checked:flex lg:sticky lg:inset-x-auto lg:top-sticky lg:bottom-auto lg:z-auto lg:flex lg:max-h-[calc(100dvh_-_var(--spacing-sticky)_-_1rem)]"
       >
         <div className={CATALOG_PANEL_HEAD}>
           <SectionHeading className="mr-auto">Отбор</SectionHeading>

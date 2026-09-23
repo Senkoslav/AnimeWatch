@@ -4,6 +4,9 @@ import type { Route } from "next";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type ChangeEvent, type FormEvent, type ReactNode, useEffect, useRef, useTransition } from "react";
 
+/** Начало выдачи на странице каталога (app/catalog/page.tsx). */
+const RESULTS_ID = "catalog-results";
+
 /** Пауза после последней набранной буквы: запрос на каждую букву — это полный скан `Title` на букву. */
 const TYPING_DELAY = 500;
 
@@ -44,7 +47,13 @@ export function CatalogForm({ className, children }: CatalogFormProps) {
   // Флаг живёт до конца перехода, а не до смены адреса: отбор, который канонически равен
   // текущему, адрес не меняет, и флаг иначе остался бы висеть до следующей чужой навигации.
   useEffect(() => {
-    if (!pending) own.current = false;
+    if (pending || !own.current) return;
+    own.current = false;
+    // Страница не прыгает вверх на каждом чипе (scroll: false), но если начало выдачи уже выше
+    // окна, новая выдача — обычно короче старой — оказалась бы за экраном, а на её месте пустота
+    // под концом страницы. Тогда возвращаемся к началу выдачи; отступ под шапку — scroll-mt.
+    const results = document.getElementById(RESULTS_ID);
+    if (results && results.getBoundingClientRect().top < 0) results.scrollIntoView({ block: "start" });
   }, [pending]);
 
   useEffect(() => () => clearTimeout(timer.current), []);

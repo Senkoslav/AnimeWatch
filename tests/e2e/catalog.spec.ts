@@ -358,6 +358,24 @@ test("отбор применяется сам: клик по статусу с�
   await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&status=ongoing");
 });
 
+test("клик по нижнему чипу не прокручивает саму панель: шапка на месте, снизу нет пустоты", async ({ page }) => {
+  // Баг 2026-09-23: скрытый чекбокс чипа позиционировался от панели, а не от подписи. Фокус на нём
+  // прокручивал панель с overflow-hidden, шапка «Отбор» уезжала вверх, а снизу оставалась пустота.
+  // Панель между переходами больше не пересоздаётся, и сдвиг оставался навсегда.
+  const viewport = page.viewportSize();
+  await page.setViewportSize({ width: viewport?.width ?? 1440, height: 520 });
+  await page.goto("/catalog");
+  await openFilters(page);
+
+  await chip(page, "kind", "special").click();
+  await expect(page).toHaveURL("/catalog?kind=special");
+
+  const panel = page.locator("#catalog-filters-panel");
+  expect(await panel.evaluate((element) => element.scrollTop)).toBe(0);
+  await expect(panel.getByRole("heading", { name: "Отбор" })).toBeInViewport();
+  await expect(page.getByRole("checkbox", { name: "Спешл" })).toBeChecked();
+});
+
 test("ссылка снаружи формы подводит к адресу и поля панели", async ({ page }) => {
   // Панель живёт между переходами, поэтому «Сбросить» и метки обязаны сбросить и её поля.
   await page.goto("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&kind=tv");

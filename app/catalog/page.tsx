@@ -95,7 +95,7 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
 
         <section aria-labelledby="catalog-results" className="mt-6 min-w-0 lg:mt-0 lg:self-start">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-3">
-            <p id="catalog-results" className="text-sm text-muted">
+            <p id="catalog-results" className="scroll-mt-sticky text-sm text-muted">
               {catalog.total === 0 ? (
                 "Ничего не нашлось"
               ) : (
