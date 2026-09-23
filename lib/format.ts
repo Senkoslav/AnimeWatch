@@ -122,3 +122,13 @@ export function moscowWeekday(now: Date): number {
 
 /** Короткое имя дня для чипов расписания: «пн», «вт». */
 export const WEEKDAY_SHORT = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"] as const;
+
+const timeInMoscow = new Intl.DateTimeFormat("ru", { hour: "2-digit", minute: "2-digit", timeZone: TIME_ZONE });
+
+/** Время выхода по Москве: «17:15». День и время у сериала повторяются каждую неделю, дата — нет. */
+export function formatAirTime(date: Date): string {
+  return timeInMoscow.format(date);
+}
+
+/** Полное имя дня для заголовков недели: «Понедельник». */
+export const WEEKDAY_FULL = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"] as const;

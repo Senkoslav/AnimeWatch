@@ -29,6 +29,7 @@ export function SiteHeader() {
         <MobileMenu label="Меню">
           <nav aria-label="Разделы" className="flex flex-col">
             <NavLink href="/catalog">Каталог</NavLink>
+            <NavLink href="/schedule">Расписание</NavLink>
           </nav>
         </MobileMenu>
 
@@ -43,6 +44,7 @@ export function SiteHeader() {
 
         <nav aria-label="Разделы" className="hidden lg:flex lg:items-center lg:gap-1">
           <NavLink href="/catalog">Каталог</NavLink>
+          <NavLink href="/schedule">Расписание</NavLink>
         </nav>
 
         {/* Поле, а не иконка: поиск — вторая причина, по которой сюда приходят, и прятать его незачем. */}

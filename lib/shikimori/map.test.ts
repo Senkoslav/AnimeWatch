@@ -114,3 +114,41 @@ describe("отбраковка", () => {
     expect(mapTitle({ ...node(16498), russian: null })?.nameRu).toBe("Shingeki no Kyojin");
   });
 });
+
+describe("расписание из nextEpisodeAt", () => {
+  /**
+   * Снимок фикстуры сделан до того, как импорт стал запрашивать nextEpisodeAt, поэтому поле подставляется
+   * здесь поверх живого узла, а не дописывается в фикстуру: она остаётся настоящим ответом API.
+   */
+  function withNext(shikimoriId: number, nextEpisodeAt: string | null) {
+    const raw = FIXTURE.data.animes.find((anime) => (anime as { id: string }).id === String(shikimoriId));
+    return animeNodeSchema.parse({ ...(raw as object), nextEpisodeAt });
+  }
+
+  it("у онгоинга — дата и день недели по Москве", () => {
+    // Ван-Пис, воскресенье 17:15 по Москве.
+    const title = mapTitle(withNext(21, "2026-09-27T17:15:00+03:00"));
+    expect(title?.nextEpisodeAt?.toISOString()).toBe("2026-09-27T14:15:00.000Z");
+    expect(title?.airDay).toBe(7);
+  });
+
+  it("день берётся по Москве, а не по UTC и не по смещению в строке", () => {
+    // 01:30 понедельника по Москве — это ещё воскресенье по UTC.
+    expect(mapTitle(withNext(21, "2026-09-20T22:30:00+00:00"))?.airDay).toBe(1);
+  });
+
+  it("у завершённого расписания нет, даже если их API держит старую дату", () => {
+    expect(mapTitle(withNext(16498, "2026-09-27T17:15:00+03:00"))).toMatchObject({
+      nextEpisodeAt: null,
+      airDay: null,
+    });
+  });
+
+  it("онгоинг без даты — вне расписания, а не в понедельнике", () => {
+    expect(mapTitle(withNext(21, null))).toMatchObject({ nextEpisodeAt: null, airDay: null });
+  });
+
+  it("мусор вместо даты не проходит разбор", () => {
+    expect(() => withNext(21, "в воскресенье")).toThrow();
+  });
+});

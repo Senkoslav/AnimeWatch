@@ -5,7 +5,7 @@
  * Клиент передаётся снаружи, а не берётся из `lib/db.ts`: тот помечен `server-only` и в обычном
  * node-скрипте падает при импорте, а импорт запускают именно скриптом.
  */
-import type { PrismaClient } from "@/lib/generated/prisma/client";
+import type { Prisma, PrismaClient } from "@/lib/generated/prisma/client";
 import { TitleStatus } from "@/lib/generated/prisma/enums";
 
 import { mapTitle, type MappedTitle } from "./map";
@@ -64,7 +64,11 @@ async function importOne(
     // не трогает: иначе точечное обновление одного тайтла стёрло бы порядок, собранный пакетом.
     ...(popularityRank === null ? {} : { popularityRank }),
     totalEpisodes: mapped.totalEpisodes,
-  };
+    // Оба поля пишутся всегда, в том числе null: вышедший тайтл обязан уйти из расписания.
+    nextEpisodeAt: mapped.nextEpisodeAt,
+    airDay: mapped.airDay,
+    // satisfies, а не просто объект: поле, которого нет в схеме, иначе проходит tsc и падает только в рантайме.
+  } satisfies Prisma.TitleUpdateInput;
 
   const title = existing
     ? // publishedAt при обновлении не трогаем: черновик остаётся черновиком.

@@ -1,11 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 
+import { ScheduleRow } from "@/components/schedule/schedule-row";
 import { CHIP, FOCUS_WITHIN } from "@/components/ui/controls";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { WEEKDAY_SHORT } from "@/lib/format";
 import type { OngoingTitle } from "@/lib/queries/home";
-import { titleHref } from "@/lib/routes";
 
 /** Строк на день: расписание на главной — выжимка, а не весь список недели. */
 const ROWS_PER_DAY = 5;
@@ -20,8 +19,7 @@ interface ScheduleProps {
  * «Расписание» (Main.dc.html). Дни — радиокнопки-чипы: выбор переключает панель одним CSS
  * (`.schedule:has(...)` в globals.css), без JS и без параметра в адресе — главная остаётся ISR.
  *
- * Времени выхода на макете нет смысла рисовать: Shikimori отдаёт его отдельным полем, которого мы не
- * храним. Строка говорит, какая серия следующая. «Вся неделя» появится вместе с /schedule.
+ * Время выхода — из nextEpisodeAt Shikimori, по Москве. Полная неделя — на /schedule.
  */
 export function Schedule({ byDay, today }: ScheduleProps) {
   // Неделя с сегодняшнего дня: «сегодня, вт, ср…», а не с понедельника.
@@ -29,7 +27,16 @@ export function Schedule({ byDay, today }: ScheduleProps) {
 
   return (
     <section aria-labelledby="schedule-title" className="schedule min-w-0">
-      <SectionHeading id="schedule-title" tone="signal" className="mb-4">
+      <SectionHeading
+        id="schedule-title"
+        tone="signal"
+        className="mb-4"
+        aside={
+          <Link href="/schedule" className="inline-flex min-h-11 items-center text-muted underline hover:text-text">
+            Вся неделя
+          </Link>
+        }
+      >
         Расписание
       </SectionHeading>
 
@@ -66,18 +73,7 @@ export function Schedule({ byDay, today }: ScheduleProps) {
                 <ul>
                   {titles.slice(0, ROWS_PER_DAY).map((title) => (
                     <li key={title.slug} className="border-b border-line last:border-b-0">
-                      <Link
-                        href={titleHref(title.slug)}
-                        className="flex min-h-15 items-center gap-3.5 px-4 py-2 hover:bg-surface-2"
-                      >
-                        <span className="relative h-11.5 w-8 shrink-0 overflow-hidden rounded-sm border border-line bg-surface-2">
-                          {title.posterUrl && (
-                            <Image src={title.posterUrl} alt="" fill sizes="32px" className="object-cover" />
-                          )}
-                        </span>
-                        <span className="min-w-0 flex-1 truncate text-base">{title.nameRu}</span>
-                        <span className="shrink-0 text-sm text-dim">{nextEpisode(title)}</span>
-                      </Link>
+                      <ScheduleRow title={title} />
                     </li>
                   ))}
                   {rest > 0 && <li className="px-4 py-2.5 text-xs text-dim">и ещё {rest} в этот день</li>}
@@ -89,11 +85,4 @@ export function Schedule({ byDay, today }: ScheduleProps) {
       </div>
     </section>
   );
-}
-
-/** «эпизод 8»: следующая после вышедших, если она вообще будет. */
-function nextEpisode(title: OngoingTitle): string | null {
-  const next = title.published + 1;
-  if (title.totalEpisodes && next > title.totalEpisodes) return null;
-  return `эпизод ${next}`;
 }

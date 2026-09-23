@@ -75,7 +75,10 @@ model Title {
   // есть только сортировка. Известно поэтому лишь для тайтлов из пакетного импорта.
   popularityRank Int?
   totalEpisodes  Int? // сколько всего в тайтле
-  airDay         Int? // 1-7, для расписания
+  airDay         Int? // 1-7 по Москве; выводится импортом из nextEpisodeAt
+  // Следующая серия по данным Shikimori на момент импорта. Снимок: импорт запускается руками, поэтому
+  // расписание показывает день и время («чт, 17:15»), а не дату, которая устареет через неделю.
+  nextEpisodeAt  DateTime?
   publishedAt    DateTime? // null = черновик; HIDDEN — только рубильник по жалобе
   episodes       Episode[]
   bookmarks      Bookmark[]
@@ -279,6 +282,10 @@ model DmcaRequest {
 - **Клиент генерируется** в `lib/generated/prisma` (в git не попадает) на
   `postinstall`. Импорт в приложении — только `prisma` из `lib/db.ts`: модуль
   помечен `server-only`, и импорт из клиентского компонента роняет сборку.
+- **`migrate dev` клиент не пересобирает.** В Prisma 7 после новой миграции нужен
+  `pnpm exec prisma generate` (на Vercel это делает `postinstall`). Иначе клиент не знает
+  новое поле, и запись падает в рантайме с «Unknown argument». В импорте объект полей
+  помечен `satisfies Prisma.TitleUpdateInput`, чтобы такое ловил уже `tsc`.
 - **Миграции.** Обычная — `pnpm db:migrate`. Миграцию с потерей данных
   `migrate dev` не сделает: он требует интерактивного подтверждения, которого в
   сессии агента нет. Тогда SQL генерируется Prisma же:

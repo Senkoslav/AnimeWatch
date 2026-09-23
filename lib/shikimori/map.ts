@@ -2,6 +2,7 @@
  * Перевод ответа Shikimori в наши модели. Здесь нет сети и нет базы: чистая функция,
  * которую можно проверить на зафиксированном ответе API (tests/fixtures/shikimori-animes.json).
  */
+import { moscowWeekday } from "@/lib/format";
 import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 
 import type { AnimeNode } from "./schema";
@@ -72,6 +73,9 @@ export interface MappedTitle {
   /** Длительность серии в секундах: у них минуты, у нас `Episode.duration` в секундах. */
   episodeSeconds: number | null;
   episodeCount: number;
+  /** Следующая серия и её день недели по Москве; только у онгоингов, у остальных — null. */
+  nextEpisodeAt: Date | null;
+  airDay: number | null;
 }
 
 /** null — тайтл в каталог не берём: неизвестный тип (клип, реклама) или неизвестный статус. */
@@ -104,5 +108,16 @@ export function mapTitle(node: AnimeNode): MappedTitle | null {
     totalEpisodes: node.episodes || null,
     episodeSeconds: node.duration ? node.duration * 60 : null,
     episodeCount: episodeCount(node),
+    ...schedule(node, status),
   };
+}
+
+/**
+ * Расписание — только у того, что выходит. У завершённого их API может ещё держать старую дату, и без
+ * этой проверки повторный импорт оставил бы вышедший тайтл в расписании навсегда.
+ */
+function schedule(node: AnimeNode, status: TitleStatus): { nextEpisodeAt: Date | null; airDay: number | null } {
+  if (status !== TitleStatus.ONGOING || !node.nextEpisodeAt) return { nextEpisodeAt: null, airDay: null };
+  const nextEpisodeAt = new Date(node.nextEpisodeAt);
+  return { nextEpisodeAt, airDay: moscowWeekday(nextEpisodeAt) };
 }

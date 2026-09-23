@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { formatAirTime } from "@/lib/format";
 import { TitleStatus, type TitleKind } from "@/lib/generated/prisma/enums";
 import { publicEpisodeWhere, publicTitleWhere } from "@/lib/public-where";
 import { isDefined } from "@/lib/unknown";
@@ -98,6 +99,8 @@ export interface OngoingTitle {
   airDay: number | null;
   /** Сколько серий уже опубликовано у нас: «7 из 28» и «следующая — 8». */
   published: number;
+  /** Следующая серия по данным Shikimori на момент импорта. Показывается временем, не датой. */
+  nextEpisodeAt: Date | null;
 }
 
 const ONGOING_SELECT = {
@@ -107,6 +110,7 @@ const ONGOING_SELECT = {
   score: true,
   totalEpisodes: true,
   airDay: true,
+  nextEpisodeAt: true,
   // Счётчик в том же запросе, а не запрос на тайтл.
   _count: { select: { episodes: { where: { publishedAt: { not: null } } } } },
 } as const;
@@ -138,8 +142,8 @@ export async function getOngoing(limit: number): Promise<{ titles: OngoingTitle[
 }
 
 /**
- * Расписание: онгоинги с известным днём выхода, по дням недели. Времени выхода нет — Shikimori
- * отдаёт его отдельным полем, которого мы не храним, — поэтому внутри дня порядок по популярности.
+ * Расписание: онгоинги с известным днём выхода, по дням недели. Внутри дня — по времени выхода по
+ * Москве; без времени — в конце, по популярности.
  */
 export async function getSchedule(): Promise<Map<number, OngoingTitle[]>> {
   const titles = await prisma.title.findMany({
@@ -152,6 +156,11 @@ export async function getSchedule(): Promise<Map<number, OngoingTitle[]>> {
   for (const title of titles.map(toOngoing)) {
     if (title.airDay === null) continue;
     byDay.set(title.airDay, [...(byDay.get(title.airDay) ?? []), title]);
+  }
+  // Время суток по Москве строкой «17:15» сравнивается как есть; сортировка устойчивая, поэтому
+  // у равных остаётся порядок популярности из запроса.
+  for (const day of byDay.values()) {
+    day.sort((a, b) => airTimeKey(a).localeCompare(airTimeKey(b)));
   }
   return byDay;
 }
@@ -179,4 +188,9 @@ export async function getPopular(limit: number): Promise<PopularTitle[]> {
     select: { slug: true, nameRu: true, posterUrl: true, kind: true, year: true, score: true, popularityRank: true },
   });
   return titles.flatMap(({ popularityRank, ...title }) => (popularityRank === null ? [] : [{ ...title, popularityRank }]));
+}
+
+/** Ключ сортировки внутри дня: время по Москве, а без времени — после всех. */
+function airTimeKey(title: OngoingTitle): string {
+  return title.nextEpisodeAt ? formatAirTime(title.nextEpisodeAt) : "99:99";
 }

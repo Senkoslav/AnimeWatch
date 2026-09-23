@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   formatAgeRating,
+  formatAirTime,
   formatAirDay,
   formatCount,
   formatDuration,
@@ -165,5 +166,12 @@ describe("moscowWeekday", () => {
   it("день берётся по Москве, а не по UTC", () => {
     // 22:30 UTC в воскресенье — это уже 01:30 понедельника в Москве.
     expect(moscowWeekday(new Date("2026-09-20T22:30:00Z"))).toBe(1);
+  });
+});
+
+describe("formatAirTime", () => {
+  it("время по Москве, а не по UTC", () => {
+    expect(formatAirTime(new Date("2026-09-27T14:15:00Z"))).toBe("17:15");
+    expect(formatAirTime(new Date("2026-09-20T22:05:00Z"))).toBe("01:05");
   });
 });

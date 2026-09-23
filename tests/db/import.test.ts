@@ -31,6 +31,22 @@ async function titleBySlug(slug: string) {
 }
 
 describe("importTitles", () => {
+  it("пишет расписание онгоинга и стирает его, когда тайтл вышел целиком", async () => {
+    const now = new Date("2026-09-18T10:00:00Z");
+    const ongoing = { status: "ongoing", episodes: 12, episodesAired: 3, nextEpisodeAt: "2026-09-24T17:15:00+03:00" };
+    await importTitles(prisma, [node(ongoing)], now);
+
+    const scheduled = await prisma.title.findUnique({ where: { shikimoriId: 16498 }, select: { nextEpisodeAt: true, airDay: true } });
+    expect(scheduled?.nextEpisodeAt?.toISOString()).toBe("2026-09-24T14:15:00.000Z");
+    expect(scheduled?.airDay).toBe(4);
+
+    // Повторный импорт после финала: null пишется явно, иначе тайтл висел бы в расписании вечно.
+    await importTitles(prisma, [node({ status: "released", nextEpisodeAt: null })], now);
+    expect(
+      await prisma.title.findUnique({ where: { shikimoriId: 16498 }, select: { nextEpisodeAt: true, airDay: true } }),
+    ).toEqual({ nextEpisodeAt: null, airDay: null });
+  });
+
   it("заводит тайтл с сериями и публикует его", async () => {
     const now = new Date("2026-09-18T10:00:00Z");
     const stats = await importTitles(prisma, [node()], now);

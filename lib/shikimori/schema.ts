@@ -30,6 +30,8 @@ export const animeNodeSchema = z.object({
   // 0.0 у тайтла без оценок — это «оценки нет», а не ноль. Разбирается как есть, смысл придаёт mapTitle.
   score: z.number().min(0).max(10).nullish(),
   description: z.string().nullish(),
+  // Дата со смещением: «2026-09-27T17:15:00+03:00». Есть только у онгоингов; у остальных null.
+  nextEpisodeAt: z.iso.datetime({ offset: true }).nullish(),
   genres: z.array(z.object({ russian: z.string() })).nullish(),
   poster: z.object({ originalUrl: z.url() }).nullish(),
 });

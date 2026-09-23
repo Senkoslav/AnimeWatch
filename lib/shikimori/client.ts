@@ -26,7 +26,7 @@ const ANIMES_QUERY = `query Animes($limit: PositiveInt, $page: PositiveInt, $ord
   animes(limit: $limit, page: $page, order: $order, ids: $ids, kind: $kind, status: $status) {
     id name russian english japanese synonyms kind status season
     airedOn { year }
-    episodes episodesAired duration rating description score
+    episodes episodesAired duration rating description score nextEpisodeAt
     genres { russian }
     poster { originalUrl }
   }
