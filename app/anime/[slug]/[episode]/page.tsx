@@ -4,8 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
-import { EpisodeList } from "@/components/title/episode-list";
 import { AddToList } from "@/components/ui/add-to-list";
+import { EpisodeGrid } from "@/components/watch/episode-grid";
 import { PlayerSlot } from "@/components/watch/player-slot";
 import { formatDuration, formatEpisodeNumber, formatRelativeDate } from "@/lib/format";
 import { TitleKind } from "@/lib/generated/prisma/enums";
@@ -107,18 +107,7 @@ export default async function WatchPage({ params }: PageProps<"/anime/[slug]/[ep
 
         {!isMovie && (
           <aside className="px-4 pb-6 sm:px-0">
-            <EpisodeList
-              title={title}
-              now={now}
-              currentNumber={episode.number}
-              footer={
-                connected > 0 && connected < title.episodes.length ? (
-                  <p className="text-xs text-dim">
-                    Серии с пометкой «не подключена» вышли, но источник к ним ещё не подключён.
-                  </p>
-                ) : undefined
-              }
-            />
+            <EpisodeGrid title={title} now={now} currentNumber={episode.number} />
           </aside>
         )}
       </div>

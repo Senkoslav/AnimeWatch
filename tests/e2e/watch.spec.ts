@@ -46,6 +46,34 @@ test("переходы между сериями и возврат на стра
   await expect(page).toHaveURL("/anime/frieren");
 });
 
+test("серии рядом с плеером — плитки с номером, текущая отмечена, черновика нет", async ({ page }) => {
+  await stubProvider(page);
+  await page.goto("/anime/frieren/2");
+
+  const tiles = page.getByRole("region", { name: "Серии" }).getByRole("listitem");
+  // Четвёртая серия — черновик: плитки у неё нет.
+  await expect(tiles).toHaveCount(3);
+
+  const current = page.getByRole("link", { name: /^Эпизод 02, .*играет сейчас/ });
+  await expect(current).toHaveAttribute("aria-current", "page");
+  await expect(current).toHaveText("02");
+
+  // Двузначная плитка — квадрат не меньше тач-цели, все плитки одной ширины.
+  const box = await current.boundingBox();
+  if (!box) throw new Error("плитка не отрисована");
+  expect(Math.round(box.width)).toBe(Math.round(box.height));
+  expect(box.height).toBeGreaterThanOrEqual(44);
+  const widths = await tiles.getByRole("link").evaluateAll((links) => links.map((link) => link.clientWidth));
+  expect(new Set(widths).size).toBe(1);
+
+  // Название серии не теряется: оно в подписи ссылки. Свежая серия помечена и словом.
+  await expect(page.getByRole("link", { name: "Эпизод 03, Магия убийства людей, новая" })).toBeVisible();
+
+  await page.getByRole("link", { name: /^Эпизод 01,/ }).click();
+  await expect(page).toHaveURL("/anime/frieren/1");
+  await expect(page.getByRole("link", { name: /^Эпизод 01, .*играет сейчас/ })).toHaveAttribute("aria-current", "page");
+});
+
 test("черновик серии и скрытый тайтл на просмотре — 404", async ({ page }) => {
   for (const url of ["/anime/frieren/4", "/anime/spy-x-family/1", "/anime/frieren/999"]) {
     const response = await page.goto(url);

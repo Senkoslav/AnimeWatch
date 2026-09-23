@@ -13,27 +13,26 @@ import { episodeHref } from "@/lib/routes";
 interface EpisodeListProps {
   title: Pick<TitlePage, "slug" | "kind" | "totalEpisodes" | "episodes">;
   now: Date;
-  /** На странице просмотра: серия, которая играет сейчас. */
-  currentNumber?: number;
-  /** Кадр в строке (страница тайтла, Title.dc.html). Рядом с плеером места под него нет. */
+  /** Кадр в строке (страница тайтла, Title.dc.html). */
   thumbs?: boolean;
   /** Подвал: пояснение и действие справа («Начать с первой»). */
   footer?: ReactNode;
 }
 
 /**
- * Список серий — основной блок страницы на телефоне.
+ * Список серий на странице тайтла — основной её блок на телефоне. Рядом с плеером серии стоят
+ * плитками (components/watch/episode-grid.tsx).
  *
  * Все три колонки заданы одной сеткой (.row-ruled): при прокрутке номера и хронометражи
  * собираются в сплошные вертикальные линейки, а не пляшут по ширине от строки к строке.
  *
  * Плотная поверхность, не стекло: под списком ничего нет (docs/04, «Стекло»).
  */
-export function EpisodeList({ title, now, currentNumber, thumbs = false, footer }: EpisodeListProps) {
+export function EpisodeList({ title, now, thumbs = false, footer }: EpisodeListProps) {
   const { episodes: all, totalEpisodes, kind, slug } = title;
   const isMovie = kind === TitleKind.MOVIE;
   // У долгих тайтлов серий больше тысячи: список показывается окном (lib/episodes.ts).
-  const { episodes, capped, first, last, total } = episodeWindow(all, currentNumber);
+  const { episodes, capped, first, last, total } = episodeWindow(all);
   const count =
     totalEpisodes && totalEpisodes > total
       ? `вышло ${total} из ${totalEpisodes}`
@@ -73,7 +72,6 @@ export function EpisodeList({ title, now, currentNumber, thumbs = false, footer 
             const label = isMovie ? "Фильм" : episode.name;
             const duration = episode.duration ? formatDuration(episode.duration) : null;
             const fresh = isFresh(episode.publishedAt, now);
-            const current = episode.number === currentNumber;
             const missing = markMissing && !episode.hasSource;
 
             return (
@@ -87,25 +85,14 @@ export function EpisodeList({ title, now, currentNumber, thumbs = false, footer 
                     duration && `длительность ${duration}`,
                     fresh ? "новая" : null,
                     missing ? "источник не подключён" : null,
-                    current ? "играет сейчас" : null,
                   ]
                     .filter(Boolean)
                     .join(", ")}
-                  aria-current={current ? "page" : undefined}
-                  /*
-                   * Играющая строка помечена янтарём, но не залита им целиком: сплошная заливка
-                   * потребовала бы тёмного текста и превратила строку в светлый блок посреди
-                   * тёмного списка. Заливка в 14 процентов, черта слева и янтарный номер.
-                   */
-                  className={`row-ruled relative min-h-14 px-4 py-2 sm:px-5 ${
-                    current
-                      ? "bg-signal-soft before:absolute before:inset-y-0 before:left-0 before:w-[3px] before:bg-signal"
-                      : "hover:bg-surface-2"
-                  }`}
+                  className="row-ruled relative min-h-14 px-4 py-2 hover:bg-surface-2 sm:px-5"
                 >
                   {!isMovie && (
                     <span
-                      className={`font-display text-base font-bold tabular-nums ${current ? "text-signal" : missing ? "text-dim" : ""}`}
+                      className={`font-display text-base font-bold tabular-nums ${missing ? "text-dim" : ""}`}
                     >
                       {number}
                     </span>
@@ -117,7 +104,7 @@ export function EpisodeList({ title, now, currentNumber, thumbs = false, footer 
                         отточие — линия от названия до времени. */}
                     {label ? (
                       <span
-                        className={`min-w-0 truncate text-base ${current ? "text-text" : missing ? "text-muted" : "text-text-2"}`}
+                        className={`min-w-0 truncate text-base ${missing ? "text-muted" : "text-text-2"}`}
                       >
                         {label}
                       </span>
@@ -126,11 +113,11 @@ export function EpisodeList({ title, now, currentNumber, thumbs = false, footer 
                     )}
                   </span>
                   <span className="flex items-center gap-3">
-                    {fresh && !current && <FreshMark />}
+                    {fresh && <FreshMark />}
                     {/* Отсутствие источника показано словом, а не выцветанием строки: прозрачный
                         текст не проходит по контрасту (docs/04, «Компоненты»). */}
                     {missing && <span className="text-xs text-dim">не подключена</span>}
-                    <span className={`text-sm tabular-nums ${current ? "text-signal" : "text-dim"}`}>
+                    <span className="text-sm text-dim tabular-nums">
                       {duration ?? <span aria-hidden="true">—:—</span>}
                     </span>
                   </span>

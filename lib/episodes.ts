@@ -4,8 +4,14 @@
  * до неё показываем окно и честно пишем, какое именно.
  */
 
-/** Сколько серий помещается на странице, не ломая её вес. */
+/** Сколько серий помещается на странице тайтла, не ломая её вес. */
 export const EPISODE_WINDOW = 100;
+
+/**
+ * Сколько плиток стоит рядом с плеером. Колонка липкая и не выше окна: 48 плиток — восемь рядов
+ * по шесть, и текущая серия в середине окна видна без прокрутки внутри колонки.
+ */
+export const WATCH_EPISODE_WINDOW = 48;
 
 export interface EpisodeWindow<T> {
   episodes: T[];
@@ -17,19 +23,23 @@ export interface EpisodeWindow<T> {
 }
 
 /**
- * Последние серии, а если человек смотрит конкретную — окно вокруг неё. Первая серия остаётся
- * доступной кнопкой «Смотреть», а вот последняя из тысячи иначе недостижима вообще.
+ * Последние серии, а если человек смотрит конкретную — окно вокруг неё, текущая в середине.
+ * Первая серия остаётся доступной кнопкой «Смотреть», а вот последняя из тысячи иначе
+ * недостижима вообще.
  */
-export function episodeWindow<T extends { number: number }>(episodes: T[], currentNumber?: number): EpisodeWindow<T> {
+export function episodeWindow<T extends { number: number }>(
+  episodes: T[],
+  currentNumber?: number,
+  size: number = EPISODE_WINDOW,
+): EpisodeWindow<T> {
   const total = episodes.length;
-  if (total <= EPISODE_WINDOW) {
+  if (total <= size) {
     return { episodes, capped: false, first: episodes[0]?.number ?? 0, last: episodes.at(-1)?.number ?? 0, total };
   }
 
   const currentIndex = currentNumber ? episodes.findIndex((episode) => episode.number === currentNumber) : -1;
-  const end =
-    currentIndex >= 0 ? Math.min(total, Math.max(currentIndex + Math.ceil(EPISODE_WINDOW / 2), EPISODE_WINDOW)) : total;
-  const visible = episodes.slice(Math.max(0, end - EPISODE_WINDOW), end);
+  const end = currentIndex >= 0 ? Math.min(total, Math.max(currentIndex + Math.ceil(size / 2), size)) : total;
+  const visible = episodes.slice(Math.max(0, end - size), end);
 
   return {
     episodes: visible,
