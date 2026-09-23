@@ -41,7 +41,7 @@ export function TitleCard({ title, eager = false, sizes = POSTER_SIZES, backgrou
 
       {/* Две строки всегда, даже под коротким названием: иначе подписи соседних карточек встают на
           разной высоте и линейки ряда перестают собираться — а на них держится весь мир. */}
-      <p className="mt-2.5 line-clamp-2 min-h-[2.6rem] text-sm leading-snug font-medium group-hover:underline">
+      <p className="mt-2.5 line-clamp-2 min-h-[2lh] text-sm leading-snug font-medium group-hover:underline">
         {title.nameRu}
       </p>
 

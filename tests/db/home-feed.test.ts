@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { prisma } from "@/lib/db";
 import { TitleStatus } from "@/lib/generated/prisma/enums";
-import { getHomeFeed } from "@/lib/queries/home";
+import { getHomeFeed, getOngoing, getPopular, getSchedule } from "@/lib/queries/home";
 
 import { createEpisode, createTitle, hoursAgo } from "../factories/catalog";
 
@@ -97,5 +97,52 @@ describe("getHomeFeed", () => {
 
       expect(slugs(await getHomeFeed())).toEqual(["visible"]);
     });
+  });
+});
+
+describe("getOngoing", () => {
+  it("только публичные онгоинги, по популярности, с числом вышедших серий и общим счётом", async () => {
+    const popular = await createTitle({ slug: "popular", status: TitleStatus.ONGOING, popularityRank: 3 });
+    await createTitle({ slug: "unranked", status: TitleStatus.ONGOING, popularityRank: null });
+    await createTitle({ slug: "top", status: TitleStatus.ONGOING, popularityRank: 1 });
+    await createTitle({ slug: "done", status: TitleStatus.COMPLETED, popularityRank: 2 });
+    await createTitle({ slug: "draft", status: TitleStatus.ONGOING, publishedAt: null });
+    await createEpisode(popular, { number: 1 });
+    await createEpisode(popular, { number: 2 });
+    await createEpisode(popular, { number: 3, publishedAt: null });
+
+    const { titles, total } = await getOngoing(2);
+    expect(titles.map((title) => title.slug)).toEqual(["top", "popular"]);
+    expect(titles.find((title) => title.slug === "popular")?.published).toBe(2);
+    // Счёт — по всем онгоингам, а не по показанному ряду; черновик и завершённый не в счёт.
+    expect(total).toBe(3);
+  });
+});
+
+describe("getPopular", () => {
+  it("по месту у Shikimori; тайтл без места сюда не попадает", async () => {
+    await createTitle({ slug: "second", popularityRank: 2 });
+    await createTitle({ slug: "first", popularityRank: 1 });
+    await createTitle({ slug: "no-rank", popularityRank: null });
+    await createTitle({ slug: "hidden", popularityRank: 0, status: TitleStatus.HIDDEN });
+
+    expect((await getPopular(5)).map((title) => [title.slug, title.popularityRank])).toEqual([
+      ["first", 1],
+      ["second", 2],
+    ]);
+  });
+});
+
+describe("getSchedule", () => {
+  it("группирует онгоинги по дню выхода; без дня и не онгоинги — мимо", async () => {
+    await createTitle({ slug: "thu", status: TitleStatus.ONGOING, airDay: 4, popularityRank: 2 });
+    await createTitle({ slug: "thu-top", status: TitleStatus.ONGOING, airDay: 4, popularityRank: 1 });
+    await createTitle({ slug: "mon", status: TitleStatus.ONGOING, airDay: 1 });
+    await createTitle({ slug: "no-day", status: TitleStatus.ONGOING, airDay: null });
+    await createTitle({ slug: "done", status: TitleStatus.COMPLETED, airDay: 4 });
+
+    const schedule = await getSchedule();
+    expect([...schedule.keys()].sort()).toEqual([1, 4]);
+    expect(schedule.get(4)?.map((title) => title.slug)).toEqual(["thu-top", "thu"]);
   });
 });

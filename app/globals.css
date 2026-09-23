@@ -248,6 +248,26 @@
   }
 
   /*
+   * Расписание на главной (components/home/schedule.tsx): дни — радиокнопки, панель дня
+   * показывается одним CSS. Без JS и без параметра в адресе: главная остаётся ISR, а выбор дня —
+   * это просмотр, а не состояние, которым делятся ссылкой. Правило на каждый день, потому что
+   * связать радиокнопку с панелью по значению CSS не умеет.
+   */
+  .schedule-panel {
+    display: none;
+  }
+
+  .schedule:has(#schedule-day-1:checked) [data-day="1"],
+  .schedule:has(#schedule-day-2:checked) [data-day="2"],
+  .schedule:has(#schedule-day-3:checked) [data-day="3"],
+  .schedule:has(#schedule-day-4:checked) [data-day="4"],
+  .schedule:has(#schedule-day-5:checked) [data-day="5"],
+  .schedule:has(#schedule-day-6:checked) [data-day="6"],
+  .schedule:has(#schedule-day-7:checked) [data-day="7"] {
+    display: block;
+  }
+
+  /*
    * Линованная строка списка: номер в фиксированном поле слева, содержимое по центру,
    * хронометраж прижат к правому краю. Одна сетка на серии, выдачу поиска и расписание —
    * при прокрутке номера и времена собираются в сплошные вертикальные линейки. Осталась от

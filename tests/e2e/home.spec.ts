@@ -8,17 +8,45 @@ test.beforeEach(async ({ page }) => {
   expect(response?.status()).toBe(200);
 });
 
-test("герой ведёт к просмотру последней серии, лента на месте", async ({ page }) => {
+test("промо ведёт к просмотру последней серии, разделы главной на месте", async ({ page }) => {
   await expect(page.locator("html")).toHaveAttribute("lang", "ru");
 
-  const hero = page.getByRole("region", { name: /./ }).first();
-  await expect(hero.getByRole("heading", { level: 2 })).toBeVisible();
-  await expect(hero.getByRole("link", { name: "Смотреть" })).toHaveAttribute("href", /^\/anime\/[^/]+\/\d+$/);
+  const promo = page.getByRole("region").first();
+  await expect(promo.getByRole("heading", { level: 2 })).toBeVisible();
+  await expect(promo.getByRole("link", { name: "Смотреть", exact: true })).toHaveAttribute(
+    "href",
+    /^\/anime\/[^/]+\/\d+$/,
+  );
 
-  const fresh = page.getByRole("region", { name: "Свежее" });
+  for (const name of ["Новые серии", "Сейчас выходит", "Популярное за всё время", "Расписание"]) {
+    await expect(page.getByRole("region", { name }), name).toBeVisible();
+  }
+
+  const fresh = page.getByRole("region", { name: "Новые серии" });
   await expect(fresh.getByRole("listitem").first()).toBeVisible();
   // Имя ссылки читается по частям, номер серии не слипается со временем («Эпизод 025 часов назад»).
-  await expect(fresh.getByRole("link").first()).toHaveAccessibleName(/^.+, (Эпизод \d{2,}|Фильм), вышел .+$/);
+  await expect(fresh.getByRole("listitem").first().getByRole("link")).toHaveAccessibleName(
+    /^.+, (Эпизод \d{2,}|Фильм), вышел .+$/,
+  );
+});
+
+test("«В список» в промо ведёт во вход", async ({ page }) => {
+  await page.getByRole("region").first().getByRole("link", { name: "В список" }).click();
+  await expect(page.getByRole("dialog", { name: "Вход в AnimeWatch" })).toBeVisible();
+});
+
+test("расписание переключает день без JavaScript-обработчиков: выбран сегодняшний", async ({ page }) => {
+  const schedule = page.getByRole("region", { name: "Расписание" });
+  await expect(schedule.getByRole("radio", { name: "сегодня" })).toBeChecked();
+
+  // Панель переключает CSS: видна ровно одна.
+  const visiblePanels = schedule.locator(".schedule-panel:visible");
+  await expect(visiblePanels).toHaveCount(1);
+
+  const other = schedule.locator("label").filter({ hasNotText: "сегодня" }).first();
+  await other.click();
+  await expect(other.getByRole("radio")).toBeChecked();
+  await expect(visiblePanels).toHaveCount(1);
 });
 
 test("черновик и скрытый по жалобе тайтл не видны", async ({ page }) => {
@@ -37,15 +65,15 @@ test("на 360px нет горизонтального скролла", async ({
   expect(overflow).toBeLessThanOrEqual(0);
 });
 
-test("с клавиатуры: ссылка «К содержанию», затем до карточек ленты, фокус виден", async ({ page, isMobile }) => {
+test("с клавиатуры: ссылка «К содержанию», затем до новых серий, фокус виден", async ({ page, isMobile }) => {
   test.skip(isMobile, "клавиатурная навигация проверяется на десктопе");
 
   await page.keyboard.press("Tab");
   await expect(page.getByRole("link", { name: "К содержанию" })).toBeFocused();
   await expect(page.getByRole("link", { name: "К содержанию" })).toBeInViewport();
 
-  const fresh = page.getByRole("region", { name: "Свежее" });
-  for (let step = 0; step < 20; step += 1) {
+  const fresh = page.getByRole("region", { name: "Новые серии" });
+  for (let step = 0; step < 30; step += 1) {
     await page.keyboard.press("Tab");
     if (await fresh.locator(":focus").count()) break;
   }

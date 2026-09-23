@@ -10,6 +10,8 @@ import {
   formatScore,
   formatSeason,
   isFresh,
+  isToday,
+  moscowWeekday,
 } from "./format";
 
 const now = new Date("2026-09-16T12:00:00Z");
@@ -143,5 +145,25 @@ describe("formatAirDay", () => {
     expect(formatAirDay(0)).toBeNull();
     expect(formatAirDay(8)).toBeNull();
     expect(formatAirDay(null)).toBeNull();
+  });
+});
+
+describe("isToday", () => {
+  it("тот же календарный день по Москве, а не последние 24 часа", () => {
+    // now — 15:00 по Москве 16 сентября.
+    expect(isToday(ago(10 * HOUR), now)).toBe(true); // 05:00 того же дня
+    expect(isToday(ago(16 * HOUR), now)).toBe(false); // 23:00 накануне, хотя меньше суток назад
+  });
+});
+
+describe("moscowWeekday", () => {
+  it("нумерация как у airDay: 1 — понедельник, 7 — воскресенье", () => {
+    expect(moscowWeekday(new Date("2026-09-14T12:00:00Z"))).toBe(1);
+    expect(moscowWeekday(new Date("2026-09-20T12:00:00Z"))).toBe(7);
+  });
+
+  it("день берётся по Москве, а не по UTC", () => {
+    // 22:30 UTC в воскресенье — это уже 01:30 понедельника в Москве.
+    expect(moscowWeekday(new Date("2026-09-20T22:30:00Z"))).toBe(1);
   });
 });

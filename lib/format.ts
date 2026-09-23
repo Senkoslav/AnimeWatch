@@ -106,3 +106,19 @@ const AIR_DAYS = ["по понедельникам", "по вторникам", 
 export function formatAirDay(airDay: number | null): string | null {
   return airDay && airDay >= 1 && airDay <= 7 ? (AIR_DAYS[airDay - 1] ?? null) : null;
 }
+
+/** Вышла в тот же календарный день по Москве: «Вышло сегодня» — про календарь, а не про последние сутки. */
+export function isToday(date: Date, now: Date): boolean {
+  return calendarDaysBetween(date, now) === 0;
+}
+
+const weekdayInMoscow = new Intl.DateTimeFormat("en-US", { weekday: "short", timeZone: TIME_ZONE });
+const WEEKDAY_NUMBER: Record<string, number> = { Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6, Sun: 7 };
+
+/** День недели по Москве в той же нумерации, что airDay у Shikimori: 1 — понедельник, 7 — воскресенье. */
+export function moscowWeekday(now: Date): number {
+  return WEEKDAY_NUMBER[weekdayInMoscow.format(now)] ?? 1;
+}
+
+/** Короткое имя дня для чипов расписания: «пн», «вт». */
+export const WEEKDAY_SHORT = ["пн", "вт", "ср", "чт", "пт", "сб", "вс"] as const;
