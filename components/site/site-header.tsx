@@ -30,6 +30,9 @@ export function SiteHeader() {
           <nav aria-label="Разделы" className="flex flex-col">
             <NavLink href="/catalog">Каталог</NavLink>
             <NavLink href="/schedule">Расписание</NavLink>
+            <NavLink href="/random" prefetch={false}>
+              Случайное
+            </NavLink>
           </nav>
         </MobileMenu>
 
@@ -45,6 +48,10 @@ export function SiteHeader() {
         <nav aria-label="Разделы" className="hidden lg:flex lg:items-center lg:gap-1">
           <NavLink href="/catalog">Каталог</NavLink>
           <NavLink href="/schedule">Расписание</NavLink>
+          {/* Без предзагрузки: она сама открыла бы /random и выбрала тайтл до нажатия. */}
+          <NavLink href="/random" prefetch={false}>
+            Случайное
+          </NavLink>
         </nav>
 
         {/* Поле, а не иконка: поиск — вторая причина, по которой сюда приходят, и прятать его незачем. */}

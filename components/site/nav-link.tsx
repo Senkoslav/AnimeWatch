@@ -6,13 +6,14 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 // Клиентский лист только ради usePathname: шапка остаётся серверной.
-export function NavLink({ href, children }: { href: Route; children: ReactNode }) {
+export function NavLink({ href, prefetch, children }: { href: Route; prefetch?: boolean; children: ReactNode }) {
   const pathname = usePathname();
   const active = pathname === href || pathname.startsWith(`${href}/`);
 
   return (
     <Link
       href={href}
+      prefetch={prefetch}
       aria-current={active ? "page" : undefined}
       // Активный пункт — светлая пилюля, не янтарь: раздел это место, а не то, что происходит
       // сейчас, и заливка сигналом здесь обесценила бы сам сигнал (docs/04, «Токены»).
