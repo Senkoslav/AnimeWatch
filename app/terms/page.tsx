@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { PAGE_TITLE } from "@/components/ui/controls";
-
-import { ToCheck } from "@/components/site/to-check";
+import { PAGE_TITLE, TEXT_LINK } from "@/components/ui/controls";
+import { siteContactEmail } from "@/lib/site/contact";
 
 export const metadata: Metadata = {
   title: "Пользовательское соглашение",
@@ -14,17 +13,14 @@ export const metadata: Metadata = {
 export const revalidate = 86_400;
 
 export default function TermsPage() {
+  const email = siteContactEmail();
+
   return (
     <article className="mx-auto max-w-page px-4 lg:px-8 py-6 md:py-10">
       <h1 className={PAGE_TITLE}>Пользовательское соглашение</h1>
       <p className="mt-2 text-sm text-dim">Редакция от 18 сентября 2026 года</p>
 
       <div className="mt-8 max-w-[70ch] space-y-8">
-        <ToCheck>
-          Текст составлен по фактической работе сайта и не проверен юристом. Перед запуском нужно указать владельца
-          сайта, контактный адрес и страну, по праву которой рассматриваются споры.
-        </ToCheck>
-
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Что это за сайт</h2>
           <p>
@@ -39,19 +35,16 @@ export default function TermsPage() {
           <p>Можно смотреть материалы для личного просмотра и делиться ссылками на страницы сайта. Нельзя:</p>
           <ul className="list-disc space-y-1 pl-5">
             <li>скачивать материалы и публиковать их под своим именем;</li>
-            <li>
-              автоматически выгружать каталог и мешать работе сайта нагрузкой: частота запросов ограничивается на нашей
-              стороне.
-            </li>
+            <li>автоматически выгружать каталог и мешать работе сайта нагрузкой.</li>
           </ul>
         </section>
 
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Регистрация</h2>
           <p>
-            Аккаунтов на сайте пока нет: смотреть можно без регистрации, и никаких данных для этого мы не спрашиваем.
-            Когда появятся закладки и продолжение просмотра, вход будет через Telegram, и этот раздел изменится вместе с
-            политикой конфиденциальности.
+            Смотреть можно без регистрации, и никаких данных для этого мы не спрашиваем. Вход нужен только для
+            списков и оценок и будет через аккаунт Google — отдельной регистрации нет. Когда он заработает, этот раздел
+            изменится вместе с политикой конфиденциальности.
           </p>
         </section>
 
@@ -80,6 +73,17 @@ export default function TermsPage() {
             .
           </p>
         </section>
+
+        {email && (
+          <section className="space-y-3">
+            <h2 className="text-lg font-semibold">Связаться с нами</h2>
+            <p>
+              <a href={`mailto:${email}`} className={TEXT_LINK}>
+                {email}
+              </a>
+            </p>
+          </section>
+        )}
       </div>
     </article>
   );

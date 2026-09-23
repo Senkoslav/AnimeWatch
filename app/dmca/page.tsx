@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 
-import { PAGE_TITLE } from "@/components/ui/controls";
 import { DmcaForm } from "@/components/dmca/dmca-form";
+import { PAGE_TITLE, TEXT_LINK } from "@/components/ui/controls";
+import { siteContactEmail } from "@/lib/site/contact";
 
 export const metadata: Metadata = {
   title: "Обращение правообладателя",
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default function DmcaPage() {
+  const email = siteContactEmail();
+
   return (
     <div className="mx-auto max-w-page px-4 lg:px-8 py-6 md:py-10">
       <h1 className={PAGE_TITLE}>Обращение правообладателя</h1>
@@ -30,14 +33,20 @@ export default function DmcaPage() {
 
       <DmcaForm />
 
-      <section className="mt-12 max-w-[70ch] space-y-3 border-t border-line pt-6 text-sm text-muted">
-        <h2 className="text-base text-text">Если форма не работает</h2>
-        <p>
-          {/* TODO: контактный адрес — нужен перед запуском (docs/06, открытый вопрос «Контакты и домен»). */}
-          Напишите на контактный адрес сайта. Укажите те же сведения: кто вы, чьи права затронуты, ссылку на страницу и
-          суть обращения.
-        </p>
-      </section>
+      {/* Без адреса (CONTACT_EMAIL не задан) раздела нет вовсе: «напишите на контактный адрес» без
+          самого адреса — это обещание, которое нечем выполнить. */}
+      {email && (
+        <section className="mt-12 max-w-[70ch] space-y-3 border-t border-line pt-6 text-sm text-muted">
+          <h2 className="text-base text-text">Если форма не работает</h2>
+          <p>
+            Напишите на{" "}
+            <a href={`mailto:${email}`} className={TEXT_LINK}>
+              {email}
+            </a>
+            . Укажите те же сведения: кто вы, чьи права затронуты, ссылку на страницу и суть обращения.
+          </p>
+        </section>
+      )}
     </div>
   );
 }

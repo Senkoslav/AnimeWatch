@@ -73,3 +73,13 @@ test("на 360px нет горизонтального скролла, axe бе�
     expect(blocking, url).toEqual([]);
   }
 });
+
+test("юридические страницы не показывают посетителю пометок для владельца", async ({ page }) => {
+  // Их читает проверяющий из Kodik: «требует проверки перед запуском» выглядит как недоделанный сайт,
+  // а вход через Telegram и лимит запросов, которого нет, — как неправда.
+  for (const url of ["/terms", "/privacy", "/dmca"]) {
+    await page.goto(url);
+    await expect(page.getByText(/перед запуском|требует проверки/i), url).toHaveCount(0);
+    await expect(page.getByText(/Telegram/), url).toHaveCount(0);
+  }
+});

@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { PAGE_TITLE } from "@/components/ui/controls";
-
-import { ToCheck } from "@/components/site/to-check";
+import { PAGE_TITLE, TEXT_LINK } from "@/components/ui/controls";
+import { siteContactEmail } from "@/lib/site/contact";
 
 export const metadata: Metadata = {
   title: "Политика конфиденциальности",
@@ -13,17 +12,14 @@ export const metadata: Metadata = {
 export const revalidate = 86_400;
 
 export default function PrivacyPage() {
+  const email = siteContactEmail();
+
   return (
     <article className="mx-auto max-w-page px-4 lg:px-8 py-6 md:py-10">
       <h1 className={PAGE_TITLE}>Политика конфиденциальности</h1>
       <p className="mt-2 text-sm text-dim">Редакция от 18 сентября 2026 года</p>
 
       <div className="mt-8 max-w-[70ch] space-y-8">
-        <ToCheck>
-          Перечислено то, что сайт делает сегодня. Перед запуском нужно дописать владельца сайта как оператора данных,
-          адрес для запросов об удалении и — если появятся аналитика и мониторинг ошибок — их названия и сроки хранения.
-        </ToCheck>
-
         <section className="space-y-3">
           <h2 className="text-lg font-semibold">Что мы храним</h2>
           <p>
@@ -40,10 +36,6 @@ export default function PrivacyPage() {
               виде хеша — он нужен, чтобы ограничить поток обращений с одного источника, и восстановить из него адрес
               нельзя.
             </li>
-            <li>
-              Позиция просмотра серии живёт в открытой вкладке браузера и на сервер не уходит. Закрыли вкладку — её
-              больше нет.
-            </li>
           </ul>
           <p className="text-muted">
             Когда появятся аккаунты, закладки и продолжение просмотра на другом устройстве, здесь появится список того,
@@ -55,8 +47,8 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-semibold">Чего мы не делаем</h2>
           <ul className="list-disc space-y-1 pl-5">
             <li>Не продаём и не передаём данные третьим лицам для рекламы.</li>
-            <li>Не собираем историю просмотра: позиция серии не уходит с вашего устройства.</li>
-            <li>Не просим и не храним пароли: входить некуда.</li>
+            <li>Не собираем историю просмотра: сайт не знает, что и сколько вы смотрели.</li>
+            <li>Не просим и не храним пароли: вход, когда заработает, будет через аккаунт Google.</li>
           </ul>
         </section>
 
@@ -74,6 +66,16 @@ export default function PrivacyPage() {
           <p>
             Удалять пока нечего: всё, что у нас есть, — отправленные обращения правообладателей. Их мы храним как
             основание для скрытия материала.
+            {email && (
+              <>
+                {" "}
+                Вопрос о своих данных можно задать по адресу{" "}
+                <a href={`mailto:${email}`} className={TEXT_LINK}>
+                  {email}
+                </a>
+                .
+              </>
+            )}
           </p>
         </section>
       </div>
