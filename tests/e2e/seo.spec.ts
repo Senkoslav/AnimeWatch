@@ -69,3 +69,24 @@ test("в карте сайта — публичные тайтлы, без че�
   expect(xml).not.toContain("/anime/oshi-no-ko");
   expect(xml).not.toMatch(/\/anime\/[^<]+\/\d+<\/loc>/);
 });
+
+test("знак: иконка вкладки, иконка телефона, манифест и картинка превью главной", async ({ page, request }) => {
+  await page.goto("/");
+  const icon = await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute("href");
+  const apple = await page.locator('link[rel="apple-touch-icon"]').getAttribute("href");
+  const image = await page.locator('meta[property="og:image"]').first().getAttribute("content");
+  for (const url of [icon, apple]) {
+    expect(url, "ссылка на иконку").toBeTruthy();
+    expect((await request.get(url ?? "")).ok(), url ?? "").toBe(true);
+  }
+  expect(image).toMatch(/opengraph-image/);
+
+  const manifest = await (await request.get("/manifest.webmanifest")).json();
+  expect(manifest.name).toBe("AnimeWatch");
+  for (const { src } of manifest.icons as { src: string }[]) {
+    expect((await request.get(src)).ok(), src).toBe(true);
+  }
+
+  // Знак в шапке декоративный: ссылку называет слово рядом.
+  await expect(page.locator("header").getByRole("link", { name: "animewatch", exact: true })).toBeVisible();
+});

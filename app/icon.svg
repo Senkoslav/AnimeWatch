@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <rect width="100" height="100" rx="22" fill="#14181f"/>
+  <g transform="translate(16 16) scale(0.68)"><defs>
+    <clipPath id="band"><rect x="0" y="16" width="100" height="68"/></clipPath>
+  </defs>
+  <rect x="10" y="59" width="34" height="11" fill="#ffb02e"/>
+  <polyline clip-path="url(#band)" points="7,90 27,10 47,90 59,48 71,90 93,6" fill="none" stroke="#edf1f7" stroke-width="10" stroke-linejoin="miter" stroke-miterlimit="10" stroke-linecap="butt"/></g>
+</svg>

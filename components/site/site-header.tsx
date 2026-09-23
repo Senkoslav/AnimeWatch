@@ -3,6 +3,7 @@ import Form from "next/form";
 import Link from "next/link";
 
 import { AccountMenu } from "@/components/auth/account-menu";
+import { LogoMark } from "@/components/site/logo-mark";
 import { AuthTrigger } from "@/components/auth/auth-trigger";
 import { button, FIELD_COMPACT } from "@/components/ui/controls";
 import { MAX_QUERY_LENGTH } from "@/lib/search/query";
@@ -39,13 +40,16 @@ export function SiteHeader() {
           </nav>
         </MobileMenu>
 
-        {/* Точка — единственный знак различия логотипа. Янтарная, потому что это марка, а не место. */}
+        {/*
+          Знак и слово. Янтарная перекладина знака — единственный сигнал логотипа, поэтому прежняя
+          янтарная точка после слова ушла: два янтарных пятна рядом спорили бы между собой.
+        */}
         <Link
           href="/"
-          className="-mx-2 inline-flex min-h-11 shrink-0 items-center gap-1.5 rounded-sm px-2 font-display text-lg font-bold tracking-tight"
+          className="-mx-2 inline-flex min-h-11 shrink-0 items-center gap-2 rounded-sm px-2 font-display text-lg font-bold tracking-tight"
         >
+          <LogoMark className="size-6 shrink-0" />
           animewatch
-          <span aria-hidden="true" className="size-1.5 rounded-full bg-signal" />
         </Link>
 
         <nav aria-label="Разделы" className="hidden lg:flex lg:items-center lg:gap-1">
