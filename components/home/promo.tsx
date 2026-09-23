@@ -1,3 +1,4 @@
+import { Play } from "lucide-react";
 import Link from "next/link";
 
 import { EpisodeFrame } from "@/components/home/episode-frame";
@@ -67,7 +68,7 @@ export function Promo({ release, latest, allToday, now }: PromoProps) {
 
             <div className="mt-1 flex flex-wrap items-center gap-3">
               <Link href={episodeHref(title.slug, number)} className={`${button()} max-sm:w-full`}>
-                <PlayIcon />
+                <Play aria-hidden="true" className="size-4 fill-current" />
                 Смотреть
               </Link>
               <AddToList />
@@ -105,7 +106,7 @@ export function Promo({ release, latest, allToday, now }: PromoProps) {
                 )}
                 {/* Стекло над кадром: под кнопкой реально есть картинка, и она её размывает. */}
                 <span className="glass-panel absolute top-1/2 left-1/2 inline-flex size-14 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-fill-2 bg-bg/55 text-text group-hover:bg-bg/70">
-                  <PlayIcon className="ml-0.5 size-5" />
+                  <Play aria-hidden="true" className="ml-0.5 size-5 fill-current" />
                 </span>
               </EpisodeFrame>
             </Link>
@@ -140,13 +141,5 @@ export function Promo({ release, latest, allToday, now }: PromoProps) {
         </div>
       </div>
     </section>
-  );
-}
-
-function PlayIcon({ className = "size-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className={className} fill="currentColor">
-      <path d="M7 4.5l13 7.5-13 7.5z" />
-    </svg>
   );
 }

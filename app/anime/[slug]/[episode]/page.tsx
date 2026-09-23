@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -78,7 +79,10 @@ export default async function WatchPage({ params }: PageProps<"/anime/[slug]/[ep
 
           <div className="flex flex-wrap items-start gap-x-6 gap-y-3 px-4 sm:px-0">
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-              <Link href={titleHref(title.slug)} className="inline-flex min-h-11 items-center self-start text-sm text-muted hover:text-text">
+              <Link
+                href={titleHref(title.slug)}
+                className="inline-flex min-h-11 items-center self-start text-sm text-muted hover:text-text"
+              >
                 {title.nameRu}
               </Link>
               {/* Название серии рядом с номером, но вне заголовка: h1 — это «Эпизод 05», и только он. */}
@@ -109,7 +113,9 @@ export default async function WatchPage({ params }: PageProps<"/anime/[slug]/[ep
               currentNumber={episode.number}
               footer={
                 connected > 0 && connected < title.episodes.length ? (
-                  <p className="text-xs text-dim">Серии с пометкой «не подключена» вышли, но источник к ним ещё не подключён.</p>
+                  <p className="text-xs text-dim">
+                    Серии с пометкой «не подключена» вышли, но источник к ним ещё не подключён.
+                  </p>
                 ) : undefined
               }
             />
@@ -132,7 +138,7 @@ function Neighbour({ slug, episode, direction }: { slug: string; episode: TitleE
       rel={direction}
       className={`flex min-h-17 min-w-0 items-center gap-3.5 rounded-md border border-line bg-surface px-4 py-2.5 hover:bg-surface-2 ${isNext ? "col-start-2 justify-end text-right" : ""}`}
     >
-      {!isNext && <Chevron direction="prev" />}
+      {!isNext && <ChevronLeft aria-hidden="true" className="size-4.5 shrink-0 text-muted" />}
       <span className="flex min-w-0 flex-col gap-0.5">
         <span className="text-xs text-dim">{isNext ? "Следующая" : "Предыдущая"}</span>
         <span className="truncate text-base font-medium">
@@ -140,15 +146,7 @@ function Neighbour({ slug, episode, direction }: { slug: string; episode: TitleE
           {episode.name ? `. ${episode.name}` : ""}
         </span>
       </span>
-      {isNext && <Chevron direction="next" />}
+      {isNext && <ChevronRight aria-hidden="true" className="size-4.5 shrink-0 text-muted" />}
     </Link>
-  );
-}
-
-function Chevron({ direction }: { direction: "prev" | "next" }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4.5 shrink-0 text-muted" fill="none" stroke="currentColor">
-      <path d={direction === "prev" ? "M14 6l-6 6 6 6" : "M10 6l6 6-6 6"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }

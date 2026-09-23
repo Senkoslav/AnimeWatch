@@ -1,5 +1,6 @@
 "use client";
 
+import { Menu } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 
@@ -29,9 +30,7 @@ export function MobileMenu({ label, children }: { label: string; children: React
       <summary className="-ml-2 inline-flex size-11 cursor-pointer list-none items-center justify-center rounded-sm text-muted hover:text-text [&::-webkit-details-marker]:hidden">
         {/* Имя кнопке даёт текст, а не aria-label: иконка сама по себе ничего не говорит. */}
         <span className="sr-only">{label}</span>
-        <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5" fill="none" stroke="currentColor">
-          <path d="M4 7h16M4 12h16M4 17h16" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+        <Menu aria-hidden="true" className="size-5" />
       </summary>
 
       {/* Абсолютно — под всей шапкой: внутри строки-флексбокса панель иначе встала бы в ряд.

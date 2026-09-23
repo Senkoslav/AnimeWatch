@@ -1,3 +1,4 @@
+import { SlidersHorizontal, X } from "lucide-react";
 import Form from "next/form";
 import type { ReactNode } from "react";
 
@@ -80,7 +81,7 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
         htmlFor={TOGGLE_ID}
         className={`${active.length > 0 ? button() : button("secondary")} w-full cursor-pointer peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-signal lg:hidden`}
       >
-        <FiltersIcon />
+        <SlidersHorizontal aria-hidden="true" className="size-4" />
         Фильтры
         {active.length > 0 && <span data-numeric="">{active.length}</span>}
       </label>
@@ -109,7 +110,7 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
             className="ml-auto inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-sm border border-line bg-fill text-text-2 hover:text-text lg:hidden"
           >
             <span className="sr-only">Закрыть отбор</span>
-            <CloseIcon />
+            <X aria-hidden="true" className="size-4" />
           </label>
         </div>
 
@@ -286,22 +287,5 @@ function YearSelect({
         ))}
       </select>
     </>
-  );
-}
-
-/** Иконки рисуются, а не берутся из юникода: глиф зависит от шрифта и на телефоне бывает эмодзи. */
-function FiltersIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="none" stroke="currentColor">
-      <path d="M4 6h16M7 12h10M10 18h4" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="none" stroke="currentColor">
-      <path d="M6 6l12 12M18 6L6 18" strokeWidth="2" strokeLinecap="round" />
-    </svg>
   );
 }

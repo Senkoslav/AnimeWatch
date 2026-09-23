@@ -187,7 +187,9 @@ export async function getPopular(limit: number): Promise<PopularTitle[]> {
     take: limit,
     select: { slug: true, nameRu: true, posterUrl: true, kind: true, year: true, score: true, popularityRank: true },
   });
-  return titles.flatMap(({ popularityRank, ...title }) => (popularityRank === null ? [] : [{ ...title, popularityRank }]));
+  return titles.flatMap(({ popularityRank, ...title }) =>
+    popularityRank === null ? [] : [{ ...title, popularityRank }],
+  );
 }
 
 /** Ключ сортировки внутри дня: время по Москве, а без времени — после всех. */

@@ -1,3 +1,4 @@
+import { Search as SearchIcon } from "lucide-react";
 import Form from "next/form";
 import Link from "next/link";
 
@@ -64,7 +65,7 @@ export function SiteHeader() {
           aria-label="Поиск"
           className="-mr-2 ml-auto inline-flex size-11 shrink-0 items-center justify-center rounded-sm text-muted hover:text-text md:hidden"
         >
-          <SearchIcon />
+          <SearchIcon aria-hidden="true" className="size-5" />
         </Link>
 
         {/* На телефоне «Войти» уходит в меню: в строку 360px оно не встаёт рядом с логотипом и лупой.
@@ -75,15 +76,6 @@ export function SiteHeader() {
         </div>
       </div>
     </header>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-5" fill="none" stroke="currentColor">
-      <circle cx="11" cy="11" r="6" strokeWidth="2" />
-      <line x1="15.5" y1="15.5" x2="20" y2="20" strokeWidth="2" strokeLinecap="round" />
-    </svg>
   );
 }
 
@@ -101,7 +93,7 @@ function Search({ className = "" }: { className?: string }) {
         Поиск аниме
       </label>
       <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-dim">
-        <SearchIcon />
+        <SearchIcon aria-hidden="true" className="size-5" />
       </span>
       <input
         id="site-search"

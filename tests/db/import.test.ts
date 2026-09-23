@@ -36,7 +36,10 @@ describe("importTitles", () => {
     const ongoing = { status: "ongoing", episodes: 12, episodesAired: 3, nextEpisodeAt: "2026-09-24T17:15:00+03:00" };
     await importTitles(prisma, [node(ongoing)], now);
 
-    const scheduled = await prisma.title.findUnique({ where: { shikimoriId: 16498 }, select: { nextEpisodeAt: true, airDay: true } });
+    const scheduled = await prisma.title.findUnique({
+      where: { shikimoriId: 16498 },
+      select: { nextEpisodeAt: true, airDay: true },
+    });
     expect(scheduled?.nextEpisodeAt?.toISOString()).toBe("2026-09-24T14:15:00.000Z");
     expect(scheduled?.airDay).toBe(4);
 

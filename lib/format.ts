@@ -101,7 +101,15 @@ export function formatAgeRating(rating: string | null): string | null {
 }
 
 /** День выхода по airDay (1 — понедельник): «по четвергам». Вне 1–7 — null. */
-const AIR_DAYS = ["по понедельникам", "по вторникам", "по средам", "по четвергам", "по пятницам", "по субботам", "по воскресеньям"];
+const AIR_DAYS = [
+  "по понедельникам",
+  "по вторникам",
+  "по средам",
+  "по четвергам",
+  "по пятницам",
+  "по субботам",
+  "по воскресеньям",
+];
 
 export function formatAirDay(airDay: number | null): string | null {
   return airDay && airDay >= 1 && airDay <= 7 ? (AIR_DAYS[airDay - 1] ?? null) : null;
@@ -131,4 +139,12 @@ export function formatAirTime(date: Date): string {
 }
 
 /** Полное имя дня для заголовков недели: «Понедельник». */
-export const WEEKDAY_FULL = ["Понедельник", "Вторник", "Среда", "Четверг", "Пятница", "Суббота", "Воскресенье"] as const;
+export const WEEKDAY_FULL = [
+  "Понедельник",
+  "Вторник",
+  "Среда",
+  "Четверг",
+  "Пятница",
+  "Суббота",
+  "Воскресенье",
+] as const;

@@ -1,3 +1,4 @@
+import { Play } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -100,19 +101,13 @@ export default async function TitlePageView({ params }: PageProps<"/anime/[slug]
           {/* Левая колонка на десктопе; на телефоне её блоки встают в общий поток. */}
           <div className="contents md:flex md:flex-col md:gap-3.5">
             <div className="col-start-1 row-start-1">
-              <Poster
-                src={title.posterUrl}
-                title={title.nameRu}
-                sizes={POSTER_SIZES}
-                loading="preload"
-                radius="lg"
-              />
+              <Poster src={title.posterUrl} title={title.nameRu} sizes={POSTER_SIZES} loading="preload" radius="lg" />
             </div>
 
             <div className="order-2 col-span-2 flex flex-col gap-2.5 md:order-none">
               {startEpisode && (
                 <Link href={episodeHref(title.slug, startEpisode.number)} className={`${button()} w-full`}>
-                  <PlayIcon />
+                  <Play aria-hidden="true" className="size-4 fill-current" />
                   {isMovie ? "Смотреть" : `Смотреть эпизод ${startEpisode.number}`}
                 </Link>
               )}
@@ -268,13 +263,5 @@ function episodesFooter(title: TitlePage) {
         Начать с первой
       </Link>
     </div>
-  );
-}
-
-function PlayIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="currentColor">
-      <path d="M7 4.5l13 7.5-13 7.5z" />
-    </svg>
   );
 }

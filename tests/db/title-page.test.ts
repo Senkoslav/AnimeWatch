@@ -26,7 +26,9 @@ describe("getTitlePage", () => {
     const kodik = await createEpisode(title, { number: 1 });
     const mp4 = await createEpisode(title, { number: 2 });
     await createEpisode(title, { number: 3 });
-    await prisma.source.create({ data: { episodeId: kodik.id, type: SourceType.KODIK, url: "https://kodik.info/seria/1" } });
+    await prisma.source.create({
+      data: { episodeId: kodik.id, type: SourceType.KODIK, url: "https://kodik.info/seria/1" },
+    });
     await prisma.source.create({ data: { episodeId: mp4.id, type: SourceType.MP4, url: "https://example.com/2.mp4" } });
 
     const page = await getTitlePage("mixed");

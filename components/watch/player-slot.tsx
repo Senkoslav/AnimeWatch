@@ -1,3 +1,4 @@
+import { Play, Wifi } from "lucide-react";
 import Link from "next/link";
 
 import { button } from "@/components/ui/controls";
@@ -59,14 +60,14 @@ export function PlayerSlot({
     // На телефоне 16:9 слишком низок для текста и двух кнопок: высота там по содержимому.
     <section
       aria-labelledby="player-state"
-      className="relative flex min-h-88 w-full flex-col overflow-hidden border-line md:aspect-video md:min-h-0 sm:rounded-lg sm:border"
+      className="relative flex min-h-88 w-full flex-col overflow-hidden border-line sm:rounded-lg sm:border md:aspect-video md:min-h-0"
     >
       <PosterBackdrop src={posterUrl} className="inset-0" />
 
       <div className="relative flex flex-1 flex-col items-center justify-center gap-4 px-5 pt-8 pb-16 text-center sm:px-10">
         {/* Сигнал: доступ к источнику подключается прямо сейчас — это и есть «сейчас». */}
         <span className="inline-flex size-16 items-center justify-center rounded-lg border border-signal-line bg-signal-soft text-signal sm:size-19">
-          <SignalIcon />
+          <Wifi aria-hidden="true" className="size-8" />
         </span>
         <h2
           id="player-state"
@@ -81,7 +82,7 @@ export function PlayerSlot({
         <div className="mt-1 flex flex-wrap items-center justify-center gap-3">
           {nextPlayable && (
             <Link href={nextPlayable.href} className={button()}>
-              <PlayIcon />
+              <Play aria-hidden="true" className="size-4 fill-current" />
               Смотреть эпизод {nextPlayable.number}
             </Link>
           )}
@@ -102,23 +103,5 @@ export function PlayerSlot({
         Плеер поставщика, доступ подключается
       </p>
     </section>
-  );
-}
-
-function SignalIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-8" fill="none" stroke="currentColor">
-      <path d="M5.5 8.5a9 9 0 0 1 13 0" strokeWidth="1.8" strokeLinecap="round" />
-      <path d="M8 11.5a5 5 0 0 1 8 0" strokeWidth="1.8" strokeLinecap="round" />
-      <circle cx="12" cy="16" r="1.6" fill="currentColor" stroke="none" />
-    </svg>
-  );
-}
-
-function PlayIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="currentColor">
-      <path d="M7 4.5l13 7.5-13 7.5z" />
-    </svg>
   );
 }

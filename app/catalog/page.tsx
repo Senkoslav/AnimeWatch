@@ -1,3 +1,4 @@
+import { ChevronDown, X } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -121,7 +122,7 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
                     <Link href={filter.href} className={CHIP}>
                       {filter.label}
                       <span className="sr-only"> — снять</span>
-                      <CloseIcon />
+                      <X aria-hidden="true" className="size-3 text-dim" />
                     </Link>
                   </li>
                 ))}
@@ -198,7 +199,7 @@ function SortMenu({ params }: { params: CatalogParams }) {
       <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-sm border border-line bg-fill px-3 text-sm text-text-2 hover:text-text [&::-webkit-details-marker]:hidden">
         <span className="text-dim">Сортировка</span>
         {SORT_LABELS[params.sort]}
-        <ChevronIcon />
+        <ChevronDown aria-hidden="true" className="size-3.5 shrink-0 text-dim" />
       </summary>
       <ul className="glass-modal absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-md border border-line p-1">
         {CATALOG_SORTS.map((sort) => {
@@ -217,28 +218,5 @@ function SortMenu({ params }: { params: CatalogParams }) {
         })}
       </ul>
     </details>
-  );
-}
-
-/** Иконки рисуются, а не берутся из юникода: глиф зависит от шрифта и на телефоне бывает эмодзи. */
-function CloseIcon() {
-  return (
-    <svg viewBox="0 0 16 16" aria-hidden="true" className="size-3 text-dim" fill="none" stroke="currentColor">
-      <path d="M4 4l8 8M12 4l-8 8" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function ChevronIcon() {
-  return (
-    <svg
-      viewBox="0 0 16 16"
-      aria-hidden="true"
-      className="size-3.5 shrink-0 text-dim"
-      fill="none"
-      stroke="currentColor"
-    >
-      <path d="M4 6l4 4 4-4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }
