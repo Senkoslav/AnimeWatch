@@ -100,3 +100,30 @@ test("открытое меню списков: axe чист, на 360 нет г
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(0);
 });
+
+test("меню списков в промо главной не обрезается: низ меню не спрятан за краем блока", async ({ page, baseURL }, testInfo) => {
+  // Баг 2026-09-24: промо резало всё за своим краем (overflow-hidden ради размытого постера), и
+  // нижние пункты меню «В список» были недостижимы. Кликом этого не поймать: Playwright перед
+  // кликом прокручивает даже контейнер с overflow-hidden, а человек так не может. Поэтому проверка
+  // — геометрия: ни один обрезающий предок меню не кончается выше его низа.
+  await signInAs(page.context(), baseURL, viewer(testInfo));
+  await page.goto("/");
+  const button = page.locator("details:has(button[aria-pressed]) > summary").first();
+  await expect(button).not.toHaveAttribute("aria-busy", "true");
+  await button.click();
+
+  const clipped = await page.evaluate(() => {
+    const panel = document.querySelector("details[open] > div.glass-modal");
+    if (!panel) return ["меню не открылось"];
+    const bottom = panel.getBoundingClientRect().bottom;
+    const problems: string[] = [];
+    for (let el = panel.parentElement; el; el = el.parentElement) {
+      const style = getComputedStyle(el);
+      if (style.overflowY !== "visible" && el !== document.documentElement && el !== document.body) {
+        if (el.getBoundingClientRect().bottom < bottom - 1) problems.push(`${el.tagName}.${el.className}`);
+      }
+    }
+    return problems;
+  });
+  expect(clipped).toEqual([]);
+});

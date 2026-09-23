@@ -35,8 +35,13 @@ export function Promo({ release, latest, allToday, now }: PromoProps) {
 
   return (
     <section aria-labelledby="promo-title" className="mx-auto max-w-page px-4 lg:px-8 pt-4 md:pt-6">
-      <div className="relative overflow-hidden rounded-xl border border-line">
-        <PosterBackdrop src={title.posterUrl} className="inset-0" />
+      {/*
+        Без overflow-hidden на самом блоке: меню «В список» открывается вниз и выходит за его край,
+        а обрезка прятала нижние пункты. Размытый постер режет по скруглению его собственный слой
+        (у PosterBackdrop своя обрезка, радиус он наследует отсюда).
+      */}
+      <div className="relative rounded-xl border border-line">
+        <PosterBackdrop src={title.posterUrl} className="inset-0 rounded-[inherit]" />
 
         <div className="relative grid gap-6 p-4 md:p-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,27rem)] lg:gap-10 lg:p-10">
           <div className="flex min-w-0 flex-col gap-4">
