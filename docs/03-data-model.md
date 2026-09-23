@@ -129,16 +129,32 @@ model Source {
   @@index([episodeId, priority])
 }
 
+// Аккаунт — вход через Google (docs/02, «Вход»). googleId — поле `sub` из id_token: e-mail у человека
+// может смениться, sub нет. E-mail не уникален по той же причине: он лишь подпись в меню профиля.
 model User {
   id        String     @id @default(cuid())
-  tgId      BigInt     @unique
-  username  String?
-  firstName String?
+  googleId  String     @unique
+  email     String
+  name      String?
   avatarUrl String?
   role      Role       @default(USER)
+  sessions  Session[]
   bookmarks Bookmark[]
   progress  Progress[]
   createdAt DateTime   @default(now())
+}
+
+// Сессия входа. В куке — случайный токен, здесь — только sha256 от него: утечка базы не даёт чужих
+// сессий, а id пользователя в куке нет вовсе, подменять нечего.
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Bookmark {
@@ -233,8 +249,13 @@ model DmcaRequest {
 - Postgres не индексирует внешние ключи сам. У каждого FK, который не стоит
   первым в составном ключе, есть свой `@@index`: иначе каскадное удаление
   тайтла или серии сканирует `Progress` целиком.
-- `BigInt` для `tgId` не сериализуется в JSON по умолчанию — приводи к строке
-  на границе, иначе поймаешь рантайм-ошибку в server action.
+- Пользователь опознаётся по `googleId` (`sub` из id_token), не по e-mail: адрес
+  у человека может смениться. Повторный вход обновляет e-mail, имя и аватар.
+- `Session.tokenHash` — sha256 от токена из куки. Сам токен в базе не лежит, id
+  пользователя в куке нет. Просроченная сессия равна отсутствию сессии и
+  удаляется при встрече.
+- Telegram-поля (`tgId`, `username`, `firstName`) удалены 2026-09-23 миграцией
+  `user_google_sessions`: вход ни разу не работал, таблица `User` была пуста.
 
 ## Поиск по названиям
 

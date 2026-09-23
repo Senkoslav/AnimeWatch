@@ -126,16 +126,32 @@ model Source {
   @@index([episodeId, priority])
 }
 
+// Аккаунт — вход через Google (docs/02, «Вход»). googleId — поле `sub` из id_token: e-mail у человека
+// может смениться, sub нет. E-mail не уникален по той же причине: он лишь подпись в меню профиля.
 model User {
   id        String     @id @default(cuid())
-  tgId      BigInt     @unique
-  username  String?
-  firstName String?
+  googleId  String     @unique
+  email     String
+  name      String?
   avatarUrl String?
   role      Role       @default(USER)
+  sessions  Session[]
   bookmarks Bookmark[]
   progress  Progress[]
   createdAt DateTime   @default(now())
+}
+
+// Сессия входа. В куке — случайный токен, здесь — только sha256 от него: утечка базы не даёт чужих
+// сессий, а id пользователя в куке нет вовсе, подменять нечего.
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
 }
 
 model Bookmark {
