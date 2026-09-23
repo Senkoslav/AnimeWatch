@@ -80,6 +80,12 @@
   --color-glass-panel: #ffffff0e;  /* 5.5% */
   --color-glass-modal: #161b23db;  /* 86% */
 
+  /* Палитра диаграмм: см. «Диаграммы». Не акцент бренда, меняется только набором. */
+  --color-chart-watching: #c98500;
+  --color-chart-planned: #3987e5;
+  --color-chart-completed: #199e70;
+  --color-chart-dropped: #d95926;
+
   --radius-*: initial;
   --radius-sm: 10px;   /* поля, мелкие кнопки, чипы */
   --radius-md: 14px;   /* карточки, крупные кнопки */

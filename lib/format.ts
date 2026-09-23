@@ -33,6 +33,11 @@ export function formatRelativeDate(date: Date, now: Date): string {
   return yearOnly.format(date) === yearOnly.format(now) ? dayMonth.format(date) : dayMonthYear.format(date);
 }
 
+/** Календарная дата по Москве с годом: «23 сентября 2026» — без «г.», который дописывает Intl. */
+export function formatDate(date: Date): string {
+  return dayMonthYear.format(date).replace(/\s*г\.$/, "");
+}
+
 /** Вышла меньше суток назад: единственное на главной, что «происходит сейчас» и получает акцент. */
 export function isFresh(date: Date, now: Date): boolean {
   return now.getTime() - date.getTime() < DAY;

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   formatAgeRating,
   formatAirTime,
+  formatDate,
   formatAirDay,
   formatCount,
   formatDuration,
@@ -173,5 +174,11 @@ describe("formatAirTime", () => {
   it("время по Москве, а не по UTC", () => {
     expect(formatAirTime(new Date("2026-09-27T14:15:00Z"))).toBe("17:15");
     expect(formatAirTime(new Date("2026-09-20T22:05:00Z"))).toBe("01:05");
+  });
+});
+
+describe("formatDate", () => {
+  it("дата с годом по Москве, без «г.» на конце", () => {
+    expect(formatDate(new Date("2026-09-23T21:30:00Z"))).toBe("24 сентября 2026");
   });
 });

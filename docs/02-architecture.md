@@ -45,6 +45,7 @@ serverless-функции открывают соединения агресси
 /dmca, /terms, /privacy   обязательные страницы
 /robots.txt, /sitemap.xml app/robots.ts, app/sitemap.ts
 /auth/error               неудачный вход через Google: причина и шаг, noindex
+/profile                  профиль: списки кольцом с таблицей, свои оценки, последнее; динамический, noindex
 ```
 
 Адрес сайта для `metadataBase`, canonical и карты сайта — `siteUrl()` из
