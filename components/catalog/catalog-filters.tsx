@@ -131,7 +131,7 @@ export function CatalogFilters({ params, options, total }: CatalogFiltersProps) 
                 type="search"
                 defaultValue={params.q ?? ""}
                 maxLength={MAX_QUERY_LENGTH}
-                placeholder="Например, Фрирен"
+                placeholder="Название аниме"
                 className={FIELD}
               />
             </div>

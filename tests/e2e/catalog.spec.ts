@@ -461,3 +461,13 @@ test.describe("без JS", () => {
     await expect(results(page)).toHaveCount(DRAMA_TV_BY_NAME.length);
   });
 });
+
+test("по умолчанию каталог отсортирован по популярности, и в адрес это не пишется", async ({ page }) => {
+  await page.goto("/catalog?sort=popular");
+  await expect(page).toHaveURL("/catalog");
+  await expect(page.locator("summary", { hasText: "Сортировка" })).toContainText("По популярности");
+  // Популярность — умолчание, поэтому пресет «Популярное» на чистом каталоге и есть то, что показано.
+  await expect(
+    page.getByRole("navigation", { name: "Подборки" }).getByRole("link", { name: "Популярное" }),
+  ).toHaveAttribute("aria-current", "page");
+});

@@ -100,7 +100,8 @@ function Search({ className = "" }: { className?: string }) {
         name="q"
         type="search"
         maxLength={MAX_QUERY_LENGTH}
-        placeholder="Название, жанр, год"
+        // Только название: поиск идёт по названиям и синонимам (docs/03), жанр или год он не найдёт.
+        placeholder="Поиск по названию"
         className={`${FIELD_COMPACT} pr-3 pl-10`}
       />
     </Form>

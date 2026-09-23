@@ -46,7 +46,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           type="search"
           defaultValue={query}
           maxLength={MAX_QUERY_LENGTH}
-          placeholder="Например, Фрирен"
+          placeholder="Название аниме"
           className={`${FIELD} flex-1`}
         />
         <button type="submit" className={button()}>

@@ -232,10 +232,17 @@ describe("пресеты", () => {
   it("пресет — это адрес каталога и ничего больше", () => {
     expect(CATALOG_PRESETS.map(presetHref)).toEqual([
       "/catalog?status=ongoing",
-      "/catalog?sort=popular",
+      // Популярность — порядок по умолчанию, поэтому «Популярное» — это чистый каталог.
+      "/catalog",
       "/catalog?sort=score",
       "/catalog?kind=movie",
     ]);
+  });
+
+  it("сортировка по умолчанию — популярность, и в адрес она не пишется", () => {
+    expect(parseCatalogParams({}).sort).toBe("popular");
+    expect(catalogHref({ ...EMPTY, sort: "popular" })).toBe("/catalog");
+    expect(catalogHref({ ...EMPTY, sort: "new" })).toBe("/catalog?sort=new");
   });
 
   it("отмечен выбранным, только когда открыт ровно он", () => {

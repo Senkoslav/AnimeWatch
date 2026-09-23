@@ -17,10 +17,15 @@ import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 import { KIND_LABELS, STATUS_LABELS } from "@/lib/labels";
 import { searchQuerySchema } from "@/lib/search/query";
 
-export const CATALOG_SORTS = ["new", "popular", "score", "year", "name"] as const;
+// Порядок — он же порядок в меню сортировки: первым то, что стоит по умолчанию.
+export const CATALOG_SORTS = ["popular", "new", "score", "year", "name"] as const;
 export type CatalogSort = (typeof CATALOG_SORTS)[number];
-/** Порядок по умолчанию: он же отсутствует в каноническом адресе. */
-export const DEFAULT_SORT: CatalogSort = "new";
+/**
+ * Порядок по умолчанию: он же отсутствует в каноническом адресе. Популярность, а не дата
+ * (решение владельца 2026-09-23): дата у нас — дата импорта, и «новые» после пакетного импорта
+ * выводили в начало случайный тайтл, а не то, что ищут чаще всего.
+ */
+export const DEFAULT_SORT: CatalogSort = "popular";
 
 /** HIDDEN в фильтре нет: скрытый по жалобе тайтл не существует для зрителя. */
 const STATUS_BY_PARAM = {
