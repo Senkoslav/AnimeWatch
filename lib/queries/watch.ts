@@ -16,7 +16,7 @@ export interface WatchPage {
   /** Соседние опубликованные серии: черновики между ними пропускаются. */
   previous: TitleEpisode | null;
   next: TitleEpisode | null;
-  /** null — источник у серии ещё не подключён: страница честно говорит об этом, а не отдаёт 404. */
+  /** Фрейм Kodik. null — у серии его ещё нет: страница честно говорит об этом, а не отдаёт 404. */
   source: WatchSource | null;
 }
 
@@ -34,7 +34,10 @@ export const getWatchPage = cache(async (slug: string, number: number): Promise<
   if (!episode) return null;
 
   const source = await prisma.source.findFirst({
-    where: { episodeId: episode.id },
+    // Только фрейм Kodik — по тому же правилу, что hasSource в getTitlePage: прямые файлы в этой
+    // версии не играют. Иначе MP4 по умолчанию выигрывал бы у Kodik, и плеер говорил бы «не
+    // подключён» рядом с плиткой той же серии, отмеченной подключённой.
+    where: { episodeId: episode.id, type: SourceType.KODIK },
     // Сначала источник по умолчанию, затем по приоритету: смена поставщика видео не требует правок UI.
     orderBy: [{ isDefault: "desc" }, { priority: "asc" }],
     select: { type: true, url: true },
