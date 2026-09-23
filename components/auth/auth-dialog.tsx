@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, type ReactNode } from "react";
 
 interface AuthDialogProps {
@@ -21,12 +21,22 @@ interface AuthDialogProps {
  */
 export function AuthDialog({ labelledBy, children }: AuthDialogProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const dialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     const element = dialog.current;
     if (element && !element.open) element.showModal();
   }, []);
+
+  /*
+   * Переход по ссылке изнутри окна (соглашение, политика) не сбрасывает слот: при клиентской
+   * навигации слот без совпадения держит последнее состояние, и окно осталось бы висеть над новой
+   * страницей. Документация закрывает это catch-all страницей в слоте, но она попадает в typedRoutes
+   * как «/[...catchAll]» и делает допустимым любой адрес — проверка ссылок молча отключается.
+   * Поэтому окно само уходит, как только адрес перестал быть /login.
+   */
+  if (pathname !== "/login") return null;
 
   return (
     <dialog

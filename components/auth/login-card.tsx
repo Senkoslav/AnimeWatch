@@ -49,7 +49,6 @@ export function LoginCard({ titleId, as: Title = "h2", close, standaloneLink = f
       <div className="flex flex-col gap-3">
         {configured ? (
           // Ссылка, а не кнопка: уход на сторону Google — это переход, и он обязан работать без JS.
-          // eslint-disable-next-line @next/next/no-html-link-for-pages -- обработчик маршрута, а не страница: нужен полный переход
           <a href="/api/auth/google" className={GOOGLE_BUTTON}>
             <GoogleMark />
             Продолжить с Google
@@ -111,7 +110,6 @@ export function LoginCard({ titleId, as: Title = "h2", close, standaloneLink = f
         {standaloneLink && (
           <p className="mt-3 border-t border-line pt-1">
             {/* <a>, а не Link: клиентский переход на /login снова перехватился бы модалкой. */}
-            {/* eslint-disable-next-line @next/next/no-html-link-for-pages -- нужен полный переход мимо перехвата */}
             <a href="/login" className="inline-flex min-h-11 items-center text-sm text-muted underline hover:text-text">
               Открыть отдельной страницей
             </a>
