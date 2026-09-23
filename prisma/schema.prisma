@@ -155,12 +155,17 @@ model Session {
 }
 
 model Bookmark {
-  userId  String
-  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  titleId String
-  title   Title      @relation(fields: [titleId], references: [id], onDelete: Cascade)
-  state   WatchState @default(WATCHING)
-  addedAt DateTime   @default(now())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  titleId   String
+  title     Title      @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  state     WatchState @default(WATCHING)
+  // Своя оценка 1–10, как у Shikimori. Границы проверяет zod в server action: CHECK Prisma не умеет.
+  // Оценка без списка кладёт тайтл в «Просмотрено» (решение владельца 2026-09-23).
+  rating    Int?
+  addedAt   DateTime   @default(now())
+  // Последняя смена отметки или оценки: «последние отмеченные» в профиле.
+  updatedAt DateTime   @updatedAt
 
   @@id([userId, titleId])
   @@index([userId, state])

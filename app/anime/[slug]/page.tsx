@@ -4,9 +4,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 
+import { ListControl } from "@/components/bookmarks/list-control";
+import { RatingControl } from "@/components/bookmarks/rating-control";
 import { EpisodeList } from "@/components/title/episode-list";
 import { ExpandableText } from "@/components/title/expandable-text";
-import { AddToList } from "@/components/ui/add-to-list";
 import { button, CHIP, TAG, TAG_SIGNAL } from "@/components/ui/controls";
 import { Poster } from "@/components/ui/poster";
 import { PosterBackdrop } from "@/components/ui/poster-backdrop";
@@ -124,7 +125,7 @@ export default async function TitlePageView({ params }: PageProps<"/anime/[slug]
                   {isMovie ? "Смотреть" : `Смотреть эпизод ${startEpisode.number}`}
                 </Link>
               )}
-              <AddToList className="w-full" />
+              <ListControl titleId={title.id} className="w-full" />
             </div>
 
             <dl className="order-6 col-span-2 overflow-hidden rounded-lg border border-line bg-surface md:order-none">
@@ -188,10 +189,15 @@ export default async function TitlePageView({ params }: PageProps<"/anime/[slug]
                     <div className="h-full bg-signal" style={{ width: `${Math.min(100, title.score * 10)}%` }} />
                   </div>
                   <p className="mt-2.5 text-xs text-dim">
-                    Своих оценок у сайта пока нет — появятся вместе с аккаунтами.
+                    Средней по оценкам зрителей сайта пока нет: их ещё мало.
                   </p>
                 </div>
               )}
+            </div>
+
+            {/* Своя оценка — сразу под оценкой Shikimori: две оценки рядом читаются как пара. */}
+            <div className="order-3 col-span-2 md:order-none">
+              <RatingControl titleId={title.id} />
             </div>
 
             <div className="order-4 col-span-2 flex flex-col gap-4 md:order-none">

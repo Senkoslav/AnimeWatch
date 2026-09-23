@@ -14,6 +14,8 @@ export interface Release {
   thumbUrl: string | null;
   publishedAt: Date;
   title: {
+    /** Для кнопки «В список» в промо. */
+    id: string;
     slug: string;
     nameRu: string;
     /** Оригинальное название — подпись под заголовком промо. */
@@ -65,6 +67,7 @@ export async function getHomeFeed(): Promise<HomeFeed> {
       publishedAt: true,
       title: {
         select: {
+          id: true,
           slug: true,
           nameRu: true,
           name: true,

@@ -1,8 +1,8 @@
 import { Play } from "lucide-react";
 import Link from "next/link";
 
+import { ListControl } from "@/components/bookmarks/list-control";
 import { EpisodeFrame } from "@/components/home/episode-frame";
-import { AddToList } from "@/components/ui/add-to-list";
 import { button, TAG, TAG_SIGNAL } from "@/components/ui/controls";
 import { PosterBackdrop } from "@/components/ui/poster-backdrop";
 import { formatEpisodeNumber, formatRelativeDate, formatScore, isFresh } from "@/lib/format";
@@ -71,7 +71,7 @@ export function Promo({ release, latest, allToday, now }: PromoProps) {
                 <Play aria-hidden="true" className="size-4 fill-current" />
                 Смотреть
               </Link>
-              <AddToList />
+              <ListControl titleId={title.id} />
               <Link href={titleHref(title.slug)} className={button("quiet")}>
                 О тайтле
               </Link>

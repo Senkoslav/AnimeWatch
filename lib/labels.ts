@@ -1,5 +1,5 @@
 /** Подписи значений из базы для интерфейса. */
-import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
+import { TitleKind, TitleStatus, WatchState } from "@/lib/generated/prisma/enums";
 
 import type { CatalogSort, PublicStatus } from "./catalog/params";
 
@@ -24,3 +24,14 @@ export const SORT_LABELS: Record<CatalogSort, string> = {
   year: "По году",
   name: "По названию",
 };
+
+/** Списки (docs/04, «Диаграммы» — тот же порядок): что стоит на кнопке «В список» у вошедшего. */
+export const WATCH_STATE_LABELS: Record<WatchState, string> = {
+  [WatchState.WATCHING]: "Смотрю",
+  [WatchState.PLANNED]: "Запланировано",
+  [WatchState.COMPLETED]: "Просмотрено",
+  [WatchState.DROPPED]: "Брошено",
+};
+
+/** Порядок пунктов в меню списков и в профиле. */
+export const WATCH_STATES = [WatchState.WATCHING, WatchState.PLANNED, WatchState.COMPLETED, WatchState.DROPPED] as const;

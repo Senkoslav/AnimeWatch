@@ -1,9 +1,10 @@
 import Link from "next/link";
 
+import { StateBadge } from "@/components/bookmarks/state-badge";
 import { Poster } from "@/components/ui/poster";
 import { ScoreBadge } from "@/components/ui/score-badge";
 import { formatCount } from "@/lib/format";
-import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
+import { TitleKind, TitleStatus, type WatchState } from "@/lib/generated/prisma/enums";
 import { KIND_LABELS, STATUS_LABELS } from "@/lib/labels";
 import type { CatalogItem } from "@/lib/queries/catalog";
 import { titleHref } from "@/lib/routes";
@@ -19,10 +20,12 @@ interface TitleCardProps {
   sizes?: string;
   /** На чём лежит карточка: внутри панели --surface заглушке постера нужен другой фон. */
   background?: "surface" | "bg";
+  /** Свой список вошедшего зрителя: значок на постере. */
+  listState?: WatchState;
 }
 
 /** Карточка каталога: ведёт на страницу тайтла. */
-export function TitleCard({ title, eager = false, sizes = POSTER_SIZES, background = "surface" }: TitleCardProps) {
+export function TitleCard({ title, eager = false, sizes = POSTER_SIZES, background = "surface", listState }: TitleCardProps) {
   const facts = [title.year, KIND_LABELS[title.kind]].filter(Boolean).join(", ");
   // HIDDEN сюда не доходит: такой тайтл отсекается ещё в запросе (publicTitleWhere).
   const status = title.status === TitleStatus.HIDDEN ? null : title.status;
@@ -45,6 +48,7 @@ export function TitleCard({ title, eager = false, sizes = POSTER_SIZES, backgrou
         loading={eager ? "eager" : "lazy"}
       >
         {title.score !== null && <ScoreBadge score={title.score} />}
+        {listState && <StateBadge state={listState} />}
         {episodes && (
           // Счёт серий на стекле с тёмной основой (Catalog.dc.html): постер под ним заранее неизвестен.
           <span className="glass-panel pointer-events-none absolute bottom-2 left-2 rounded-sm border border-line bg-bg/65 px-2 py-0.5 text-xs text-text-2">

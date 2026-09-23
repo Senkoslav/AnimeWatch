@@ -1,7 +1,6 @@
 import { X } from "lucide-react";
 
 import { CloseOnNavigate } from "@/components/auth/close-on-navigate";
-import { DialogBody } from "@/components/auth/dialog-body";
 import { AUTH_DIALOG_ID } from "@/components/auth/ids";
 import { LoginCard } from "@/components/auth/login-card";
 
@@ -51,9 +50,7 @@ export function AuthDialog() {
       <div aria-hidden="true" className="flex justify-center pt-2.5 sm:hidden">
         <span className="h-1 w-10 rounded-full bg-fill-2" />
       </div>
-      <DialogBody titleId={TITLE_ID} close={CLOSE}>
-        <LoginCard titleId={TITLE_ID} close={CLOSE} />
-      </DialogBody>
+      <LoginCard titleId={TITLE_ID} close={CLOSE} />
     </dialog>
   );
 }

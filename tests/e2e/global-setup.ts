@@ -6,8 +6,8 @@ import { PrismaClient } from "@/lib/generated/prisma/client";
 
 /** Адрес из формы в tests/e2e/dmca.spec.ts: чистим только свои следы, чужие обращения не трогаем. */
 const TEST_CLAIMANT_EMAIL = "legal@example.com";
-/** googleId тестового зрителя из tests/e2e/auth.spec.ts. */
-const E2E_GOOGLE_ID = "e2e-google-user";
+/** Префикс googleId тестовых зрителей из tests/e2e: у настоящих Google id это число. */
+const E2E_GOOGLE_PREFIX = "e2e-";
 
 /**
  * Один раз на прогон: убрать обращения, оставленные прошлыми прогонами e2e.
@@ -31,8 +31,9 @@ export default async function globalSetup(): Promise<void> {
   const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
   try {
     await prisma.dmcaRequest.deleteMany({ where: { claimantEmail: TEST_CLAIMANT_EMAIL } });
-    // Тестовый зритель из auth.spec.ts: его сессии от прошлых прогонов (каскадом вместе с ним).
-    await prisma.user.deleteMany({ where: { googleId: E2E_GOOGLE_ID } });
+    // Тестовые зрители из auth.spec.ts и bookmarks.spec.ts: их сессии и отметки от прошлых прогонов
+    // уходят каскадом вместе с ними. Живых пользователей префикс «e2e-» не задевает.
+    await prisma.user.deleteMany({ where: { googleId: { startsWith: E2E_GOOGLE_PREFIX } } });
   } finally {
     await prisma.$disconnect();
   }

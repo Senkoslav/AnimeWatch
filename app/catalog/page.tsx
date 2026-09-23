@@ -26,6 +26,7 @@ import { formatCount } from "@/lib/format";
 import { SORT_LABELS } from "@/lib/labels";
 import { CATALOG_PAGE_SIZE, getCatalog, getCatalogFilters } from "@/lib/queries/catalog";
 import { CATALOG_MATCH_LIMIT } from "@/lib/queries/search";
+import { myListStates } from "@/lib/bookmarks/list-states";
 
 /**
  * Адрес с поиском из индекса убираем, как и `/search`: `q` — произвольная строка, значит адресов
@@ -61,6 +62,7 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
     redirect(canonical);
   }
 
+  const listStates = await myListStates(catalog.items.map((item) => item.id));
   const active = activeFilters(params);
   const range = shownRange(params.page, CATALOG_PAGE_SIZE, catalog.total);
 
@@ -145,7 +147,12 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
               >
                 {catalog.items.map((title, index) => (
                   <li key={title.id}>
-                    <TitleCard title={title} sizes={POSTER_SIZES} eager={params.page === 1 && index < MOBILE_COLUMNS} />
+                    <TitleCard
+                      title={title}
+                      sizes={POSTER_SIZES}
+                      eager={params.page === 1 && index < MOBILE_COLUMNS}
+                      listState={listStates.get(title.id)}
+                    />
                   </li>
                 ))}
               </ul>

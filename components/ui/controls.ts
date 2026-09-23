@@ -12,7 +12,7 @@
  * Тач-цель нигде не меньше 44×44 — поэтому даже у маленького размера `min-h-11`.
  */
 
-type ButtonVariant = "primary" | "secondary" | "quiet" | "disabled";
+type ButtonVariant = "primary" | "secondary" | "selected" | "quiet" | "disabled";
 type ButtonSize = "md" | "sm";
 
 const BUTTON_BASE = "inline-flex items-center justify-center gap-2 text-center";
@@ -30,6 +30,11 @@ const BUTTON_VARIANT: Record<ButtonVariant, string> = {
   primary: "bg-signal text-signal-ink hover:bg-signal/90",
   /** Вторичное: светлая плёнка с границей. Цвета не берёт — на странице он один и уже занят. */
   secondary: "border border-line bg-fill text-text hover:bg-fill-2",
+  /**
+   * Выбранное состояние: тайтл в одном из списков. Как активный чип — заливка 14% и граница янтаря,
+   * без сплошной заливки: та принадлежит «Смотреть».
+   */
+  selected: "border border-signal-line bg-signal-soft text-signal hover:bg-signal/20",
   /** Третичное: только текст. Действие, которое не должно выглядеть кнопкой. */
   quiet: "text-muted hover:text-text",
   /**

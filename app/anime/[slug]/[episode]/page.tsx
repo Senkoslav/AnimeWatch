@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 
-import { AddToList } from "@/components/ui/add-to-list";
+import { ListControl } from "@/components/bookmarks/list-control";
 import { EpisodeGrid } from "@/components/watch/episode-grid";
 import { PlayerSlot } from "@/components/watch/player-slot";
 import { formatDuration, formatEpisodeNumber, formatRelativeDate } from "@/lib/format";
@@ -106,7 +106,7 @@ export default async function WatchPage({ params }: PageProps<"/anime/[slug]/[ep
               </div>
               <p className="text-sm text-dim">{released}</p>
             </div>
-            <AddToList size="sm" />
+            <ListControl titleId={title.id} size="sm" />
           </div>
 
           {(previous || next) && (

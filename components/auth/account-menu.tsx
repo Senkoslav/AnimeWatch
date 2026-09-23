@@ -1,10 +1,10 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { type ReactNode, useActionState, useEffect, useRef } from "react";
 
 import { AUTH_CHANGE_EVENT, useDisplayUser } from "@/components/auth/use-display-user";
+import { useDismissableDetails } from "@/components/ui/use-dismissable-details";
 import { signOut, type SignOutState } from "@/lib/auth/actions";
 import type { DisplayUser } from "@/lib/auth/display";
 
@@ -26,7 +26,6 @@ const INITIAL: SignOutState = { signedOutAt: null };
  */
 export function AccountMenu({ variant, children, itemClassName = "" }: AccountMenuProps) {
   const user = useDisplayUser();
-  const pathname = usePathname();
   const menu = useRef<HTMLDetailsElement>(null);
   const [state, formAction, pending] = useActionState(signOut, INITIAL);
 
@@ -35,25 +34,7 @@ export function AccountMenu({ variant, children, itemClassName = "" }: AccountMe
     if (state.signedOutAt) window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
   }, [state.signedOutAt]);
 
-  // Меню закрывается при переходе, по Esc и нажатием мимо — как любое выпадающее меню.
-  useEffect(() => {
-    if (menu.current) menu.current.open = false;
-  }, [pathname]);
-  useEffect(() => {
-    function close(event: Event) {
-      const details = menu.current;
-      if (!details?.open) return;
-      if (event instanceof KeyboardEvent ? event.key === "Escape" : !details.contains(event.target as Node)) {
-        details.open = false;
-      }
-    }
-    document.addEventListener("keydown", close);
-    document.addEventListener("pointerdown", close);
-    return () => {
-      document.removeEventListener("keydown", close);
-      document.removeEventListener("pointerdown", close);
-    };
-  }, []);
+  useDismissableDetails(menu);
 
   if (!user) return children;
 

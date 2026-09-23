@@ -18,3 +18,52 @@ export function e2eDatabase(): PrismaClient {
   }
   return new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 }
+
+export interface SeededViewer {
+  googleId: string;
+  email: string;
+  name: string;
+}
+
+/**
+ * Вошедший зритель без Google: пользователь и сессия пишутся в базу, а кука сессии и показная
+ * кука — в контекст браузера. Каждый вызов — новая сессия того же пользователя: второй контекст
+ * с ней — «другое устройство».
+ */
+export async function signInAs(
+  context: import("@playwright/test").BrowserContext,
+  baseURL: string | undefined,
+  viewer: SeededViewer,
+): Promise<{ token: string; userId: string }> {
+  const { createHash, randomBytes } = await import("node:crypto");
+  const { encodeDisplayUser } = await import("@/lib/auth/display");
+  const prisma = e2eDatabase();
+  try {
+    const user = await prisma.user.upsert({
+      where: { googleId: viewer.googleId },
+      create: { googleId: viewer.googleId, email: viewer.email, name: viewer.name },
+      update: { email: viewer.email, name: viewer.name },
+    });
+    const token = randomBytes(32).toString("base64url");
+    await prisma.session.create({
+      data: {
+        tokenHash: createHash("sha256").update(token).digest("hex"),
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+      },
+    });
+    const url = baseURL ?? "http://localhost:3100";
+    await context.addCookies([
+      { name: "aw_session", value: token, url, httpOnly: true, sameSite: "Lax" },
+      {
+        name: "aw_user",
+        value: encodeDisplayUser({ name: viewer.name, email: viewer.email, avatarUrl: null }),
+        url,
+        sameSite: "Lax",
+      },
+    ]);
+    return { token, userId: user.id };
+  } finally {
+    await prisma.$disconnect();
+  }
+}

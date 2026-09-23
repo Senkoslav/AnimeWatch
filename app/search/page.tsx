@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { TitleCard } from "@/components/catalog/title-card";
 import { button, FIELD, PAGE_TITLE, TEXT_LINK } from "@/components/ui/controls";
 import { requestedHref, trackingEntries, withTracking } from "@/lib/canonical";
+import { myListStates } from "@/lib/bookmarks/list-states";
 import { formatCount } from "@/lib/format";
 import { SEARCH_LIMIT, searchTitles } from "@/lib/queries/search";
 import { MAX_QUERY_LENGTH, searchHref, searchQuerySchema } from "@/lib/search/query";
@@ -28,6 +29,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
   }
 
   const { titles, truncated } = query ? await searchTitles(query) : { titles: [], truncated: false };
+  const listStates = await myListStates(titles.map((title) => title.id));
 
   return (
     <div className="mx-auto max-w-page px-4 lg:px-8 py-6 md:py-10">
@@ -72,7 +74,7 @@ export default async function SearchPage({ searchParams }: PageProps<"/search">)
           <ul className="mt-4 grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
             {titles.map((title, index) => (
               <li key={title.id}>
-                <TitleCard title={title} eager={index < MOBILE_COLUMNS} />
+                <TitleCard title={title} eager={index < MOBILE_COLUMNS} listState={listStates.get(title.id)} />
               </li>
             ))}
           </ul>

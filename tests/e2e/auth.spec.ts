@@ -1,11 +1,9 @@
-import { createHash, randomBytes } from "node:crypto";
+import { createHash } from "node:crypto";
 
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type BrowserContext, type Page } from "@playwright/test";
 
-import { encodeDisplayUser } from "@/lib/auth/display";
-
-import { e2eDatabase } from "./db";
+import { e2eDatabase, signInAs } from "./db";
 
 // Настоящий Google e2e не вызывают: уход на Google проверяется по адресу редиректа, отказы возврата —
 // прямыми запросами, а вошедший пользователь — сессией, подложенной в локальную базу.
@@ -14,35 +12,8 @@ const GOOGLE_ID = "e2e-google-user";
 const EMAIL = "e2e-viewer@example.com";
 
 async function signIn(context: BrowserContext, baseURL: string | undefined) {
-  const prisma = e2eDatabase();
-  try {
-    const user = await prisma.user.upsert({
-      where: { googleId: GOOGLE_ID },
-      create: { googleId: GOOGLE_ID, email: EMAIL, name: "Тестовый зритель" },
-      update: { email: EMAIL, name: "Тестовый зритель" },
-    });
-    const token = randomBytes(32).toString("base64url");
-    await prisma.session.create({
-      data: {
-        tokenHash: createHash("sha256").update(token).digest("hex"),
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 60 * 60 * 1000),
-      },
-    });
-    const url = baseURL ?? "http://localhost:3100";
-    await context.addCookies([
-      { name: "aw_session", value: token, url, httpOnly: true, sameSite: "Lax" },
-      {
-        name: "aw_user",
-        value: encodeDisplayUser({ name: "Тестовый зритель", email: EMAIL, avatarUrl: null }),
-        url,
-        sameSite: "Lax",
-      },
-    ]);
-    return token;
-  } finally {
-    await prisma.$disconnect();
-  }
+  const { token } = await signInAs(context, baseURL, { googleId: GOOGLE_ID, email: EMAIL, name: "Тестовый зритель" });
+  return token;
 }
 
 async function sessionCount(token: string) {
@@ -115,12 +86,15 @@ test("вошедший видит себя в меню аккаунта и вы�
   expect(names).not.toContain("aw_user");
 });
 
-test("«В список» у вошедшего не зовёт входить второй раз", async ({ page, context, baseURL }) => {
+test("«В список» у вошедшего открывает меню списков, а не вход", async ({ page, context, baseURL }) => {
   await signIn(context, baseURL);
   await page.goto("/anime/frieren");
-  await page.getByRole("button", { name: "В список" }).first().click();
-  await expect(page.getByRole("dialog").getByRole("heading", { name: "Вы вошли как Тестовый зритель" })).toBeVisible();
-  await expect(page.getByRole("dialog").getByRole("link", { name: "Продолжить с Google" })).toHaveCount(0);
+  const list = page.locator("details:has(button[aria-pressed]) > summary");
+  // Своя отметка подгружается после загрузки страницы; пока грузится, кнопка занята.
+  await expect(list).not.toHaveAttribute("aria-busy", "true");
+  await list.click();
+  await expect(page.getByRole("button", { name: "Смотрю", exact: true })).toBeVisible();
+  await expect(page.getByRole("dialog")).toBeHidden();
 });
 
 test("страница ошибки входа не индексируется, мусор в причине — общий текст", async ({ page }) => {
