@@ -1,8 +1,8 @@
 import { SlidersHorizontal, X } from "lucide-react";
-import Form from "next/form";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
+import { CatalogForm } from "@/components/catalog/catalog-form";
 import { CATALOG_PANEL_HEAD } from "@/components/catalog/panel";
 import {
   button,
@@ -16,13 +16,13 @@ import {
 import { SectionHeading } from "@/components/ui/section-heading";
 import {
   activeFilters,
-  catalogHref,
   type CatalogParams,
   DEFAULT_SORT,
   hasFilters,
   KIND_OPTIONS,
   STATUS_OPTIONS,
 } from "@/lib/catalog/params";
+import { formatCount } from "@/lib/format";
 import { KIND_LABELS, STATUS_LABELS } from "@/lib/labels";
 import type { CatalogFilters as FilterOptions } from "@/lib/queries/catalog";
 import { MAX_QUERY_LENGTH } from "@/lib/search/query";
@@ -30,6 +30,8 @@ import { MAX_QUERY_LENGTH } from "@/lib/search/query";
 interface CatalogFiltersProps {
   params: CatalogParams;
   options: FilterOptions;
+  /** Сколько тайтлов под действующим отбором: подпись кнопки, закрывающей лист на телефоне. */
+  total: number;
 }
 
 const TOGGLE_ID = "catalog-filters-open";
@@ -39,8 +41,8 @@ const PANEL_ID = "catalog-filters-panel";
 const GENRES_SHOWN = 12;
 
 /**
- * Отбор каталога. GET-форма через next/form: без своего JS, состояние только в URL. Страница не
- * отправляется — после смены отбора всегда первая. Выбранные значения берутся из URL.
+ * Отбор каталога. Состояние только в URL, страница не отправляется — после смены отбора всегда
+ * первая. Применяется сам на каждом изменении (catalog-form.tsx); без JS — GET-форма с кнопкой.
  *
  * На десктопе это липкая колонка слева от выдачи (Catalog.dc.html), на телефоне — нижний лист.
  * И там, и там один и тот же DOM и одна и та же форма: два комплекта полей с одинаковыми именами
@@ -51,26 +53,23 @@ const GENRES_SHOWN = 12;
  * фокус в нём не удержать, а заявленный диалог, из которого фокус уходит на страницу под ним, хуже
  * честного раскрытия.
  */
-export function CatalogFilters({ params, options }: CatalogFiltersProps) {
+export function CatalogFilters({ params, options, total }: CatalogFiltersProps) {
   // Значения вне вариантов сюда не доходят: страница уводит такой адрес на канонический.
   const { genres, years } = options;
   const active = activeFilters(params);
 
-  // Выбранные жанры идут первыми: иначе отмеченный жанр мог бы оказаться под «ещё» и выглядел бы
-  // как не выбранный. Порядок полей в форме от этого расходится с каноническим, и отправка даёт
-  // один лишний редирект — ровно как пустые поля формы сегодня.
-  const sortedGenres = [...genres].sort(
-    (a, b) => Number(params.genres.includes(b)) - Number(params.genres.includes(a)),
-  );
-  const shownGenres = sortedGenres.slice(0, GENRES_SHOWN);
-  const hiddenGenres = sortedGenres.slice(GENRES_SHOWN);
+  // Порядок жанров алфавитный и от отбора не зависит: отбор применяется на клике, и чип,
+  // уезжающий в начало списка, уходил бы из-под курсора. Отмеченный жанр из хвоста не теряется:
+  // хвост с отметкой стоит раскрытым (.details-keep-checked).
+  const shownGenres = genres.slice(0, GENRES_SHOWN);
+  const hiddenGenres = genres.slice(GENRES_SHOWN);
 
   return (
-    // key: при переходе по ссылке «Сбросить», по метке отбора или «Назад» в истории панель
-    // пересоздаётся, иначе неуправляемые поля и чекбокс остались бы с прежними значениями.
+    // Без key: панель живёт между переходами, иначе каждый клик по чипу закрывал бы лист на
+    // телефоне и сбрасывал фокус. Поля к адресу, пришедшему снаружи формы, подводит CatalogForm.
     // lg:h-full — не оформление: `sticky` держится только внутри родителя, и без полной высоты
     // обёртки панели прилипать некуда — на длинной выдаче она уезжала вверх вместе со страницей.
-    <div key={catalogHref({ ...params, page: 1 })} className="lg:h-full">
+    <div className="lg:h-full">
       {/* sr-only, а не hidden: элемент должен остаться фокусируемым с клавиатуры. */}
       <input type="checkbox" id={TOGGLE_ID} aria-controls={PANEL_ID} className="peer sr-only lg:hidden" />
 
@@ -117,7 +116,7 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
           </label>
         </div>
 
-        <Form action="/catalog" className="flex min-h-0 flex-col">
+        <CatalogForm className="flex min-h-0 flex-col">
           <div className="flex min-h-0 flex-col gap-5 overflow-y-auto p-4 md:p-5">
             {/* Первым и здесь, и в catalogHref: пришедший адрес собирается как есть, и перестановка
                 параметров увела бы страницу в вечный редирект. */}
@@ -146,14 +145,14 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
               </div>
               {hiddenGenres.length > 0 && (
                 // Остальные жанры остаются в форме и отправляются наравне с открытыми: <details>
-                // прячет их от глаз, но не из разметки. Выбранные сюда не попадают по построению.
-                <details className="mt-2">
+                // прячет их от глаз, но не из разметки.
+                <details className="details-keep-checked mt-2">
                   <summary className="inline-flex min-h-11 cursor-pointer items-center text-sm text-dim hover:text-text">
                     ещё {hiddenGenres.length}
                   </summary>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {hiddenGenres.map((genre) => (
-                      <CheckChip key={genre} name="genre" value={genre} checked={false}>
+                      <CheckChip key={genre} name="genre" value={genre} checked={params.genres.includes(genre)}>
                         {genre}
                       </CheckChip>
                     ))}
@@ -199,14 +198,27 @@ export function CatalogFilters({ params, options }: CatalogFiltersProps) {
             {params.sort !== DEFAULT_SORT && <input type="hidden" name="sort" value={params.sort} />}
           </div>
 
-          {/* Кнопка прижата к низу листа и не уезжает вместе с полями. Числа на ней нет: без JS оно
-              относилось бы к уже применённому отбору, а не к набранному, — счёт стоит над выдачей. */}
-          <div className="border-t border-line p-4 md:p-5">
-            <button type="submit" className={`${button()} w-full`}>
-              Показать
-            </button>
+          {/*
+            Низ листа. С JS отбор применяется сам, и кнопки отправки нет: на десктопе низа нет
+            вовсе, а на телефоне здесь закрывашка листа со счётом — выдача под листом уже новая.
+            Без JS (@media (scripting: none)) — обычная отправка: число на ней соврало бы, оно
+            относится к применённому отбору, а не к набранному.
+          */}
+          {/* Обёртки, а не классы на самих кнопках: button() уже задаёт display, и hidden рядом с
+              ним спорил бы порядком утилит в CSS. */}
+          <div className="border-t border-line p-4 md:p-5 lg:not-noscript:hidden">
+            <div className="noscript:hidden">
+              <label htmlFor={TOGGLE_ID} className={`${button()} w-full cursor-pointer`}>
+                Показать {formatCount(total, ["тайтл", "тайтла", "тайтлов"])}
+              </label>
+            </div>
+            <div className="not-noscript:hidden">
+              <button type="submit" className={`${button()} w-full`}>
+                Показать
+              </button>
+            </div>
           </div>
-        </Form>
+        </CatalogForm>
       </div>
     </div>
   );

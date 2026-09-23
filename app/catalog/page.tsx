@@ -90,7 +90,7 @@ export default async function CatalogPage({ searchParams }: PageProps<"/catalog"
           панель и липнет (components/catalog/catalog-filters.tsx). */}
       <div className="mt-5 lg:grid lg:grid-cols-[18.75rem_minmax(0,1fr)] lg:gap-6">
         <div className="lg:h-full">
-          <CatalogFilters params={params} options={options} />
+          <CatalogFilters params={params} options={options} total={catalog.total} />
         </div>
 
         <section aria-labelledby="catalog-results" className="mt-6 min-w-0 lg:mt-0 lg:self-start">

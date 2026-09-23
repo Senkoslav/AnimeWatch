@@ -44,7 +44,7 @@ async function openFilters(page: Page) {
     }
   }
   // Жанров в базе бывает больше, чем помещается открытыми: остальные лежат под «ещё N».
-  const more = page.locator("#catalog-filters-panel details > summary");
+  const more = page.locator("#catalog-filters-panel details:not([open]) > summary");
   if ((await more.count()) > 0) await more.first().click();
   await expect(page.getByRole("group", { name: "Жанр" })).toBeVisible();
 }
@@ -84,9 +84,10 @@ test("форма меняет адрес на чистый, «Сбросить»
   expect(total).toBeGreaterThan(DRAMA_TV_BY_NAME.length);
 
   await openFilters(page);
+  // Отбор применяется сам, без «Показать»: второй клик идёт по уже обновлённой панели.
   await chip(page, "genre", "Драма").click();
+  await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0");
   await chip(page, "kind", "tv").click();
-  await page.getByRole("button", { name: "Показать" }).click();
 
   // Пустые поля формы (status=, year_from=) в адрес не попадают: им делятся.
   await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&kind=tv");
@@ -104,14 +105,12 @@ test("два жанра сразу — это «или»: выдача шире,
   await openFilters(page);
 
   await chip(page, "genre", "Драма").click();
-  await page.getByRole("button", { name: "Показать" }).click();
   // Ждём адрес, а не просто клик: без этого счёт снялся бы ещё со старой выдачи.
   await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0");
   const onlyDrama = await results(page).count();
 
   await openFilters(page);
   await chip(page, "genre", "Комедия").click();
-  await page.getByRole("button", { name: "Показать" }).click();
 
   // Порядок повторяемых параметров канонический: жанры по алфавиту.
   await expect(page).toHaveURL(
@@ -166,7 +165,6 @@ test("сортировка — ссылки, работает без отпра�
   // Выбранная сортировка переживает отправку формы отбора скрытым полем.
   await openFilters(page);
   await chip(page, "genre", "Драма").click();
-  await page.getByRole("button", { name: "Показать" }).click();
   await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&sort=name");
 });
 
@@ -224,8 +222,8 @@ test("поиск в каталоге складывается с фильтро�
   await openFilters(page);
 
   // Два слова: encodeURIComponent дал бы «%20» вместо «+», и страница ушла бы в вечный редирект.
+  // Название применяется паузой в наборе, без Enter и без кнопки.
   await page.getByLabel("Название").fill("монолог фармацевта");
-  await page.getByRole("button", { name: "Показать" }).click();
 
   await expect(page).toHaveURL(
     "/catalog?q=%D0%BC%D0%BE%D0%BD%D0%BE%D0%BB%D0%BE%D0%B3+%D1%84%D0%B0%D1%80%D0%BC%D0%B0%D1%86%D0%B5%D0%B2%D1%82%D0%B0",
@@ -334,24 +332,61 @@ test("панель отбора липнет на длинной страниц�
   if (!panel) throw new Error("панель отбора не отрисована");
   expect(panel.y).toBeGreaterThanOrEqual(0);
   expect(panel.y).toBeLessThan(120);
-  await expect(page.getByRole("button", { name: "Показать" })).toBeInViewport();
+  // Выше окна панель не растёт: остальное прокручивается внутри неё.
+  expect(panel.y + panel.height).toBeLessThanOrEqual(500);
 });
 
-test("выбранный статус и жанр подсвечиваются сразу, до «Показать»", async ({ page }) => {
-  // Раньше подсветку считал сервер из адреса: клик менял радиокнопку, а глазами ничего не происходило.
+test("отбор применяется сам: клик по статусу сразу меняет выдачу, фокус остаётся на месте", async ({ page }) => {
   await page.goto("/catalog");
   await openFilters(page);
+  // Кнопки отправки с включённым JS нет: она осталась только для браузера без скриптов.
+  await expect(page.getByRole("button", { name: "Показать" })).toBeHidden();
 
   const ongoing = page.locator('label:has(input[name="status"][value="ongoing"])');
   await ongoing.click();
+  await expect(page).toHaveURL("/catalog?status=ongoing");
   await expect(page.getByRole("radio", { name: "Выходит" })).toBeChecked();
   await expect(ongoing).toHaveCSS("color", "rgb(255, 176, 46)");
-  await expect(page.locator('label:has(input[name="status"][value=""])')).not.toHaveCSS("color", "rgb(255, 176, 46)");
+  await expect(page.getByRole("list", { name: "Действующий отбор" })).toContainText("Выходит");
+  // Панель не пересоздаётся на каждом переходе: иначе фокус улетал бы в начало страницы.
+  await expect(page.getByRole("radio", { name: "Выходит" })).toBeFocused();
 
+  // Подсветка чипа не ждёт ответа сервера: её рисует CSS от состояния поля.
   const drama = chip(page, "genre", "Драма");
   await drama.click();
   await expect(drama).toHaveCSS("color", "rgb(255, 176, 46)");
-  await expect(page).toHaveURL("/catalog");
+  await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&status=ongoing");
+});
+
+test("ссылка снаружи формы подводит к адресу и поля панели", async ({ page }) => {
+  // Панель живёт между переходами, поэтому «Сбросить» и метки обязаны сбросить и её поля.
+  await page.goto("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&kind=tv");
+  await expect(appliedFilters(page)).toHaveCount(2);
+  await appliedFilters(page).filter({ hasText: "ТВ-сериал" }).getByRole("link").click();
+  await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0");
+
+  await openFilters(page);
+  await expect(page.getByRole("checkbox", { name: "ТВ-сериал" })).not.toBeChecked();
+  await expect(page.getByRole("checkbox", { name: "Драма" })).toBeChecked();
+
+  await page.goBack();
+  await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&kind=tv");
+  await expect(page.getByRole("checkbox", { name: "ТВ-сериал" })).toBeChecked();
+});
+
+test("на телефоне лист остаётся открытым после клика, внизу — счёт и закрытие", async ({ page }) => {
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/catalog");
+  await openFilters(page);
+
+  await chip(page, "genre", "Драма").click();
+  await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0");
+  await expect(page.locator("#catalog-filters-open")).toBeChecked();
+
+  const done = page.locator('label[for="catalog-filters-open"]', { hasText: /^Показать \d+ тайтл/ });
+  await expect(done).toBeVisible();
+  await done.click();
+  await expect(page.getByRole("group", { name: "Жанр" })).toBeHidden();
 });
 
 test("на 360px отбор закрыт, первый ряд постеров виден сразу, лист открывается и закрывается", async ({ page }) => {
@@ -392,3 +427,19 @@ test("axe: нет нарушений critical и serious в выдаче, в п�
 function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
+
+test.describe("без JS", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("отбор — обычная форма с кнопкой «Показать»", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto("/catalog");
+    await chip(page, "genre", "Драма").click();
+    await chip(page, "kind", "tv").click();
+    // Без скриптов клик ничего не отправляет: адрес меняет только кнопка.
+    await expect(page).toHaveURL("/catalog");
+    await page.getByRole("button", { name: "Показать" }).click();
+    await expect(page).toHaveURL("/catalog?genre=%D0%94%D1%80%D0%B0%D0%BC%D0%B0&kind=tv");
+    await expect(results(page)).toHaveCount(DRAMA_TV_BY_NAME.length);
+  });
+});
