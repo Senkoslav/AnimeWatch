@@ -88,5 +88,5 @@ test("знак: иконка вкладки, иконка телефона, ма
   }
 
   // Знак в шапке декоративный: ссылку называет слово рядом.
-  await expect(page.locator("header").getByRole("link", { name: "animewatch", exact: true })).toBeVisible();
+  await expect(page.locator("header").getByRole("link", { name: "AnimeWatch", exact: true })).toBeVisible();
 });

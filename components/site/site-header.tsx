@@ -49,7 +49,7 @@ export function SiteHeader() {
           className="-mx-2 inline-flex min-h-11 shrink-0 items-center gap-2 rounded-sm px-2 font-display text-lg font-bold tracking-tight"
         >
           <LogoMark className="size-6 shrink-0" />
-          animewatch
+          AnimeWatch
         </Link>
 
         <nav aria-label="Разделы" className="hidden lg:flex lg:items-center lg:gap-1">

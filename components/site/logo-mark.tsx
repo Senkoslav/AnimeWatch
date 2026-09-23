@@ -3,7 +3,7 @@
  * перекладина A — янтарный сигнал. Тот же рисунок, что public/brand/mark.svg, но в токенах:
  * буквы — цвет текста вокруг (currentColor), перекладина — signal.
  *
- * Декоративный: рядом всегда стоит слово «animewatch», и называет ссылку оно.
+ * Декоративный: рядом всегда стоит слово «AnimeWatch», и называет ссылку оно.
  */
 export function LogoMark({ className = "" }: { className?: string }) {
   return (

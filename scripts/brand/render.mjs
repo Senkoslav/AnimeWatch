@@ -43,7 +43,7 @@ writeFileSync(
 const og = `<div style="width:1200px;height:630px;background:${BG};display:flex;flex-direction:column;justify-content:center;gap:40px;padding:0 96px;box-sizing:border-box;font-family:Unbounded,sans-serif">
   <div style="display:flex;align-items:center;gap:36px">
     <div style="width:180px;height:180px">${mark}</div>
-    <div style="font-weight:700;font-size:112px;letter-spacing:-0.04em;color:${TEXT}">animewatch</div>
+    <div style="font-weight:700;font-size:112px;letter-spacing:-0.04em;color:${TEXT}">AnimeWatch</div>
   </div>
   <div style="font-family:'Golos Text',sans-serif;font-size:40px;color:${DIM};max-width:900px;line-height:1.35">Каталог аниме: поиск, расписание онгоингов и серии в плеере поставщика</div>
 </div>`;
