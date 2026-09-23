@@ -1,28 +1,24 @@
 "use client";
 
 import { Menu } from "lucide-react";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
+
+import { useDismissableDetails } from "@/components/ui/use-dismissable-details";
 
 /**
  * Мобильное меню на нативном <details>: раскрытие, клавиатура и кольцо фокуса достаются от браузера,
  * и без JS оно работает целиком.
  *
- * Клиентский лист нужен ровно для одного: закрыть меню после перехода. Шапка живёт в рутовом
- * лэйауте и при клиентской навигации не перемонтируется, а атрибут `open` ставит сам браузер —
- * React его не сбрасывает, и меню осталось бы раскрытым поверх новой страницы. Приём с `key`,
- * которым спасается панель фильтров, здесь не работает по той же причине.
+ * Клиентский лист нужен, чтобы закрыть меню после перехода, по Esc и нажатием мимо. Шапка живёт
+ * в рутовом лэйауте и при клиентской навигации не перемонтируется, а атрибут `open` ставит сам
+ * браузер — React его не сбрасывает, и меню осталось бы раскрытым поверх новой страницы.
  *
  * Без JS этот эффект не выполняется, но и не нужен: там каждый переход — полная перезагрузка,
  * после которой <details> и так закрыт.
  */
 export function MobileMenu({ label, children }: { label: string; children: ReactNode }) {
-  const pathname = usePathname();
   const details = useRef<HTMLDetailsElement>(null);
-
-  useEffect(() => {
-    if (details.current) details.current.open = false;
-  }, [pathname]);
+  useDismissableDetails(details);
 
   return (
     <details ref={details} className="lg:hidden">
@@ -33,9 +29,15 @@ export function MobileMenu({ label, children }: { label: string; children: React
         <Menu aria-hidden="true" className="size-5" />
       </summary>
 
-      {/* Абсолютно — под всей шапкой: внутри строки-флексбокса панель иначе встала бы в ряд.
-          Привязка к самой шапке: sticky уже делает её позиционированным предком. */}
-      <div className="glass-chrome absolute top-full left-0 w-full border-b border-line">
+      {/*
+        Абсолютно — под всей шапкой: внутри строки-флексбокса панель иначе встала бы в ряд.
+        Привязка к самой шапке: sticky уже делает её позиционированным предком.
+
+        Плотная поверхность, а не стекло: панель вложена в шапку со своим backdrop-filter, а
+        вложенный элемент видит только фон родителя, не страницу. От стекла оставалась одна
+        прозрачность без размытия, и заголовок страницы читался сквозь пункты меню.
+      */}
+      <div className="absolute top-full left-0 w-full border-b border-line bg-surface">
         <div className="mx-auto max-w-page px-4 lg:px-8 py-3">{children}</div>
       </div>
     </details>

@@ -115,3 +115,22 @@ test("мобильное меню закрывается после перехо
   await expect(page).toHaveURL("/catalog");
   await expect(menu).not.toHaveAttribute("open", "");
 });
+
+test("мобильное меню непрозрачное и закрывается по Esc и нажатием мимо", async ({ page }) => {
+  // Панель была стеклом внутри шапки со своим backdrop-filter: размытие не работало, и страница
+  // читалась сквозь пункты меню. Теперь фон плотный — без прозрачности.
+  await page.setViewportSize({ width: 360, height: 800 });
+  await page.goto("/search");
+  const menu = page.locator("header details");
+  await menu.locator("summary").click();
+
+  const background = await menu.locator("summary + div").evaluate((panel) => getComputedStyle(panel).backgroundColor);
+  expect(background).toMatch(/^rgb\(/);
+
+  await page.keyboard.press("Escape");
+  await expect(menu).not.toHaveAttribute("open", "");
+
+  await menu.locator("summary").click();
+  await page.mouse.click(180, 700);
+  await expect(menu).not.toHaveAttribute("open", "");
+});

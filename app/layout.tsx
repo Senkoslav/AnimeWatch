@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata } from "next";
 import { Golos_Text, Unbounded } from "next/font/google";
 
@@ -77,6 +78,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <SiteFooter />
         <BottomNav />
         <AuthDialog />
+        {/*
+          Vercel Web Analytics: посещения без cookie и без персональных данных, счёт в панели Vercel.
+          Только на Vercel: локально и в e2e скрипт аналитики не грузится и в чужую сеть не ходит.
+        */}
+        {process.env.VERCEL && <Analytics />}
       </body>
     </html>
   );
