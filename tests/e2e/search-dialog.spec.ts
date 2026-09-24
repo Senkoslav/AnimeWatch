@@ -11,10 +11,20 @@ function field(page: Page) {
   return dialog(page).getByLabel("Название аниме");
 }
 
+/**
+ * Открыть окно с клавиатуры. Сочетания слушает JS окна: сразу после загрузки он может ещё не
+ * подключиться, и первое нажатие уходит в пустоту. Повторяем, пока окно не откроется.
+ */
+async function openWithKey(page: Page, key: string) {
+  await expect(async () => {
+    await page.keyboard.press(key);
+    await expect(dialog(page)).toBeVisible({ timeout: 1000 });
+  }).toPass();
+}
+
 test("Ctrl+K открывает поиск, выдача живая, стрелки и Enter ведут на тайтл", async ({ page }) => {
   await page.goto("/catalog");
-  await page.keyboard.press("Control+k");
-  await expect(dialog(page)).toBeVisible();
+  await openWithKey(page, "Control+k");
   await expect(field(page)).toBeFocused();
 
   await field(page).fill("фрирен");
@@ -49,8 +59,7 @@ test("Esc закрывает окно и возвращает фокус туд�
 
 test("«/» открывает поиск, но не когда печатают в поле", async ({ page }) => {
   await page.goto("/catalog");
-  await page.keyboard.press("/");
-  await expect(dialog(page)).toBeVisible();
+  await openWithKey(page, "/");
   await page.keyboard.press("Escape");
 
   // В поле названия каталога «/» — просто символ.
@@ -64,7 +73,7 @@ test("«/» открывает поиск, но не когда печатают
 
 test("пустая выдача зовёт в каталог, «Все результаты» ведёт на страницу поиска", async ({ page }) => {
   await page.goto("/");
-  await page.keyboard.press("Control+k");
+  await openWithKey(page, "Control+k");
   await field(page).fill("ыщвщшзхъ");
   await expect(dialog(page).getByText(/Ничего не нашлось по «ыщвщшзхъ»\. Проверьте опечатку/)).toBeVisible();
   await expect(dialog(page).getByRole("link", { name: "откройте каталог" })).toBeVisible();

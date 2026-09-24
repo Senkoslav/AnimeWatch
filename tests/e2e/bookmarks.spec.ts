@@ -31,6 +31,9 @@ async function chooseList(page: Page, label: string) {
   await (await readyListButton(page)).click();
   await page.getByRole("button", { name: label, exact: true }).click();
   await expect(listButton(page)).toContainText(label);
+  // Надпись меняется сразу, до ответа сервера. Уйти со страницы раньше подтверждения — значит
+  // оборвать сохранение: ждём, пока кнопка перестанет быть занятой.
+  await expect(listButton(page)).not.toHaveAttribute("aria-busy", "true");
 }
 
 test("отметка и оценка переживают смену устройства и видны значком в каталоге", async ({ page, browser, baseURL }, testInfo) => {
@@ -75,6 +78,17 @@ test("оценка тайтла вне списков кладёт его в «�
 
   await page.reload();
   await expect(listButton(page)).toContainText("В список");
+});
+
+test("«Отложено» — пятый список: ставится, видно на кнопке и значком в каталоге", async ({ page, baseURL }, testInfo) => {
+  await signInAs(page.context(), baseURL, viewer(testInfo));
+  await page.goto("/anime/dandadan");
+  await chooseList(page, "Отложено");
+
+  await page.goto("/catalog");
+  await expect(
+    page.getByRole("list", { name: "Найденные тайтлы" }).getByRole("listitem").filter({ hasText: "Дандадан" }),
+  ).toContainText("отложено");
 });
 
 test("аноним: «В список» и «Оценить» зовут войти, а не молчат", async ({ page }) => {

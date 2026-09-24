@@ -20,7 +20,7 @@ interface ListControlProps {
 
 /**
  * «В список» (Title, Watch, Main). Аноним видит кнопку входа: отметок без аккаунта не бывает, а
- * молчащая кнопка хуже приглашения. Вошедший — текущий список на кнопке и меню из четырёх списков
+ * молчащая кнопка хуже приглашения. Вошедший — текущий список на кнопке и меню из пяти списков
  * и «Убрать из списка». Выбранный список — янтарный: это то, что с тайтлом происходит сейчас.
  */
 export function ListControl({ titleId, size = "md", className = "" }: ListControlProps) {
@@ -38,6 +38,8 @@ export function ListControl({ titleId, size = "md", className = "" }: ListContro
   }
 
   const loading = status === "loading";
+  // Правка уже на кнопке, но сервер её ещё не подтвердил: кнопка занята (aria-busy), хоть и открывается.
+  const busy = loading || status === "saving";
   const current = bookmark?.state ?? null;
 
   function choose(state: WatchState) {
@@ -54,7 +56,7 @@ export function ListControl({ titleId, size = "md", className = "" }: ListContro
     <div className={`relative ${className}`}>
       <details ref={menu} className="group">
         <summary
-          aria-busy={loading || undefined}
+          aria-busy={busy || undefined}
           aria-disabled={loading || undefined}
           /*
            * Пока своя отметка грузится (доли секунды), кнопка на месте, но не открывается: выбор,

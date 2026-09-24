@@ -7,6 +7,7 @@ import { WatchState } from "@/lib/generated/prisma/enums";
 export const LIST_STROKE: Record<WatchState, string> = {
   [WatchState.WATCHING]: "stroke-chart-watching",
   [WatchState.PLANNED]: "stroke-chart-planned",
+  [WatchState.ON_HOLD]: "stroke-chart-on-hold",
   [WatchState.COMPLETED]: "stroke-chart-completed",
   [WatchState.DROPPED]: "stroke-chart-dropped",
 };
@@ -14,6 +15,7 @@ export const LIST_STROKE: Record<WatchState, string> = {
 export const LIST_FILL: Record<WatchState, string> = {
   [WatchState.WATCHING]: "bg-chart-watching",
   [WatchState.PLANNED]: "bg-chart-planned",
+  [WatchState.ON_HOLD]: "bg-chart-on-hold",
   [WatchState.COMPLETED]: "bg-chart-completed",
   [WatchState.DROPPED]: "bg-chart-dropped",
 };

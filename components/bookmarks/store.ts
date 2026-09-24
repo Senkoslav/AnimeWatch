@@ -15,7 +15,8 @@ import type { BookmarkView } from "@/lib/queries/bookmarks";
  * после загрузки. Правка применяется сразу и откатывается, если сервер её не принял.
  */
 export interface BookmarkEntry {
-  status: "loading" | "ready" | "error";
+  /** loading — своя отметка ещё не пришла; saving — правка показана, но сервер её ещё не подтвердил. */
+  status: "loading" | "saving" | "ready" | "error";
   bookmark: BookmarkView | null;
   /** Что случилось, словами: показывается рядом с кнопкой (docs/04, «Текст в интерфейсе»). */
   message: string | null;
@@ -82,7 +83,7 @@ export async function mutate(
   request: () => Promise<BookmarkResult>,
 ): Promise<BookmarkResult | null> {
   const previous = entries.get(titleId)?.bookmark ?? null;
-  update(titleId, { status: "ready", bookmark: optimistic, message: null });
+  update(titleId, { status: "saving", bookmark: optimistic, message: null });
   try {
     const result = await request();
     applyResult(titleId, result, previous);

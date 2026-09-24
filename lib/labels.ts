@@ -29,9 +29,16 @@ export const SORT_LABELS: Record<CatalogSort, string> = {
 export const WATCH_STATE_LABELS: Record<WatchState, string> = {
   [WatchState.WATCHING]: "Смотрю",
   [WatchState.PLANNED]: "Запланировано",
+  [WatchState.ON_HOLD]: "Отложено",
   [WatchState.COMPLETED]: "Просмотрено",
   [WatchState.DROPPED]: "Брошено",
 };
 
 /** Порядок пунктов в меню списков и в профиле. */
-export const WATCH_STATES = [WatchState.WATCHING, WatchState.PLANNED, WatchState.COMPLETED, WatchState.DROPPED] as const;
+export const WATCH_STATES = [
+  WatchState.WATCHING,
+  WatchState.PLANNED,
+  WatchState.ON_HOLD,
+  WatchState.COMPLETED,
+  WatchState.DROPPED,
+] as const;

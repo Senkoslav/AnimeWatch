@@ -17,11 +17,12 @@ async function viewer() {
 describe("профиль", () => {
   it("счётчики списков, оценки и средняя сходятся с содержимым Bookmark", async () => {
     const user = await viewer();
-    const titles = await Promise.all(Array.from({ length: 5 }, () => createTitle()));
-    const [a, b, c, d, e] = titles.map((title) => title.id) as [string, string, string, string, string];
+    const titles = await Promise.all(Array.from({ length: 6 }, () => createTitle()));
+    const [a, b, c, d, e, f] = titles.map((title) => title.id) as [string, string, string, string, string, string];
     await setListState(user.id, a, WatchState.WATCHING);
     await setListState(user.id, b, WatchState.WATCHING);
     await setListState(user.id, c, WatchState.PLANNED);
+    await setListState(user.id, f, WatchState.ON_HOLD);
     await setRating(user.id, d, 8); // вне списков — «Просмотрено»
     await setRating(user.id, e, 6);
     await setRating(user.id, a, 8);
@@ -30,6 +31,7 @@ describe("профиль", () => {
     expect(profile?.lists).toEqual([
       { state: "WATCHING", count: 2 },
       { state: "PLANNED", count: 1 },
+      { state: "ON_HOLD", count: 1 },
       { state: "COMPLETED", count: 2 },
       { state: "DROPPED", count: 0 },
     ]);

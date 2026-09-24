@@ -45,6 +45,8 @@ enum Role {
 enum WatchState {
   WATCHING
   PLANNED
+  // «Отложено», как on_hold у Shikimori (решение владельца 2026-09-24): начал и поставил на паузу.
+  ON_HOLD
   COMPLETED
   DROPPED
 }

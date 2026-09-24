@@ -67,7 +67,9 @@ test("серии рядом с плеером — плитки с номером
   expect(new Set(widths).size).toBe(1);
 
   // Название серии не теряется: оно в подписи ссылки. Свежая серия помечена и словом.
-  await expect(page.getByRole("link", { name: "Эпизод 03, Магия убийства людей, новая" })).toBeVisible();
+  // «новая» — только первые сутки после выхода, а seed ставит время от момента заливки: через день
+  // метка честно пропадает. Проверяем название, а не свежесть — её проверяет format.test.ts (isFresh).
+  await expect(page.getByRole("link", { name: /^Эпизод 03, Магия убийства людей/ })).toBeVisible();
 
   await page.getByRole("link", { name: /^Эпизод 01,/ }).click();
   await expect(page).toHaveURL("/anime/frieren/1");
