@@ -46,6 +46,7 @@ serverless-функции открывают соединения агресси
 /robots.txt, /sitemap.xml app/robots.ts, app/sitemap.ts
 /auth/error               неудачный вход через Google: причина и шаг, noindex
 /profile                  профиль: списки кольцом с таблицей, свои оценки, последнее; динамический, noindex
+/recommendations          советы по спискам и оценкам с объяснением и «Не интересно»; динамический, noindex
 ```
 
 Адрес сайта для `metadataBase`, canonical и карты сайта — `siteUrl()` из
@@ -111,6 +112,11 @@ Google — обычный `<a>` на `/api/auth/google`: это полный п�
   остаётся на нажатом чипе, а лист на телефоне открытым. Без JS это та же GET-форма, и
   кнопка «Показать» видна только под `@media (scripting: none)`.
 - Главная — `revalidate: 60`.
+- Рекомендации на главной — ряд `components/recommendations/recommended-row.tsx`:
+  главная ISR и о пользователе не знает, поэтому ряд спрашивает server action
+  `getMyRecommendations` из браузера и только у вошедшего, как отметка на
+  странице тайтла. Стоит ниже первого экрана, чтобы его появление не давало CLS.
+  `/recommendations` динамическая: читает сессию.
 - Страница просмотра — динамическая (`force-dynamic`): скрытие тайтла по
   жалобе должно действовать сразу.
 - `/terms`, `/privacy` — `revalidate: 86400`. `/dmca` — `force-dynamic`:

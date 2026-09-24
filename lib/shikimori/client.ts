@@ -3,10 +3,12 @@
  * повторы и таймаут. Зависимости (fetch, сон, часы) внедряются, поэтому клиент проверяется
  * тестами без сети и без настоящего ожидания.
  */
-import { animeNodeSchema, animesResponseSchema, type AnimeNode } from "./schema";
+import { animeNodeSchema, animesResponseSchema, type AnimeNode, similarResponseSchema } from "./schema";
 
 /** Старый shikimori.one отвечает 308 на этот адрес (проверено 2026-09-18). */
 const ENDPOINT = "https://shikimori.io/api/graphql";
+/** «Похожие» есть только в REST: GraphQL их не отдаёт (проверено 2026-09-24). */
+const REST_BASE = "https://shikimori.io/api";
 
 /** Они требуют опознаваемый User-Agent; без него запросы отклоняются. */
 const USER_AGENT = "AnimeWatch/1.0 (+https://github.com/Senkoslav/AnimeWatch)";
@@ -29,6 +31,7 @@ const ANIMES_QUERY = `query Animes($limit: PositiveInt, $page: PositiveInt, $ord
     episodes episodesAired duration rating description score nextEpisodeAt
     genres { russian }
     poster { originalUrl }
+    related { relationKind anime { id } }
   }
 }`;
 
@@ -52,6 +55,8 @@ export interface ClientOptions {
 
 export interface ShikimoriClient {
   animes(query: AnimesQuery): Promise<AnimeNode[]>;
+  /** id похожих тайтлов в их порядке: первый — самый похожий. */
+  similar(shikimoriId: number): Promise<number[]>;
 }
 
 class RateLimiter {
@@ -93,16 +98,12 @@ export function createShikimoriClient(options: ClientOptions = {}): ShikimoriCli
   const now = options.now ?? Date.now;
   const limiter = new RateLimiter(now, sleep);
 
-  async function request(variables: Record<string, unknown>): Promise<unknown> {
+  /** Любой запрос к ним: общий лимит частоты, таймаут и повторы на 429 и пятисотках. */
+  async function send(url: string, init: RequestInit): Promise<unknown> {
     for (let attempt = 1; ; attempt += 1) {
       await limiter.take();
 
-      const response = await doFetch(ENDPOINT, {
-        method: "POST",
-        headers: { "content-type": "application/json", "user-agent": USER_AGENT },
-        body: JSON.stringify({ query: ANIMES_QUERY, variables }),
-        signal: AbortSignal.timeout(TIMEOUT_MS),
-      });
+      const response = await doFetch(url, { ...init, signal: AbortSignal.timeout(TIMEOUT_MS) });
 
       if (response.ok) return response.json();
 
@@ -117,7 +118,23 @@ export function createShikimoriClient(options: ClientOptions = {}): ShikimoriCli
     }
   }
 
+  function request(variables: Record<string, unknown>): Promise<unknown> {
+    return send(ENDPOINT, {
+      method: "POST",
+      headers: { "content-type": "application/json", "user-agent": USER_AGENT },
+      body: JSON.stringify({ query: ANIMES_QUERY, variables }),
+    });
+  }
+
   return {
+    async similar(shikimoriId: number): Promise<number[]> {
+      const body = await send(`${REST_BASE}/animes/${shikimoriId}/similar`, {
+        headers: { accept: "application/json", "user-agent": USER_AGENT },
+      });
+      // Мусорный элемент выбрасывается поштучно: один сломанный тайтл не отменяет остальные.
+      return similarResponseSchema.parse(body).flatMap((item) => (item === null ? [] : [item.id]));
+    },
+
     async animes(query: AnimesQuery): Promise<AnimeNode[]> {
       const body = await request({
         limit: Math.min(query.limit ?? MAX_PAGE_SIZE, MAX_PAGE_SIZE),

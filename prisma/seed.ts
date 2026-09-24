@@ -9,7 +9,14 @@ import { existsSync } from "node:fs";
 
 import { PrismaPg } from "@prisma/adapter-pg";
 
-import { PrismaClient, SourceType, TitleKind, TitleStatus, type Prisma } from "../lib/generated/prisma/client";
+import {
+  PrismaClient,
+  RelationKind,
+  SourceType,
+  TitleKind,
+  TitleStatus,
+  type Prisma,
+} from "../lib/generated/prisma/client";
 
 interface SeedEpisode {
   number: number;
@@ -296,6 +303,23 @@ const TITLES: SeedTitle[] = [
   },
 ];
 
+/**
+ * «Похожие» Shikimori между тайтлами seed: настоящие места из /api/animes/:id/similar на 2026-09-24, и
+ * только в первых 20 — столько хранит импорт. На них рекомендации на dev-данных становятся личными.
+ */
+const SIMILAR: Record<string, [shikimoriId: number, rank: number][]> = {
+  frieren: [[54492, 12]],
+  "mushoku-tensei-part-2": [[52991, 1]],
+  "kusuriya-no-hitorigoto": [[52991, 14]],
+  "chainsaw-man": [
+    [57334, 4],
+    [52588, 15],
+  ],
+  "jujutsu-kaisen-2": [[44511, 2]],
+  dandadan: [[44511, 2]],
+  "kaiju-no-8": [[44511, 4]],
+};
+
 async function main(): Promise<void> {
   if (existsSync(".env.local")) {
     process.loadEnvFile(".env.local");
@@ -329,6 +353,16 @@ async function seed(prisma: PrismaClient): Promise<void> {
     await prisma.$transaction(async (tx) => {
       const fields = { ...data, publishedAt: hoursAgo(titleHoursAgo) };
       const title = await tx.title.upsert({ where: { slug: data.slug }, create: fields, update: fields });
+
+      await tx.titleRelation.deleteMany({ where: { titleId: title.id, kind: RelationKind.SIMILAR } });
+      await tx.titleRelation.createMany({
+        data: (SIMILAR[data.slug] ?? []).map(([targetShikimoriId, rank]) => ({
+          titleId: title.id,
+          targetShikimoriId,
+          kind: RelationKind.SIMILAR,
+          rank,
+        })),
+      });
 
       for (const { hoursAgo: episodeHoursAgo, kodik, ...episode } of episodes) {
         const episodeFields = { name: null, ...episode, publishedAt: hoursAgo(episodeHoursAgo) };

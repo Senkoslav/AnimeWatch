@@ -5,6 +5,7 @@
  * Примеры:
  *   pnpm import:shikimori --top 150
  *   pnpm import:shikimori --ongoing
+ *   pnpm import:shikimori --similar          # «похожие» для всего каталога, по запросу на тайтл
  *   pnpm import:shikimori 21 https://shikimori.io/animes/z52991-sousou-no-frieren
  *
  * Пишет в базу из DIRECT_URL (или DATABASE_URL). Перед записью печатает хост — чтобы случайный
@@ -15,7 +16,7 @@ import { existsSync } from "node:fs";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { createShikimoriClient, MAX_PAGE_SIZE } from "../lib/shikimori/client";
-import { importTitles, resetPopularityRanks, type ImportStats } from "../lib/shikimori/import";
+import { importSimilar, importTitles, resetPopularityRanks, type ImportStats } from "../lib/shikimori/import";
 import type { AnimeNode } from "../lib/shikimori/schema";
 import { PrismaClient } from "../lib/generated/prisma/client";
 
@@ -26,6 +27,8 @@ interface Args {
   top: number;
   ongoing: boolean;
   ids: number[];
+  /** Проход «похожих» по всем тайтлам каталога: по запросу на тайтл, отдельно от метаданных. */
+  similar: boolean;
 }
 
 /** Ссылка вида https://shikimori.io/animes/z52991-sousou-no-frieren — id может идти с буквой. */
@@ -36,7 +39,7 @@ function parseId(value: string): number | null {
 }
 
 function parseArgs(argv: string[]): Args {
-  const args: Args = { top: 0, ongoing: false, ids: [] };
+  const args: Args = { top: 0, ongoing: false, ids: [], similar: false };
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -46,6 +49,8 @@ function parseArgs(argv: string[]): Args {
       args.top = value;
     } else if (arg === "--ongoing") {
       args.ongoing = true;
+    } else if (arg === "--similar") {
+      args.similar = true;
     } else if (arg?.startsWith("--")) {
       throw new Error(`неизвестный ключ ${arg}`);
     } else if (arg) {
@@ -55,7 +60,8 @@ function parseArgs(argv: string[]): Args {
     }
   }
 
-  if (args.top === 0 && !args.ongoing && args.ids.length === 0) args.top = 100;
+  // Только --similar — значит, метаданные не трогаем: проходим «похожими» по тому, что уже в базе.
+  if (args.top === 0 && !args.ongoing && args.ids.length === 0 && !args.similar) args.top = 100;
   return args;
 }
 
@@ -142,17 +148,24 @@ async function main(): Promise<void> {
   console.log(`База: ${new URL(url).host}`);
 
   try {
-    const { nodes, ranks } = await collect(args, (message) => console.log(message));
-    if (nodes.length === 0) {
-      console.log("Shikimori ничего не вернул, база не тронута");
-      return;
+    if (args.top > 0 || args.ongoing || args.ids.length > 0) {
+      const { nodes, ranks } = await collect(args, (message) => console.log(message));
+      if (nodes.length === 0) {
+        console.log("Shikimori ничего не вернул, база не тронута");
+      } else {
+        // Места переписываем целиком, а не поверх: выпавший из топа тайтл иначе навсегда остался бы в голове.
+        if (ranks.size > 0) {
+          const cleared = await resetPopularityRanks(prisma);
+          console.log(`Места по популярности сброшены у ${cleared}, проставляю заново ${ranks.size}`);
+        }
+        report(await importTitles(prisma, nodes, new Date(), ranks), nodes.length);
+      }
     }
-    // Места переписываем целиком, а не поверх: выпавший из топа тайтл иначе навсегда остался бы в голове.
-    if (ranks.size > 0) {
-      const cleared = await resetPopularityRanks(prisma);
-      console.log(`Места по популярности сброшены у ${cleared}, проставляю заново ${ranks.size}`);
+    if (args.similar) {
+      console.log("Похожие: по запросу на тайтл, это несколько минут");
+      const stats = await importSimilar(prisma, createShikimoriClient({ onRetry: console.log }), console.log);
+      console.log(`Похожие: тайтлов ${stats.titles}, связей ${stats.relations}, не получено ${stats.failed}`);
     }
-    report(await importTitles(prisma, nodes, new Date(), ranks), nodes.length);
   } finally {
     await prisma.$disconnect();
   }

@@ -1,4 +1,4 @@
-import { Play } from "lucide-react";
+import { Compass, Play } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
@@ -85,13 +85,18 @@ export default async function ProfilePage() {
               Продолжить смотреть
             </Link>
           )}
+
+          <Link href="/recommendations" className={`${button("secondary")} w-full`}>
+            <Compass aria-hidden="true" className="size-4" />
+            Рекомендации
+          </Link>
         </aside>
 
         <div className="flex min-w-0 flex-col gap-10">
           {profile.total === 0 ? (
             <Empty
               title="Здесь появятся тайтлы, которые вы отметите"
-              text="Откройте тайтл и нажмите «В список» — «Смотрю», «Запланировано», «Просмотрено» или «Брошено». Здесь соберутся списки и ваши оценки."
+              text="Откройте тайтл и нажмите «В список» — «Смотрю», «Запланировано», «Отложено», «Просмотрено» или «Брошено». Здесь соберутся списки и ваши оценки."
             />
           ) : (
             <>

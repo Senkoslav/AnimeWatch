@@ -5,6 +5,7 @@ import { NewEpisodes } from "@/components/home/new-episodes";
 import { OngoingRow } from "@/components/home/ongoing-row";
 import { PopularList } from "@/components/home/popular-list";
 import { Promo } from "@/components/home/promo";
+import { RecommendedRow } from "@/components/recommendations/recommended-row";
 import { Schedule } from "@/components/home/schedule";
 import { button } from "@/components/ui/controls";
 import { isToday, moscowWeekday } from "@/lib/format";
@@ -28,7 +29,7 @@ const WEEK = 7 * 24 * 60 * 60 * 1000;
 
 /**
  * Главная по Main.dc.html и Home-mobile.dc.html: промо последнего выпуска, новые серии, то, что
- * выходит сейчас, популярное за всё время и расписание. Каждый блок — свой запрос, все параллельно.
+ * выходит сейчас, советы вошедшему, популярное за всё время и расписание. Каждый блок — свой запрос, все параллельно.
  */
 export default async function HomePage() {
   // Момент рендера: при ISR «N минут назад», метка «новая» и «сегодня» в расписании стареют до минуты.
@@ -67,6 +68,10 @@ export default async function HomePage() {
       {fresh.length > 0 && <NewEpisodes releases={fresh} withinWeek={week.length > 0} now={now} />}
 
       {ongoing.titles.length > 0 && <OngoingRow titles={ongoing.titles} total={ongoing.total} />}
+
+      {/* Личное на ISR-странице: ряд сам спрашивает сервер из браузера и только у вошедшего. Ниже
+          первого экрана — его появление не сдвигает то, что уже видно. */}
+      <RecommendedRow />
 
       {(popular.length > 0 || schedule.size > 0) && (
         <div className="mx-auto grid max-w-page gap-9 px-4 lg:px-8 pt-9 lg:grid-cols-2 lg:gap-6">

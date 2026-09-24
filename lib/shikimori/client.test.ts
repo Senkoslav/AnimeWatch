@@ -157,4 +157,50 @@ describe("разбор ответа", () => {
     expect(body?.variables.limit).toBe(MAX_PAGE_SIZE);
     expect(body?.variables.ids).toBe("21,16498");
   });
+
+  it("похожие: REST-адрес тайтла, порядок как у них, мусорный элемент выброшен", async () => {
+    const clock = fakeClock();
+    const urls: string[] = [];
+    const client = createShikimoriClient({
+      now: clock.now,
+      sleep: clock.sleep,
+      fetch: async (input) => {
+        urls.push(String(input));
+        return jsonResponse([{ id: 33352 }, { id: "не число" }, { id: 41025 }]);
+      },
+    });
+    expect(await client.similar(52991)).toEqual([33352, 41025]);
+    expect(urls).toEqual(["https://shikimori.io/api/animes/52991/similar"]);
+  });
+
+  it("GraphQL-запрос просит франшизу, related разбирается вместе с тайтлом", async () => {
+    const clock = fakeClock();
+    let body = "";
+    const client = createShikimoriClient({
+      now: clock.now,
+      sleep: clock.sleep,
+      fetch: async (_input, init) => {
+        body = String(init?.body);
+        return jsonResponse({
+          data: {
+            animes: [
+              {
+                id: "52991",
+                name: "Sousou no Frieren",
+                kind: "tv",
+                status: "released",
+                related: [{ relationKind: "sequel", anime: { id: "59978" } }, { relationKind: "adaptation", anime: null }],
+              },
+            ],
+          },
+        });
+      },
+    });
+    const [anime] = await client.animes({ ids: [52991] });
+    expect(body).toContain("related { relationKind anime { id } }");
+    expect(anime?.related).toEqual([
+      { relationKind: "sequel", anime: { id: 59978 } },
+      { relationKind: "adaptation", anime: null },
+    ]);
+  });
 });

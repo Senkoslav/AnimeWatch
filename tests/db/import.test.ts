@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { prisma } from "@/lib/db";
 import { TitleStatus } from "@/lib/generated/prisma/enums";
-import { importTitles, resetPopularityRanks } from "@/lib/shikimori/import";
+import { importSimilar, importTitles, resetPopularityRanks, SIMILAR_LIMIT } from "@/lib/shikimori/import";
 import { animeNodeSchema, type AnimeNode } from "@/lib/shikimori/schema";
 
 function node(overrides: Record<string, unknown> = {}): AnimeNode {
@@ -165,6 +165,71 @@ describe("importTitles", () => {
 
       const imported = await prisma.title.findUnique({ where: { shikimoriId: 16498 }, select: { slug: true } });
       expect(imported?.slug).toBe("attack-on-titan-2013");
+    });
+  });
+
+  describe("связи для рекомендаций", () => {
+    async function relationsOf(slug: string) {
+      const title = await prisma.title.findUniqueOrThrow({ where: { slug }, select: { id: true } });
+      return prisma.titleRelation.findMany({
+        where: { titleId: title.id },
+        orderBy: [{ kind: "asc" }, { rank: "asc" }],
+        select: { targetShikimoriId: true, kind: true, rank: true },
+      });
+    }
+
+    it("франшиза пишется из related: манга пропускается, повтор импорта заменяет, а не копит", async () => {
+      await importTitles(prisma, [
+        node({
+          related: [
+            { relationKind: "sequel", anime: { id: "25777" } },
+            { relationKind: "adaptation", anime: null },
+            { relationKind: "side_story", anime: { id: "20291" } },
+          ],
+        }),
+      ]);
+      expect(await relationsOf("attack-on-titan")).toEqual([
+        { targetShikimoriId: 25777, kind: "SEQUEL", rank: 1 },
+        { targetShikimoriId: 20291, kind: "SIDE_STORY", rank: 2 },
+      ]);
+
+      await importTitles(prisma, [node({ related: [{ relationKind: "sequel", anime: { id: "35760" } }] })]);
+      expect(await relationsOf("attack-on-titan")).toEqual([{ targetShikimoriId: 35760, kind: "SEQUEL", rank: 1 }]);
+    });
+
+    it("related не пришёл — связи тайтла не стираются", async () => {
+      await importTitles(prisma, [node({ related: [{ relationKind: "sequel", anime: { id: "25777" } }] })]);
+      await importTitles(prisma, [node()]);
+      expect(await relationsOf("attack-on-titan")).toHaveLength(1);
+    });
+
+    it("похожие: порядок Shikimori, не больше предела, без самого тайтла, франшизу не трогают", async () => {
+      await importTitles(prisma, [node({ related: [{ relationKind: "sequel", anime: { id: "25777" } }] })]);
+      const ids = [16498, ...Array.from({ length: 30 }, (_, i) => 1000 + i)];
+      const stats = await importSimilar(prisma, { similar: async () => ids });
+
+      expect(stats).toEqual({ titles: 1, relations: SIMILAR_LIMIT, failed: 0 });
+      const relations = await relationsOf("attack-on-titan");
+      const similar = relations.filter((relation) => relation.kind === "SIMILAR");
+      expect(similar).toHaveLength(SIMILAR_LIMIT);
+      expect(similar[0]).toEqual({ targetShikimoriId: 1000, kind: "SIMILAR", rank: 1 });
+      expect(relations.some((relation) => relation.kind === "SEQUEL")).toBe(true);
+    });
+
+    it("сбой по одному тайтлу пропускается и попадает в лог", async () => {
+      await importTitles(prisma, [node()]);
+      const log: string[] = [];
+      const stats = await importSimilar(
+        prisma,
+        {
+          similar: async () => {
+            throw new Error("Shikimori ответил 500");
+          },
+        },
+        (message) => log.push(message),
+      );
+      expect(stats.failed).toBe(1);
+      expect(log.join("\n")).toMatch(/Атака титанов.*500/);
     });
   });
 });

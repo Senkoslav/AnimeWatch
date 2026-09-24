@@ -42,6 +42,16 @@ enum Role {
   ADMIN
 }
 
+// Связь тайтла с другим у Shikimori (lib/shikimori): «похожие» из их REST и франшиза из GraphQL.
+// На них держатся рекомендации (lib/recommendations): «похоже на то, что вы оценили» и «продолжение».
+enum RelationKind {
+  SIMILAR
+  SEQUEL
+  PREQUEL
+  SIDE_STORY
+  OTHER
+}
+
 enum WatchState {
   WATCHING
   PLANNED
@@ -52,17 +62,17 @@ enum WatchState {
 }
 
 model Title {
-  id             String      @id @default(cuid())
-  slug           String      @unique
-  shikimoriId    Int?        @unique
+  id             String                    @id @default(cuid())
+  slug           String                    @unique
+  shikimoriId    Int?                      @unique
   name           String // ромадзи/оригинал
   nameRu         String
   synonyms       String[] // для поиска
-  description    String?     @db.Text
+  description    String?                   @db.Text
   posterUrl      String?
   bannerUrl      String?
-  kind           TitleKind   @default(TV)
-  status         TitleStatus @default(ONGOING)
+  kind           TitleKind                 @default(TV)
+  status         TitleStatus               @default(ONGOING)
   year           Int?
   season         String?
   ageRating      String?
@@ -81,8 +91,10 @@ model Title {
   publishedAt    DateTime? // null = черновик; HIDDEN — только рубильник по жалобе
   episodes       Episode[]
   bookmarks      Bookmark[]
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  relations      TitleRelation[]
+  dismissals     RecommendationDismissal[]
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
 
   @@index([status, updatedAt])
   @@index([publishedAt])
@@ -131,16 +143,17 @@ model Source {
 // Аккаунт — вход через Google (docs/02, «Вход»). googleId — поле `sub` из id_token: e-mail у человека
 // может смениться, sub нет. E-mail не уникален по той же причине: он лишь подпись в меню профиля.
 model User {
-  id        String     @id @default(cuid())
-  googleId  String     @unique
-  email     String
-  name      String?
-  avatarUrl String?
-  role      Role       @default(USER)
-  sessions  Session[]
-  bookmarks Bookmark[]
-  progress  Progress[]
-  createdAt DateTime   @default(now())
+  id         String                    @id @default(cuid())
+  googleId   String                    @unique
+  email      String
+  name       String?
+  avatarUrl  String?
+  role       Role                      @default(USER)
+  sessions   Session[]
+  bookmarks  Bookmark[]
+  dismissals RecommendationDismissal[]
+  progress   Progress[]
+  createdAt  DateTime                  @default(now())
 }
 
 // Сессия входа. В куке — случайный токен, здесь — только sha256 от него: утечка базы не даёт чужих
@@ -171,6 +184,33 @@ model Bookmark {
 
   @@id([userId, titleId])
   @@index([userId, state])
+  @@index([titleId])
+}
+
+// Связь «этот тайтл → тайтл Shikimori». Цель — по shikimoriId, а не по нашему id: похожий тайтл может
+// ещё не быть в каталоге, и связь заработает, как только его импортируют. rank — порядок у Shikimori:
+// у похожих это место в их списке (1 — самый похожий), у франшизы — порядок в ответе.
+model TitleRelation {
+  titleId           String
+  title             Title        @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  targetShikimoriId Int
+  kind              RelationKind
+  rank              Int
+
+  @@id([titleId, targetShikimoriId, kind])
+  @@index([targetShikimoriId])
+}
+
+// «Не интересно» у рекомендации. Хранится в аккаунте: скрытый совет не возвращается ни на этом, ни на
+// другом устройстве, пока его не вернут.
+model RecommendationDismissal {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  titleId   String
+  title     Title    @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, titleId])
   @@index([titleId])
 }
 

@@ -3,7 +3,7 @@
  * которую можно проверить на зафиксированном ответе API (tests/fixtures/shikimori-animes.json).
  */
 import { moscowWeekday } from "@/lib/format";
-import { TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
+import { RelationKind, TitleKind, TitleStatus } from "@/lib/generated/prisma/enums";
 
 import type { AnimeNode } from "./schema";
 
@@ -23,6 +23,29 @@ const STATUSES: Record<string, TitleStatus> = {
   ongoing: TitleStatus.ONGOING,
   released: TitleStatus.COMPLETED,
 };
+
+/**
+ * Их виды связи во франшизе. Продолжение и приквел нужны рекомендациям отдельно («продолжение того,
+ * что вы досмотрели»); спин-офы и побочные истории — одним видом, остальное — «прочее».
+ */
+const RELATIONS: Record<string, RelationKind> = {
+  sequel: RelationKind.SEQUEL,
+  prequel: RelationKind.PREQUEL,
+  side_story: RelationKind.SIDE_STORY,
+  spin_off: RelationKind.SIDE_STORY,
+  parent_story: RelationKind.OTHER,
+  summary: RelationKind.OTHER,
+  full_story: RelationKind.OTHER,
+  alternative_version: RelationKind.OTHER,
+  alternative_setting: RelationKind.OTHER,
+  other: RelationKind.OTHER,
+};
+
+export interface MappedRelation {
+  targetShikimoriId: number;
+  kind: RelationKind;
+  rank: number;
+}
 
 /** Теги разметки Shikimori: `[character=1]имя[/character]`, `[anime=2]…[/anime]`, `[b]…[/b]`. */
 const MARKUP_TAG = /\[\/?[a-z_]+(?:=[^\]]*)?\]/g;
@@ -76,6 +99,8 @@ export interface MappedTitle {
   /** Следующая серия и её день недели по Москве; только у онгоингов, у остальных — null. */
   nextEpisodeAt: Date | null;
   airDay: number | null;
+  /** Франшиза. null — поле не пришло, и тогда импорт связи тайтла не трогает; [] — связей нет. */
+  franchise: MappedRelation[] | null;
 }
 
 /** null — тайтл в каталог не берём: неизвестный тип (клип, реклама) или неизвестный статус. */
@@ -109,7 +134,27 @@ export function mapTitle(node: AnimeNode): MappedTitle | null {
     episodeSeconds: node.duration ? node.duration * 60 : null,
     episodeCount: episodeCount(node),
     ...schedule(node, status),
+    franchise: franchise(node),
   };
+}
+
+/**
+ * Связи франшизы с аниме. Манга и ранобэ (anime = null) в каталоге не живут. Одна цель — одна связь
+ * одного вида: у Shikimori бывают дубли, а ключ в базе — (тайтл, цель, вид).
+ */
+function franchise(node: AnimeNode): MappedRelation[] | null {
+  if (!node.related) return null;
+  const seen = new Set<string>();
+  const relations: MappedRelation[] = [];
+  for (const { relationKind, anime } of node.related) {
+    if (!anime || anime.id === node.id) continue;
+    const kind = RELATIONS[relationKind] ?? RelationKind.OTHER;
+    const key = `${anime.id}:${kind}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    relations.push({ targetShikimoriId: anime.id, kind, rank: relations.length + 1 });
+  }
+  return relations;
 }
 
 /**

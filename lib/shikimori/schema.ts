@@ -34,9 +34,22 @@ export const animeNodeSchema = z.object({
   nextEpisodeAt: z.iso.datetime({ offset: true }).nullish(),
   genres: z.array(z.object({ russian: z.string() })).nullish(),
   poster: z.object({ originalUrl: z.url() }).nullish(),
+  // Франшиза: продолжения, приквелы, спин-офы. anime = null — связь с мангой или ранобэ, её пропускаем.
+  // null целиком — поле не пришло (старый запрос, сбой): тогда связи тайтла импорт не трогает.
+  related: z
+    .array(z.object({ relationKind: z.string(), anime: z.object({ id: idSchema }).nullish() }))
+    .nullish(),
 });
 
 export type AnimeNode = z.output<typeof animeNodeSchema>;
+
+/** REST «похожие»: массив тайтлов, id — число. Элемент без числового id — null, его отбросят. */
+export const similarResponseSchema = z.array(
+  z
+    .object({ id: z.number().int().positive() })
+    .nullable()
+    .catch(null),
+);
 
 export const animesResponseSchema = z.object({
   data: z.object({ animes: z.array(z.unknown()) }).nullish(),

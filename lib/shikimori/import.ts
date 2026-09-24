@@ -6,9 +6,10 @@
  * node-скрипте падает при импорте, а импорт запускают именно скриптом.
  */
 import type { Prisma, PrismaClient } from "@/lib/generated/prisma/client";
-import { TitleStatus } from "@/lib/generated/prisma/enums";
+import { RelationKind, TitleStatus } from "@/lib/generated/prisma/enums";
 
-import { mapTitle, type MappedTitle } from "./map";
+import type { ShikimoriClient } from "./client";
+import { mapTitle, type MappedRelation, type MappedTitle } from "./map";
 import type { AnimeNode } from "./schema";
 import { buildSlug } from "./slug";
 
@@ -84,7 +85,75 @@ async function importOne(
       });
 
   const episodesCreated = await syncEpisodes(prisma, title.id, mapped, now);
+  if (mapped.franchise) await replaceRelations(prisma, title.id, mapped.franchise, "franchise");
   return { created: !existing, episodesCreated };
+}
+
+/**
+ * Заменяет связи тайтла одной группы целиком: франшизу — все виды, кроме «похожих»; «похожие» —
+ * только их. Замена, а не дописывание: связь, которую Shikimori убрал, не должна жить у нас вечно.
+ */
+async function replaceRelations(
+  prisma: PrismaClient,
+  titleId: string,
+  relations: MappedRelation[],
+  group: "franchise" | "similar",
+): Promise<void> {
+  const kindFilter = group === "similar" ? RelationKind.SIMILAR : { not: RelationKind.SIMILAR };
+  await prisma.$transaction([
+    prisma.titleRelation.deleteMany({ where: { titleId, kind: kindFilter } }),
+    prisma.titleRelation.createMany({
+      data: relations.map((relation) => ({ titleId, ...relation })),
+      skipDuplicates: true,
+    }),
+  ]);
+}
+
+/** Сколько «похожих» храним на тайтл: дальше двадцатого их порядок уже не про похожесть. */
+export const SIMILAR_LIMIT = 20;
+
+export interface SimilarStats {
+  titles: number;
+  relations: number;
+  failed: number;
+}
+
+/**
+ * Проход «похожих»: по одному REST-запросу на тайтл (у Shikimori их нет в GraphQL), через общий лимит
+ * частоты клиента. Сбой по одному тайтлу пропускается с записью в лог — остальные не ждут его.
+ */
+export async function importSimilar(
+  prisma: PrismaClient,
+  client: Pick<ShikimoriClient, "similar">,
+  log: (message: string) => void = () => undefined,
+): Promise<SimilarStats> {
+  const titles = await prisma.title.findMany({
+    where: { shikimoriId: { not: null } },
+    select: { id: true, shikimoriId: true, nameRu: true },
+    orderBy: { shikimoriId: "asc" },
+  });
+  const stats: SimilarStats = { titles: 0, relations: 0, failed: 0 };
+
+  for (const [index, title] of titles.entries()) {
+    if (title.shikimoriId === null) continue;
+    try {
+      const ids = (await client.similar(title.shikimoriId)).filter((id) => id !== title.shikimoriId);
+      const unique = [...new Set(ids)].slice(0, SIMILAR_LIMIT);
+      await replaceRelations(
+        prisma,
+        title.id,
+        unique.map((targetShikimoriId, position) => ({ targetShikimoriId, kind: RelationKind.SIMILAR, rank: position + 1 })),
+        "similar",
+      );
+      stats.titles += 1;
+      stats.relations += unique.length;
+    } catch (error) {
+      stats.failed += 1;
+      log(`«${title.nameRu}»: похожие не получены — ${error instanceof Error ? error.message : String(error)}`);
+    }
+    if ((index + 1) % 25 === 0) log(`Похожие: ${index + 1} из ${titles.length}`);
+  }
+  return stats;
 }
 
 /**

@@ -1,6 +1,6 @@
 "use client";
 
-import { LogOut, UserRound } from "lucide-react";
+import { Compass, LogOut, UserRound } from "lucide-react";
 import Link from "next/link";
 import { type ReactNode, useActionState, useEffect, useRef } from "react";
 
@@ -22,7 +22,7 @@ const INITIAL: SignOutState = { signedOutAt: null };
 
 /**
  * Аватар и меню профиля вместо «Войти». Меню — стекло третьего уровня (docs/04: «меню профиля»),
- * `<details>`, чтобы открываться без своего состояния. В меню имя, e-mail, «Профиль» и «Выйти».
+ * `<details>`, чтобы открываться без своего состояния. В меню имя, e-mail, «Профиль», «Рекомендации» и «Выйти».
  */
 export function AccountMenu({ variant, children, itemClassName = "" }: AccountMenuProps) {
   const user = useDisplayUser();
@@ -70,6 +70,13 @@ export function AccountMenu({ variant, children, itemClassName = "" }: AccountMe
         >
           <UserRound aria-hidden="true" className="size-4" />
           Профиль
+        </Link>
+        <Link
+          href="/recommendations"
+          className="flex min-h-11 w-full items-center gap-2.5 rounded-sm px-3 text-sm text-text-2 hover:bg-fill hover:text-text"
+        >
+          <Compass aria-hidden="true" className="size-4" />
+          Рекомендации
         </Link>
         {/* Форма с server action: без JS это обычная отправка формы. */}
         <form action={formAction}>
